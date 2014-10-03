@@ -1,0 +1,181 @@
+Last login: Wed Nov 27 19:18:14 on ttys000
+Alexs-MacBook-Air-3:~ alex$ irb
+1.9.3p448 :001 > a = 12
+ => 12 
+1.9.3p448 :002 > a.to_s(2)
+ => "1100" 
+1.9.3p448 :003 > 365.to_s(2)
+ => "101101101" 
+1.9.3p448 :004 > 512.to_s
+ => "512" 
+1.9.3p448 :005 > 512.to_s(2)
+ => "1000000000" 
+1.9.3p448 :006 > def b(numb)
+1.9.3p448 :007?>   return numb.to_s(2)
+1.9.3p448 :008?>   end
+ => nil 
+1.9.3p448 :009 > b 512
+ => "1000000000" 
+1.9.3p448 :010 > b (512+365)
+ => "1101101101" 
+1.9.3p448 :011 > b (1024+364)
+ => "10101101100" 
+1.9.3p448 :012 > b 1024+364
+ => "10101101100" 
+1.9.3p448 :013 > b 1536+364
+ => "11101101100" 
+1.9.3p448 :014 > b 1536
+ => "11000000000" 
+1.9.3p448 :015 > b 1536&(1536+10)
+ => "11000000000" 
+1.9.3p448 :016 > b 1024&(1536)
+ => "10000000000" 
+1.9.3p448 :017 > b 1024
+ => "10000000000" 
+1.9.3p448 :018 > 2048*2
+ => 4096 
+1.9.3p448 :019 > def test(d)
+1.9.3p448 :020?>   if d<500
+1.9.3p448 :021?>     p s d
+1.9.3p448 :022?>     else
+1.9.3p448 :023 >       if 512&d
+1.9.3p448 :024?>       p "512"+b(d)
+1.9.3p448 :025?>       enc
+1.9.3p448 :026?>       end
+1.9.3p448 :027?>     end
+1.9.3p448 :028?>   end
+ => nil 
+1.9.3p448 :029 > require test.rb
+ArgumentError: wrong number of arguments (0 for 1)
+	from (irb):19:in `test'
+	from (irb):29
+	from /Users/alex/.rvm/rubies/ruby-1.9.3-p448/bin/irb:12:in `<main>'
+1.9.3p448 :030 > require 'test.rb'
+LoadError: cannot load such file -- test.rb
+	from /Users/alex/.rvm/rubies/ruby-1.9.3-p448/lib/ruby/site_ruby/1.9.1/rubygems/core_ext/kernel_require.rb:55:in `require'
+	from /Users/alex/.rvm/rubies/ruby-1.9.3-p448/lib/ruby/site_ruby/1.9.1/rubygems/core_ext/kernel_require.rb:55:in `require'
+	from (irb):30
+	from /Users/alex/.rvm/rubies/ruby-1.9.3-p448/bin/irb:12:in `<main>'
+1.9.3p448 :031 > require '~/test.rb'
+ => true 
+1.9.3p448 :032 > test 365
+"101101101"
+ => "101101101" 
+1.9.3p448 :033 > test 366
+"101101110"
+ => "101101110" 
+1.9.3p448 :034 > test 1024+182
+"51210010110110"
+ => "51210010110110" 
+1.9.3p448 :035 > b 1024+182
+ => "10010110110" 
+1.9.3p448 :036 > b 512
+ => "1000000000" 
+1.9.3p448 :037 > b 512&(1024+182)
+ => "0" 
+1.9.3p448 :038 > 512&(1024+182)
+ => 0 
+1.9.3p448 :039 > 512&(1024+182).class
+TypeError: can't convert Class into Integer
+	from (irb):39:in `&'
+	from (irb):39
+	from /Users/alex/.rvm/rubies/ruby-1.9.3-p448/bin/irb:12:in `<main>'
+1.9.3p448 :040 > (512&(1024+182)).class
+ => Fixnum 
+1.9.3p448 :041 > p :hi if 0
+:hi
+ => :hi 
+1.9.3p448 :042 > test 20148
+"512100111010110100"
+ => "512100111010110100" 
+1.9.3p448 :043 > test 2048
+"512100000000000"
+ => "512100000000000" 
+1.9.3p448 :044 > b 512&2048
+ => "0" 
+1.9.3p448 :045 > 512&2048
+ => 0 
+1.9.3p448 :046 > 512&512
+ => 512 
+1.9.3p448 :047 > require ~/test.rb
+1.9.3p448 :048/> ;
+1.9.3p448 :049/> /
+TypeError: can't convert nil into String
+	from /Users/alex/.rvm/rubies/ruby-1.9.3-p448/lib/ruby/site_ruby/1.9.1/rubygems/core_ext/kernel_require.rb:55:in `require'
+	from /Users/alex/.rvm/rubies/ruby-1.9.3-p448/lib/ruby/site_ruby/1.9.1/rubygems/core_ext/kernel_require.rb:55:in `require'
+	from (irb):49
+	from /Users/alex/.rvm/rubies/ruby-1.9.3-p448/bin/irb:12:in `<main>'
+1.9.3p448 :050 > require '~/test.rb'
+ => false 
+1.9.3p448 :051 > require '~/test.rb'
+ => false 
+1.9.3p448 :052 > require '~/test.rb'
+ => false 
+1.9.3p448 :053 > exit
+Alexs-MacBook-Air-3:~ alex$ irb
+1.9.3p448 :001 > require '~/test.rb'
+ => true 
+1.9.3p448 :002 > exit
+Alexs-MacBook-Air-3:~ alex$ irb
+1.9.3p448 :001 > require '~/test.rb'
+ => true 
+1.9.3p448 :002 > b 2
+ => "10" 
+1.9.3p448 :003 > test 1025
+"102410000000001"
+ => "102410000000001" 
+1.9.3p448 :004 > require '~/test.rb'
+ => false 
+1.9.3p448 :005 > exit
+Alexs-MacBook-Air-3:~ alex$ irb
+1.9.3p448 :001 > require '~/test.rb'
+ => true 
+1.9.3p448 :002 > test 1025
+"1024: 10000000001"
+ => "1024: 10000000001" 
+1.9.3p448 :003 > test 513
+"512: 1000000001"
+ => "512: 1000000001" 
+1.9.3p448 :004 > test 512
+"512: 1000000000"
+ => "512: 1000000000" 
+1.9.3p448 :005 > test 511
+ => nil 
+1.9.3p448 :006 > test 2045
+"512: 11111111101"
+ => "512: 11111111101" 
+1.9.3p448 :007 > exit
+Alexs-MacBook-Air-3:~ alex$ irb
+1.9.3p448 :001 > require '~/test.rb'
+ => true 
+1.9.3p448 :002 > test 2046
+"512: 11111111110"
+ => 1534 
+1.9.3p448 :003 > test 2048
+"2048: 100000000000"
+ => 0 
+1.9.3p448 :004 > test 2049
+"2048: 100000000001"
+ => 1 
+1.9.3p448 :005 > test 2048+43
+"2048: 100000101011"
+ => 43 
+1.9.3p448 :006 > test 2048+48
+"2048: 100000110000"
+ => 48 
+1.9.3p448 :007 > test 2048+366
+"2048: 100101101110"
+ => 366 
+1.9.3p448 :008 > test 512+52
+"512: 1000110100"
+ => 52 
+1.9.3p448 :009 > test 572
+"512: 1000111100"
+ => 60 
+1.9.3p448 :010 > 512&d
+NameError: undefined local variable or method `d' for main:Object
+	from (irb):10
+	from /Users/alex/.rvm/rubies/ruby-1.9.3-p448/bin/irb:12:in `<main>'
+1.9.3p448 :011 > 512&572
+ => 512 
+1.9.3p448 :012 > 

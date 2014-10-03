@@ -1,0 +1,20 @@
+NXT Buttons: gray: 0; right:1; left:2; orange:3;
+Choice array:
+	[0]start {left:0,right:1}
+	[1]end {left:0,right:1}
+	[2]bridge {close:0,far:1, no(no sensor):2}
+	[3]delay [1..20]
+
+	
+	
+#define csfront 	0
+#define csback 		1
+
+#define csGray 		1
+#define csGrayWhite 	2
+#define csWhite 	3
+#define csGrayBlue 	4
+#define csBlue 		5
+#define csBlueRed 	6
+#define csGrayRed 	7
+#define csRed 		8

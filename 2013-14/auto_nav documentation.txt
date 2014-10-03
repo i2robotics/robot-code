@@ -1,0 +1,32 @@
+AUTO NAV DOCS
+
+drive accepts 1 or 3 args
+
+the first, which is required is the direction
+options are as follows:
+ FWD 
+ BWD 
+ RIGHT 
+ LEFT 
+ SPIN_RIGHT 
+ SPIN_LEFT 
+
+ N 
+ S 
+ E 
+ W 
+ NE 
+ SE 
+ SW 
+ NW 
+ CW 
+ AC 
+ CCW 
+ ACW 
+ 
+the second (optional) is power, from 1 to 100. default is 100
+
+the third is time, in miliseconds. if no arg is provided, then it 
+	does not set the motor values back to 0. Otherwise, it sets
+	motor values to 0 after the time provided.
+
