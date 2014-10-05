@@ -1,10 +1,16 @@
-/*--------------------------------------------------
- *
- *		ScaleJoy v. 1
- *			utility for scaling joystick
- *			values exponentially.
- *
- *------------------------------------------------*/
+
+#define button1	   0x01
+#define button2	   0x02
+#define button3	   0x04
+#define button4	   0x08
+#define button5	   0x10
+#define button6	   0x20
+#define button7	   0x40
+#define button8	   0x80
+#define button9	  0x100
+#define button10  0x200
+#define button11  0x800
+#define button12 0x1000
 
 const bool bLogarithmicScale = true;
 const bool kMaximumPowerLevel = 100;  // Adjust to set max power level to be used.
