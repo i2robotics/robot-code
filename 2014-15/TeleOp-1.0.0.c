@@ -5,11 +5,11 @@
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorC,          right,         tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C1_1,     DRIVE_NW,      tmotorTetrix, PIDControl, encoder)
-#pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, PIDControl, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C1_2,     DRIVE_SW,      tmotorTetrix, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     DRIVE_SE,      tmotorTetrix, PIDControl, reversed, encoder)
-#pragma config(Motor,  mtr_S1_C2_2,     DRIVE_SW,      tmotorTetrix, PIDControl, encoder)
-#pragma config(Motor,  mtr_S1_C3_1,     ARM,           tmotorTetrix, PIDControl)
-#pragma config(Motor,  mtr_S1_C3_2,     motorI,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C2_2,     DRIVE_NE,      tmotorTetrix, PIDControl, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C3_1,     LIFT,          tmotorTetrix, PIDControl)
+#pragma config(Motor,  mtr_S1_C3_2,     POPPER,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C4_1,     b,             tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C4_2,     a,             tmotorTetrix, openLoop, reversed)
 #pragma config(Servo,  srvo_S2_C1_1,    ARM_ROT,              tServoContinuousRotation)
@@ -26,6 +26,7 @@
 float X1;
 float Y1;
 float X2;
+float Y2;
 
 task main()
 {
@@ -38,8 +39,16 @@ task main()
 		X1 = scaleJoy(joystick.joy1_x1);
 		X2 = scaleJoy(joystick.joy1_x2);
 		Y1 = scaleJoy(joystick.joy1_y1);
+		Y2 = scaleJoy(joystick.joy2_y2);
 
+		if (joystick.joy2_Buttons & button3){ //B
+			motor[POPPER]=-100;
+		}
+		else {
+			motor[POPPER]=0;
+		}
 
+		motor[LIFT] = Y2;
 		motor[DRIVE_NE] = Y1-X1-X2;
 		motor[DRIVE_SE] = Y1+X1-X2;
 		motor[DRIVE_NW] = Y1+X1+X2;
