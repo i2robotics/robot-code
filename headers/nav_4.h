@@ -46,8 +46,8 @@ void drive(int d, byte s = 100, short t = 1000) {		//3 imputs: direction, speed,
 	float nw =0;
 	float sw =0;
 
-	int x = 0;							//X and Y for Trig functions
-	int y = 0;
+	float x = 0;							//X and Y for Trig functions
+	float y = 0;
 
 	int v = 0;							//This is needed for TLAC functionality
 
@@ -147,6 +147,7 @@ void drive(int d, byte s = 100, short t = 1000) {		//3 imputs: direction, speed,
 		default:
 			x = cos((-d+90.0)*0.017453278);			//Trigonometry to travel at specified angle.
 			y = sin((-d+90.0)*0.017453278);
+			writeDebugStreamLine("x: %f, y: %f", x, y);
 
 			ne = (y-x);
 			se = (y+x);
@@ -154,7 +155,7 @@ void drive(int d, byte s = 100, short t = 1000) {		//3 imputs: direction, speed,
 			sw = (y-x);
 			break;
 		}
-		writeDebugStreamLine(":%d,%d,%d,%d",ne,se,nw,sw);//For debuging purposes.
+		writeDebugStreamLine(":%f,%f,%f,%f",ne,se,nw,sw);//For debuging purposes.
 
 		ne = ne*s;
 		se = se*s;
@@ -167,7 +168,7 @@ void drive(int d, byte s = 100, short t = 1000) {		//3 imputs: direction, speed,
 	motor[DRIVE_NW] = nw;
 	motor[DRIVE_SW] = sw;
 
-writeDebugStreamLine(":%d,%d,%d,%d",ne,se,nw,sw);//For debuging purposes.
+writeDebugStreamLine(":%f,%f,%f,%f",ne,se,nw,sw);//For debuging purposes.
 
 	if (t!=0) {						//Unless time to wait is 0,
 		wait1Msec(t);					// Wait that time,

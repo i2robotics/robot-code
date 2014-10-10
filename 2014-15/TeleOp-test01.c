@@ -23,35 +23,56 @@
 #include "JoystickDriver.c"
 #include "../headers/scaleJoy_1.h"
 #include "../headers/helpers_1.h"
-#include "../headers/nav_4.h"
+
+float X1;
+float Y1;
+float X2;
+float Y2;
 
 task main()
 {
-int speed = 80;
-//drive(N, speed, 1000);
-//PlayImmediateTone(200,200);
-//wait1Msec(500);
+	nMotorPIDSpeedCtrl[DRIVE_NE] = nMotorPIDSpeedCtrl[DRIVE_NW] = nMotorPIDSpeedCtrl[DRIVE_SE] = nMotorPIDSpeedCtrl[DRIVE_SW] = mtrSpeedReg;
 
-drive(NE, speed, 10000);
-PlayImmediateTone(200,200);
-wait1Msec(500);
-drive(E, speed, 1000);
-PlayImmediateTone(200,200);
-wait1Msec(500);
-drive(SE, speed, 1000);
-PlayImmediateTone(200,200);
-wait1Msec(500);
-drive(S, speed, 1000);
-PlayImmediateTone(200,200);
-wait1Msec(500);
-drive(SW, speed, 1000);
-PlayImmediateTone(200,200);
-wait1Msec(500);
-drive(W, speed, 1000);
-PlayImmediateTone(200,200);
-wait1Msec(500);
-drive(NW, speed, 1000);
-PlayImmediateTone(200,200);
-wait1Msec(500);
+	while (true) {
+		getJoystickSettings(joystick);
+		X1 = scaleJoy(joystick.joy1_x1);
+		X2 = scaleJoy(joystick.joy1_x2);
+		Y1 = scaleJoy(joystick.joy1_y1);
+		Y2 = scaleJoy(joystick.joy2_y2);
 
+		if (joystick.joy2_Buttons & btn3){ //B
+			motor[POPPER] = 100;
+		}
+		else {
+			motor[POPPER] = 0;
+		}
+
+		short current_joystick = joystick.joy1_Buttons;
+
+		action
+		state btn3 down
+			motor[POPPER] = 100;
+		state btn5 down
+			motor[POPPER] = 50;
+		otherwise
+			motor[POPPER] = 0;
+		end
+
+
+		if(false) {
+		}else if(current_joystick & btn3 ){
+			motor[POPPER] = 100;
+		}else if(current_joystick & btn5 ){
+			motor[POPPER] = 50;
+		}else{
+			motor[POPPER] = 0;
+		}
+
+		motor[LIFT] = Y2;
+		motor[DRIVE_NE] = Y1 - X1 - X2;
+		motor[DRIVE_SE] = Y1 + X1 - X2;
+		motor[DRIVE_NW] = Y1 + X1 + X2;
+		motor[DRIVE_SW] = Y1 - X1 + X2;
+
+	}
 }

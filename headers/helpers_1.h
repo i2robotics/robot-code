@@ -20,5 +20,8 @@
 #define btn11   0x800
 #define btn12  0x1000
 
-//Modification of a switch statement, which does a bitwise and
-#define BIT_SWITCH(x) for (uint16_t bit = 1; x >= bit; bit *= 2) if (x & bit) switch (bit)
+#define action if(false) {
+#define state }else if(current_joystick &
+#define down ){
+#define otherwise }else{
+#define end }

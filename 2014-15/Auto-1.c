@@ -23,13 +23,13 @@
 #include "JoystickDriver.c"
 #include "../headers/scaleJoy_1.h"
 #include "../headers/helpers_1.h"
-#include "../headers/nav_3.h"
+#include "../headers/nav_4.h"
 
 task main()
 {
 	//waitForStart();
 
-	drive(N, 40, 2750);
+	drive(NE, 40, 2750);
 
 	PlayImmediateTone(200,200);
 	wait1Msec(1000);
