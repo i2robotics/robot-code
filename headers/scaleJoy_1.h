@@ -7,7 +7,7 @@
  *------------------------------------------------*/
 
 const bool bLogarithmicScale = true;
-const bool kMaximumPowerLevel = 100;  // Adjust to set max power level to be used.
+const bool kMaximumPowerLevel = 100;	// Adjust to set max power level to be used.
 
 int scaleJoy(int &nJoy1, int nMaxValue = kMaximumPowerLevel)
 {
@@ -24,10 +24,10 @@ int scaleJoy(int &nJoy1, int nMaxValue = kMaximumPowerLevel)
 	//
 	static const int nLogScale[17] =
 	{
-		0,	 5,	  9,   10,
-		12,	 15,  18,  24,
-		30,	 36,  43,  50,
-		60,	 72,  85, 100,
+		0,	 5,		9,	 10,
+		12,	 15,	18,	 24,
+		30,	 36,	43,	 50,
+		60,	 72,	85, 100,
 		100
 	};
 	int nScaled;
@@ -39,7 +39,7 @@ int scaleJoy(int &nJoy1, int nMaxValue = kMaximumPowerLevel)
 		if (nScaled >= 0)
 			nScaled = nLogScale[nScaled];
 		else
-			nScaled = - nLogScale[ - nScaled];
+			nScaled = -nLogScale[-nScaled];
 	}
 	nScaled *= nMaxValue;
 	nScaled /= 100;

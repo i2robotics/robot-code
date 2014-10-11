@@ -1,8 +1,9 @@
 /*--------------------------------------------------
  *
- *		Navigation v. 4
+ *		Navigation v. 5
  *			utility for Mecanum wheel operation
  *			during Autonomous.
+ *		v. 5: to add intelegent feedback control
  *
  *------------------------------------------------*/
 
@@ -16,7 +17,7 @@
 #define NW 315*/
 #define CW 401							//Allows for spin functionality
 #define AC 402
-#define CCW 402						//...And a lot of duplicates for counter-clockwise
+#define CCW 402							//...And a lot of duplicates for counter-clockwise
 #define ACW 402
 #define SPIN_RIGHT 401
 #define SPIN_LEFT 402
@@ -49,7 +50,7 @@ void drive(int d, byte s = 100, short t = 1000) {		//3 imputs: direction, speed,
 	float x = 0;							//X and Y for Trig functions
 	float y = 0;
 
-	int v = 0;							//This is needed for TLAC functionality
+	int v = 0;								//This is needed for TLAC functionality
 
 	if (d >= 500) {						// TLAC
 		if ((512&d)==512) {v = 2*((512^d)-50);ne=s;se=s;nw=s;sw=s;
@@ -77,13 +78,13 @@ void drive(int d, byte s = 100, short t = 1000) {		//3 imputs: direction, speed,
 	}
 	else {
 		switch (d) {
-		case 401: //Clockwise
+		case CW: //Clockwise
 			ne = 1;
 			se =0;
 			nw =0;
 			sw = -1;
 			break;
-		case 402: //Counter-Clockwise / AntiClockwise
+		case ACW: //Counter-Clockwise / AntiClockwise
 			ne =0;
 			se = -1;
 			nw = 1;
@@ -91,51 +92,51 @@ void drive(int d, byte s = 100, short t = 1000) {		//3 imputs: direction, speed,
 			break;
 			//
 			//Old Stuffs: The trig functions below inexplicably stopped working, so I had to
-							// reinstate this old code for the main cardinal directions.
+			// reinstate this old code for the main cardinal directions.
 			//
-		case 403: //North / Forwards
+		case N: //North / Forwards
 			ne = 1;
 			se = 1;
 			nw = 1;
 			sw = 1;
 			break;
-		case 404: //South / Backwards
+		case S: //South / Backwards
 			ne = -1;
 			se = -1;
 			nw = -1;
 			sw = -1;
 			break;
-		case 405: //East / Right
+		case E: //East / Right
 			ne = -1;
 			se = 1;
 			nw = 1;
 			sw = -1;
 			break;
-		case 406: //West / Left
+		case W: //West / Left
 			ne = 1;
 			se = -1;
 			nw = -1;
 			sw = 1;
 			break;
-		case 407: //ne
+		case NE: //ne
 			ne = -zero;
 			se = 1;
 			nw = 1;
 			sw = -zero;
 			break;
-		case 408: //se
+		case SE: //se
 			ne = -1;
 			se = zero;
 			nw = zero;
 			sw = -1;
 			break;
-		case 409: //sw
+		case SW: //sw
 			ne = zero;
 			se = -1;
 			nw = -1;
 			sw = zero;
 			break;
-		case 410: //nw
+		case NW: //nw
 			ne = 1;
 			se = zero;
 			nw = zero;
@@ -146,7 +147,7 @@ void drive(int d, byte s = 100, short t = 1000) {		//3 imputs: direction, speed,
 			//
 		default:
 			x = cos((-d+90.0)*0.017453278);			//Trigonometry to travel at specified angle.
-			y = sin((-d+90.0)*0.017453278);
+			y = sin((-d+90.0)*0.017453278);			//0.017453278 = pi/180
 			writeDebugStreamLine("x: %f, y: %f", x, y);
 
 			ne = (y-x);
