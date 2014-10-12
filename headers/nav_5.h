@@ -40,7 +40,13 @@
 														// the bit, will be a usable value from 0 to 100
 #define zero 0.01
 
-void drive(int d, byte s = 100, short t = 1000) {		//3 imputs: direction, speed, and time to wait.
+typedef enum {
+	kModeDumb,
+	kModeGyro
+} driveMode_t;
+
+
+void drive(int d, byte s = 100, short t = 1000, driveMode_t mode = kModeDumb) {		//3 imputs: direction, speed, and time to wait.
 
 	float ne =0;							//Values that will eventually become motor values.
 	float se =0;
@@ -171,7 +177,16 @@ void drive(int d, byte s = 100, short t = 1000) {		//3 imputs: direction, speed,
 
 writeDebugStreamLine(":%f,%f,%f,%f",ne,se,nw,sw);//For debuging purposes.
 
-	if (t!=0) {						//Unless time to wait is 0,
+	if (mode==kModeGyro)
+	{
+		//time1[T2] = 0;
+
+		//while (time1[T2] < t)
+		//{
+
+		//}
+	}
+	else if (t!=0) {						//Unless time to wait is 0,
 		wait1Msec(t);					// Wait that time,
 		motor[DRIVE_NE] = 0;			// and then stop all motors.
 		motor[DRIVE_SE] = 0;			// This way, if time is 0, motors
