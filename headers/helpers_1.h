@@ -20,6 +20,19 @@
 #define btn11		0x800
 #define btn12	 0x1000
 
+#define bX        0x01
+#define bB        0x02
+#define bA        0x04
+#define bY        0x08
+#define bLB       0x10
+#define bRB       0x20
+#define bLT       0x40
+#define bRT       0x80
+#define bBACK    0x100
+#define bSTART   0x200
+#define bLSTICK  0x800
+#define bRSTICK 0x1000
+
 #define action if(false) {
 #define state }else if(current_joystick &
 #define down ){
