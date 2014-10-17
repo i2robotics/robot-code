@@ -45,6 +45,12 @@ typedef enum {
 	kModeGyro
 } driveMode_t;
 
+void halt() {							//Convinience function to stop all motors.
+	motor[DRIVE_NE] = 0;
+	motor[DRIVE_SE] = 0;
+	motor[DRIVE_NW] = 0;
+	motor[DRIVE_SW] = 0;
+}
 
 void drive(int d, byte s = 100, short t = 1000, driveMode_t mode = kModeDumb) {		//3 imputs: direction, speed, and time to wait.
 
@@ -170,6 +176,8 @@ void drive(int d, byte s = 100, short t = 1000, driveMode_t mode = kModeDumb) {	
 		sw = sw*s;
 	}
 
+	float targetBearing = bearing;
+
 	motor[DRIVE_NE] = ne;				//Finally set the motor values
 	motor[DRIVE_SE] = se;
 	motor[DRIVE_NW] = nw;
@@ -179,25 +187,21 @@ writeDebugStreamLine(":%f,%f,%f,%f",ne,se,nw,sw);//For debuging purposes.
 
 	if (mode==kModeGyro)
 	{
-		//time1[T2] = 0;
-
-		//while (time1[T2] < t)
-		//{
-
-		//}
+		time1[T2] = 0;
+		float k_p = .01;
+		float error;
+		while (time1[T2] < t)
+		{
+			error = k_p * (bearing - targetBearing);
+			motor[DRIVE_NE] = ne - error;
+			motor[DRIVE_SE] = se - error;
+			motor[DRIVE_NW] = nw + error;
+			motor[DRIVE_SW] = sw + error;
+		}
+		halt();
 	}
-	else if (t!=0) {						//Unless time to wait is 0,
-		wait1Msec(t);					// Wait that time,
-		motor[DRIVE_NE] = 0;			// and then stop all motors.
-		motor[DRIVE_SE] = 0;			// This way, if time is 0, motors
-		motor[DRIVE_NW] = 0;			// continue indefinitely
-		motor[DRIVE_SW] = 0;
+	else if (t!=0) {			//Unless time to wait is 0,
+		wait1Msec(t);				// Wait that time, and then stop all motors.
+		halt();							// This way, if time is 0, motors continue indefinitely
 	}
-}
-
-void halt() {							//Convinience function to stop all motors.
-	motor[DRIVE_NE] = 0;
-	motor[DRIVE_SE] = 0;
-	motor[DRIVE_NW] = 0;
-	motor[DRIVE_SW] = 0;
 }
