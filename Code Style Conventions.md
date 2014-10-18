@@ -14,15 +14,16 @@
 - No spaces after `(`, `[` or before `]`, `)`.
 - No spaces after `!`.
 - Format `switch` statements as follows
-  ```c
-  switch (i) {
-  case 0:
-    ...
-    break;
-  case 1:
-    ...
-    break;
-  }
+
+  ```
+    switch (i) {
+    case 0:
+      ...
+      break;
+    case 1:
+      ...
+      break;
+    }
   ``` 
 - Follow [K&R Style](http://en.wikipedia.org/wiki/Indent_style#K.26R_style) for Indentation Style
   ```c
@@ -49,10 +50,12 @@
 ### Comments
 
 - Line end comments should be formatted as such:
+
   ```c
   code(foo, bar); // Comment is here!
   ```
 - File start comments: 50 dashes at the top. 4 spaces before file name, 6 before description
+
   ```c
   /*--------------------------------------------------
   *
