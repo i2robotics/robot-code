@@ -27,12 +27,13 @@
 
 task main()
 {
-	drive(N);
+	//drive(N, 1000);
+	//wait1Msec(10000);
+	//motor[DRIVE_NE] = 35;
+	//motor[DRIVE_NW]
 	StartTask(updateBearing);
 	wait1Msec(1000);
-	while (true)
-	{
-		nxtDisplayBigTextLine(1, "%f", bearing);
-
-	}
+	drive(E, 40, 3000, kModeGyro);
+	drive(E, 40, 3000, kModeDumb);
+	PlayImmediateTone(200,200);
 }

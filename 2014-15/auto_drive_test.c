@@ -23,7 +23,7 @@
 #include "JoystickDriver.c"
 #include "../headers/scaleJoy_1.h"
 #include "../headers/helpers_1.h"
-#include "../headers/nav_4.h"
+#include "../headers/nav_5.h"
 
 task main()
 {

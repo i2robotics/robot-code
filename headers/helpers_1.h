@@ -33,7 +33,8 @@
 #define bLSTICK  0x800
 #define bRSTICK 0x1000
 
-#define action if(false) {
+#define action_joy1 short current_joystick = joystick.joy1_Buttons; if(false) {
+#define action_joy2 short current_joystick = joystick.joy2_Buttons; if(false) {
 #define state }else if(current_joystick &
 #define down ){
 #define otherwise }else{

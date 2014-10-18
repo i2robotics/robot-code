@@ -15,6 +15,8 @@
 
 #include "../drivers/hitechnic-gyro.h"
 
+#define GYRO_INCLUDED indeed
+
 float bearing = 0;
 
 task updateBearing ()

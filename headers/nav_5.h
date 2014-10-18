@@ -52,7 +52,7 @@ void halt() {							//Convinience function to stop all motors.
 	motor[DRIVE_SW] = 0;
 }
 
-void drive(int d, byte s = 100, short t = 1000, driveMode_t mode = kModeDumb) {		//3 imputs: direction, speed, and time to wait.
+void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb) {		//3 imputs: direction, speed, and time to wait.
 
 	float ne =0;							//Values that will eventually become motor values.
 	float se =0;
@@ -176,7 +176,11 @@ void drive(int d, byte s = 100, short t = 1000, driveMode_t mode = kModeDumb) {	
 		sw = sw*s;
 	}
 
+#ifdef GYRO_INCLUDED
 	float targetBearing = bearing;
+#else
+	float targetBearing;
+#endif
 
 	motor[DRIVE_NE] = ne;				//Finally set the motor values
 	motor[DRIVE_SE] = se;

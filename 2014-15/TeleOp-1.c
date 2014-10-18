@@ -31,29 +31,28 @@ float Y2;
 
 task main()
 {
-	nMotorPIDSpeedCtrl[DRIVE_NE] = nMotorPIDSpeedCtrl[DRIVE_NW] = nMotorPIDSpeedCtrl[DRIVE_SE] = nMotorPIDSpeedCtrl[DRIVE_SW] = mtrSpeedReg;
-	
-	while (true) {
-		getJoystickSettings(joystick);
-		X1 = scaleJoy(joystick.joy1_x1);
-		X2 = scaleJoy(joystick.joy1_x2);
-		Y1 = scaleJoy(joystick.joy1_y1);
-		Y2 = scaleJoy(joystick.joy2_y2);
+  nMotorPIDSpeedCtrl[DRIVE_NE] = nMotorPIDSpeedCtrl[DRIVE_NW] = nMotorPIDSpeedCtrl[DRIVE_SE] = nMotorPIDSpeedCtrl[DRIVE_SW] = mtrSpeedReg;
 
-		if (joystick.joy2_Buttons & btn3){ //B
-			motor[POPPER] = 100;
-		}
-		else {
-			motor[POPPER] = 0;
-		}
+  while (true) {
+    getJoystickSettings(joystick);
+    X1 = scaleJoy(joystick.joy1_x1);
+    X2 = scaleJoy(joystick.joy1_x2);
+    Y1 = scaleJoy(joystick.joy1_y1);
+    Y2 = scaleJoy(joystick.joy2_y2);
 
-		motor[LIFT] = Y2;
-		motor[DRIVE_NE] = Y1 - X1 - X2;
-		motor[DRIVE_SE] = Y1 + X1 - X2;
-		motor[DRIVE_NW] = Y1 + X1 + X2;
-		motor[DRIVE_SW] = Y1 - X1 + X2;
+    motor[LIFT] = Y2;
+    motor[DRIVE_NE] = Y1 - X1 - X2;
+    motor[DRIVE_SE] = Y1 + X1 - X2;
+    motor[DRIVE_NW] = Y1 + X1 + X2;
+    motor[DRIVE_SW] = Y1 - X1 + X2;
 
-	}
+//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+
+    action_joy1
+    state bA down
+      motor[POPPER] = 100;
+    otherwise
+      motor[POPPER] = 0;
+    end
+  }
 }
-
-
