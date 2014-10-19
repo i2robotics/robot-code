@@ -10,10 +10,10 @@
 #pragma config(Motor,  mtr_S1_C2_2,     DRIVE_NE,      tmotorTetrix, PIDControl, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C3_1,     LIFT,          tmotorTetrix, PIDControl)
 #pragma config(Motor,  mtr_S1_C3_2,     POPPER,        tmotorTetrix, openLoop, reversed)
-#pragma config(Motor,  mtr_S1_C4_1,     b,             tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C4_1,     FEEDER,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C4_2,     a,             tmotorTetrix, openLoop, reversed)
-#pragma config(Servo,  srvo_S2_C1_1,    ARM_ROT,              tServoContinuousRotation)
-#pragma config(Servo,  srvo_S2_C1_2,    servo2,               tServoNone)
+#pragma config(Servo,  srvo_S2_C1_1,    grab1,                tServoStandard)
+#pragma config(Servo,  srvo_S2_C1_2,    grab2,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C1_3,    servo3,               tServoNone)
 #pragma config(Servo,  srvo_S2_C1_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S2_C1_5,    servo5,               tServoNone)
@@ -49,7 +49,25 @@ task main()
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
     action_joy1
+    state bLB down
+      motor[FEEDER] = 100;
+    state bLT down
+      motor[FEEDER] = -100;
+    otherwise
+      motor[FEEDER] = 0;
+    end
+
+    action_joy1
+    state bY down
+      servo[grab1] = 240;
+      servo[grab2]=6;
     state bA down
+      servo[grab1]=16;
+      servo[grab2]=232;
+    end
+
+    action_joy1
+    state bB down
       motor[POPPER] = 100;
     otherwise
       motor[POPPER] = 0;

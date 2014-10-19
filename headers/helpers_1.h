@@ -21,8 +21,8 @@
 #define btn12	 0x1000
 
 #define bX        0x01
-#define bB        0x02
-#define bA        0x04
+#define bA        0x02
+#define bB        0x04
 #define bY        0x08
 #define bLB       0x10
 #define bRB       0x20
