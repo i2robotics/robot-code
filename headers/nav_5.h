@@ -92,15 +92,15 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb) {		//
 		switch (d) {
 		case CW: //Clockwise
 			ne = 1;
-			se =0;
-			nw =0;
+			se = 1;
+			nw = -1;
 			sw = -1;
 			break;
 		case ACW: //Counter-Clockwise / AntiClockwise
-			ne =0;
+			ne = -1;
 			se = -1;
 			nw = 1;
-			sw =0;
+			sw = 1;
 			break;
 			//
 			//Old Stuffs: The trig functions below inexplicably stopped working, so I had to
