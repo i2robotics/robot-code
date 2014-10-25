@@ -32,8 +32,9 @@ task main()
 	//waitForStart();
 	//StartTask(updateBearing);
 
-	drive(N, 70, 1050);
-	drive(AC, 50, 1000);
+	drive(N, 70, 1100);
+	drive(AC, 50, 900);
+	drive(N, 50, 500);
 
 	halt();
 	PlayImmediateTone(200,200);
