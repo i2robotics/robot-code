@@ -7,14 +7,14 @@
 #pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, PIDControl, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, PIDControl, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     LIFT,          tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C2_2,     POPPER,        tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S2_C1_1,     FEEDER,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C2_2,     FEEDER,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S2_C1_1,     POPPER,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S2_C1_2,     motorI,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S2_C2_1,     DRIVE_NW,      tmotorTetrix, PIDControl, encoder)
 #pragma config(Motor,  mtr_S2_C2_2,     DRIVE_SW,      tmotorTetrix, PIDControl, encoder)
 #pragma config(Servo,  srvo_S2_C3_1,    grab1,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_2,    grab2,                tServoStandard)
-#pragma config(Servo,  srvo_S2_C3_3,    servo3,               tServoNone)
+#pragma config(Servo,  srvo_S2_C3_3,    flip,                 tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S2_C3_5,    servo5,               tServoNone)
 #pragma config(Servo,  srvo_S2_C3_6,    servo6,               tServoNone)
@@ -58,12 +58,19 @@ task main()
     end
 
     action_joy1
-    state bY down
+    state bY down //grab
       servo[grab1] = 240;
       servo[grab2]=6;
-    state bA down
+    state bA down //release
       servo[grab1]=16;
       servo[grab2]=232;
+    end
+
+    action_joy1
+    state bRB down
+      servo[flip] = 0;
+    state bRT down
+      servo[flip]=255;
     end
 
     action_joy1
