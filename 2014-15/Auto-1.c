@@ -2,20 +2,21 @@
 #pragma config(Hubs,  S2, HTMotor,  HTMotor,  HTServo,  none)
 #pragma config(Sensor, S1,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S2,     ,               sensorI2CMuxController)
+#pragma config(Sensor, S3,     IR_SEEK,        sensorHiTechnicIRSeeker1200)
 #pragma config(Sensor, S4,     GYRO,           sensorI2CHiTechnicGyro)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorC,          right,         tmotorNXT, PIDControl, encoder)
-#pragma config(Motor,  mtr_S1_C1_1,     motorD,        tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C1_2,     motorE,        tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C2_1,     DRIVE_SW,      tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C2_2,     DRIVE_NW,      tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S2_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed, encoder)
-#pragma config(Motor,  mtr_S2_C1_2,     DRIVE_NE,      tmotorTetrix, openLoop, reversed, encoder)
-#pragma config(Motor,  mtr_S2_C2_1,     motorJ,        tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S2_C2_2,     motorK,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C2_1,     LIFT,          tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C2_2,     FEEDER,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S2_C1_1,     POPPER,        tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S2_C1_2,     motorI,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S2_C2_1,     DRIVE_NW,      tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S2_C2_2,     DRIVE_SW,      tmotorTetrix, openLoop, encoder)
 #pragma config(Servo,  srvo_S2_C3_1,    grab1,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_2,    grab2,                tServoStandard)
-#pragma config(Servo,  srvo_S2_C3_3,    servo3,               tServoNone)
+#pragma config(Servo,  srvo_S2_C3_3,    flip,                 tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S2_C3_5,    servo5,               tServoNone)
 #pragma config(Servo,  srvo_S2_C3_6,    servo6,               tServoNone)
@@ -27,14 +28,50 @@
 #include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
 
-task main()
+typedef enum {
+	kAllianceRed,
+	kAllianceBlu
+} Alliance_t;
+
+void mission_monolith(Alliance_t alliance, int monolith_position)
+{
+		writeDebugStreamLine("%i", monolith_position);
+
+	switch (monolith_position) {
+	case 1:
+		PlayImmediateTone(400,200);
+		//drive(N, 70, 300);
+		//drive(AC, 50, 900);
+		//drive(N, 50, 500);
+		break;
+	case 2:
+		PlayImmediateTone(650,200);
+		break;
+	case 3:
+		PlayImmediateTone(900,200);
+		break;
+	}
+}
+
+
+task main() //*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
 {
 	//waitForStart();
 	//StartTask(updateBearing);
-
-	drive(N, 70, 1100);
-	drive(AC, 50, 900);
-	drive(N, 50, 500);
+	wait1Msec(500);
+	int first_IR = SensorValue[IR_SEEK];
+	drive(N, 40, 1200);
+	int second_IR = SensorValue[IR_SEEK];
+	writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
+	if (first_IR <= 3) { //Monolith position 1
+		mission_monolith(kAllianceRed, 1);
+	}
+	else if (second_IR == 5) { //monolith poisiton 3
+		mission_monolith(kAllianceRed, 3);
+	}
+	else { //monolith position 2
+		mission_monolith(kAllianceRed, 2);
+	}
 
 	halt();
 	PlayImmediateTone(200,200);

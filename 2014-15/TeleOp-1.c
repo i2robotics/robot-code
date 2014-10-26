@@ -4,14 +4,14 @@
 #pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorC,          right,         tmotorNXT, PIDControl, encoder)
-#pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, PIDControl, reversed, encoder)
-#pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, PIDControl, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     LIFT,          tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C2_2,     FEEDER,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S2_C1_1,     POPPER,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S2_C1_2,     motorI,        tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S2_C2_1,     DRIVE_NW,      tmotorTetrix, PIDControl, encoder)
-#pragma config(Motor,  mtr_S2_C2_2,     DRIVE_SW,      tmotorTetrix, PIDControl, encoder)
+#pragma config(Motor,  mtr_S2_C2_1,     DRIVE_SW,      tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S2_C2_2,     DRIVE_NW,      tmotorTetrix, openLoop, encoder)
 #pragma config(Servo,  srvo_S2_C3_1,    grab1,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_2,    grab2,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_3,    flip,                 tServoStandard)
@@ -23,6 +23,7 @@
 #include "JoystickDriver.c"
 #include "../headers/scaleJoy_1.h"
 #include "../headers/helpers_1.h"
+#include "../headers/gyro_1.h"
 
 float X1;
 float Y1;
@@ -31,8 +32,9 @@ float Y2;
 short current_joystick;
 task main()
 {
-  nMotorPIDSpeedCtrl[DRIVE_NE] = nMotorPIDSpeedCtrl[DRIVE_NW] = nMotorPIDSpeedCtrl[DRIVE_SE] = nMotorPIDSpeedCtrl[DRIVE_SW] = mtrSpeedReg;
-
+    //nMotorEncoder[DRIVE_SE] = 0;
+   // nMotorEncoder[DRIVE_SW] = 0;
+	StartTask(updateBearing);
   while (true) {
     getJoystickSettings(joystick);
     X1 = scaleJoy(joystick.joy1_x1);
@@ -40,11 +42,16 @@ task main()
     Y1 = scaleJoy(joystick.joy1_y1);
     Y2 = scaleJoy(joystick.joy2_y2);
 
+
+
     motor[LIFT] = Y2;
     motor[DRIVE_NE] = Y1 - X1 - X2;
     motor[DRIVE_SE] = Y1 + X1 - X2;
     motor[DRIVE_NW] = Y1 + X1 + X2;
     motor[DRIVE_SW] = Y1 - X1 + X2;
+    writeDebugStreamLine("Y1:%g, X1:%g, X2:%g", Y1, X1, X2);
+
+    //nxtDisplayTextLine(2, "SE:%i, SW:%i", nMotorEncoder[DRIVE_SE], nMotorEncoder[DRIVE_SW]);
 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
