@@ -62,7 +62,7 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb) {		//
 	float x = 0;							//X and Y for Trig functions
 	float y = 0;
 
-	int v = 0;								//This is needed for TLAC functionality
+	int v;								//This is needed for TLAC functionality
 
 	if (d >= 500) {						// TLAC
 		if ((512&d)==512) {v = 2*((512^d)-50);ne=s;se=s;nw=s;sw=s;
@@ -91,16 +91,16 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb) {		//
 	else {
 		switch (d) {
 		case CW: //Clockwise
-			ne = 1;
-			se = 1;
-			nw = -1;
-			sw = -1;
-			break;
-		case ACW: //Counter-Clockwise / AntiClockwise
 			ne = -1;
 			se = -1;
 			nw = 1;
 			sw = 1;
+			break;
+		case ACW: //Counter-Clockwise / AntiClockwise
+			ne = 1;
+			se = 1;
+			nw = -1;
+			sw = -1;
 			break;
 			//
 			//Old Stuffs: The trig functions below inexplicably stopped working, so I had to

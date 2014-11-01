@@ -38,17 +38,34 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
 	switch (monolith_position) {
 	case 1:
 		PlayImmediateTone(400,200);
-		//drive(N, 70, 300);
+		//drive(N, 20, 300);
 		//drive(AC, 50, 900);
 		//drive(N, 50, 500);
 		break;
 	case 2:
 		PlayImmediateTone(650,200);
+		halt();
+		drive(S, 10, 100);
+		drive(CW, 30, 900);
 		break;
 	case 3:
-		PlayImmediateTone(900,200);
+		PlayImmediateTone(900,100);
+		PlayImmediateTone(849,100);
+		PlayImmediateTone(801,100);
+		PlayImmediateTone(756,220);
+		wait10Msec(500);
+		//drive(S, 50, 600);
+		//drive(FWD+25, 44, 1400);
+		//wait1Msec(1000);
+		//drive(FWD-25, 44, 1400);
+		//drive(N, 20, 500);
 		break;
 	}
+}
+
+void mission_ramp(Alliance_t alliance)
+{
+	drive(N, 40, 2750);
 }
 
 
@@ -56,21 +73,26 @@ task main() //*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
 {
 	//waitForStart();
 	//StartTask(updateBearing);
+	Alliance_t cur_alli = kAllianceRed;
 	wait1Msec(500);
+
+
 	int first_IR = SensorValue[IR_SEEK];
 	drive(N, 40, 1200);
 	int second_IR = SensorValue[IR_SEEK];
 	writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
-	if (first_IR <= 3) { //Monolith position 1
-		mission_monolith(kAllianceRed, 1);
+	mission_monolith(cur_alli, 3);
+	/*
+	if (first_IR <= 3) {
+		mission_monolith(cur_alli, 1);
 	}
-	else if (second_IR == 5) { //monolith poisiton 3
-		mission_monolith(kAllianceRed, 3);
+	else if (second_IR == 5) {
+		mission_monolith(cur_alli, 3);
 	}
-	else { //monolith position 2
-		mission_monolith(kAllianceRed, 2);
+	else {
+		mission_monolith(cur_alli, 2);
 	}
-
+*/
 	halt();
 	PlayImmediateTone(200,200);
 	wait1Msec(1000);
