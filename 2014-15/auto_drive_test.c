@@ -29,7 +29,7 @@
 task main()
 {
 
-		drive(CW, 32, 1300);
+		drive(FWD-16, 32, 1100);
 
 
 halt();
