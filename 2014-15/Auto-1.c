@@ -1,5 +1,7 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
 #pragma config(Hubs,  S2, HTMotor,  HTMotor,  HTServo,  none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
+#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     GYRO,           sensorI2CHiTechnicGyro)
 #pragma config(Sensor, S4,     IR_SEEK,        sensorHiTechnicIRSeeker1200)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
@@ -38,9 +40,9 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
 	switch (monolith_position) {
 	case 1:
 		PlayImmediateTone(400,200);
-		//drive(N, 20, 300);
-		//drive(AC, 50, 900);
-		//drive(N, 50, 500);
+		drive(N, 20, 300);
+		drive(CW, 50, 900);
+		drive(N, 50, 500);
 		break;
 	case 2:
 		PlayImmediateTone(650,200);
@@ -49,16 +51,17 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
 		drive(CW, 30, 900);
 		break;
 	case 3:
-		PlayImmediateTone(900,100);
-		PlayImmediateTone(849,100);
-		PlayImmediateTone(801,100);
-		PlayImmediateTone(756,220);
+
+		//PlayImmediateTone(900,100);
+		//PlayImmediateTone(849,100);
+		//PlayImmediateTone(801,100);
+		//PlayImmediateTone(756,220);
 		wait10Msec(500);
-		//drive(S, 50, 600);
-		//drive(FWD+25, 44, 1400);
-		//wait1Msec(1000);
-		//drive(FWD-25, 44, 1400);
-		//drive(N, 20, 500);
+		nMotorEncoder[DRIVE_NE]=0;
+		drive(CW, 50, 900);
+		drive(N, 50, 600);
+		drive(CCW, 50, 900);
+		drive(N, 50, 600);
 		break;
 	}
 }
@@ -81,8 +84,8 @@ task main() //*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
 	drive(N, 40, 1200);
 	int second_IR = SensorValue[IR_SEEK];
 	writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
-	mission_monolith(cur_alli, 3);
-	/*
+
+
 	if (first_IR <= 3) {
 		mission_monolith(cur_alli, 1);
 	}
@@ -92,7 +95,7 @@ task main() //*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
 	else {
 		mission_monolith(cur_alli, 2);
 	}
-*/
+
 	halt();
 	PlayImmediateTone(200,200);
 	wait1Msec(1000);
