@@ -1,7 +1,7 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
 #pragma config(Hubs,  S2, HTMotor,  HTMotor,  HTServo,  none)
 #pragma config(Sensor, S3,     GYRO,           sensorI2CHiTechnicGyro)
-#pragma config(Sensor, S4,     IR_SEEK,        sensorHiTechnicIRSeeker1200)
+#pragma config(Sensor, S4,     HTSPB,          sensorI2CCustom9V)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorC,          right,         tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed)
@@ -23,8 +23,9 @@
 #include "JoystickDriver.c"
 #include "../headers/scaleJoy_1.h"
 #include "../headers/helpers_1.h"
+#include "../drivers/HTSPB-driver.h"
 //#include "../headers/gyro_1.h"
-
+int height = 1;
 float X1;
 float Y1;
 float X2;
@@ -32,6 +33,7 @@ float Y2;
 short current_joystick;
 task main()
 {
+	HTSPBsetupIO(HTSPB, 0x10);
     //nMotorEncoder[DRIVE_SE] = 0;
    // nMotorEncoder[DRIVE_SW] = 0;
 	//StartTask(updateBearing);
@@ -41,10 +43,30 @@ task main()
     X2 = scaleJoy(joystick.joy1_x2);
     Y1 = scaleJoy(joystick.joy1_y1);
     Y2 = scaleJoy(joystick.joy2_y2);
+if(HTSPBreadIO(HTSPB, 0x01) != 1) {
+      eraseDisplay();
+      nxtDisplayTextLine(1, "Magnet absent");
+      //HTSPBwriteIO(HTSPB, 0x10);
+    } else {
+      eraseDisplay();
+      nxtDisplayTextLine(1, "Magnet present");
+      //HTSPBwriteIO(HTSPB, 0x00);
+    }
+		if (HTSPBreadIO(HTSPB, 0x01) != 1 || Y2<0) {
+   		 motor[LIFT] = Y2;
+  	} else {
+  			motor[LIFT] = 0;
+  	}
 
-
-
-    motor[LIFT] = Y2;
+  	//if (joystick.joy1_Buttons == 3) {
+  	//	height = 0;
+  	//}
+  	//if (height == 0 && (HTSPBreadIO(HTSPB, 0x01) != 1)) {
+  	//	motor[LIFT] = 100;
+  	//} else {
+  	//	motor[LIFT] = 0;
+  	//	height = 1;
+  	//}
     motor[DRIVE_NE] = Y1 - X1 - X2;
     motor[DRIVE_SE] = Y1 + X1 - X2;
     motor[DRIVE_NW] = Y1 + X1 + X2;
@@ -82,7 +104,7 @@ task main()
 
     action_joy2
     state bSTART down
-      servo[roof] = 200;
+      servo[roof] = 180;
     state bBACK down
       servo[roof]=0;
     end
