@@ -28,11 +28,22 @@
 #include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
 
+//==================  Config Definitions  ==================
 typedef enum {
 	kAllianceRed,
 	kAllianceBlu
 } Alliance_t;
 
+typedef enum {
+	kPlanKick,
+	kPlanRamp
+} Plan_t;
+const char *Plan_s[] = {"Kick", "Ramp"};
+
+
+#include "../headers/dialog_2.h"
+
+//==================  Missions  ==================
 void mission_monolith(Alliance_t alliance, int monolith_position)
 {
 		writeDebugStreamLine("%i", monolith_position);
@@ -71,8 +82,8 @@ void mission_ramp(Alliance_t alliance)
 	drive(N, 40, 2750);
 }
 
-
-task main() //*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
+//==================  Main Task  ==================
+task main()
 {
 	//waitForStart();
 	//StartTask(updateBearing);
