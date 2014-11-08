@@ -3,9 +3,9 @@
 
 ## General Style
 
-- Use tab characters, with a 2 space indent. 
-  - Choosing Edit > Code Formatting > Tabify Whole File in RobotC will convert indenting spaces to tab characters
-  - Choosing Edit > Code Formatting > Format Whole File in Robotc will fix any indentation errors
+- Use spaces for indentation, with a 2 space indent. 
+  - Choosing Edit > Code Formatting > Untabify Whole File in RobotC will convert indenting spaces to tab characters
+  - Choosing Edit > Code Formatting > Format Whole File in RobotC will fix any indentation errors
 - Keep lines fewer than 100 characters.
 - Never leave trailing whitespace.
 - End each file with a single blank newline.
@@ -16,14 +16,14 @@
 - Format `switch` statements as follows
 
   ```
-    switch (i) {
-    case 0:
-      ...
-      break;
-    case 1:
-      ...
-      break;
-    }
+  switch (i) {
+  case 0:
+    ...
+    break;
+  case 1:
+    ...
+    break;
+  }
   ``` 
 - Follow [K&R Style](http://en.wikipedia.org/wiki/Indent_style#K.26R_style) for Indentation Style
   ```c
@@ -49,7 +49,7 @@
 
 ### Comments
 
-- Line end comments should be formatted as such:
+- Line end comments should have a space before and after the `//`:
 
   ```c
   code(foo, bar); // Comment is here!
