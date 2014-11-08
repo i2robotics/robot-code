@@ -1,6 +1,6 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTMotor)
 #pragma config(Hubs,  S2, HTServo,  none,     none,     none)
-#pragma config(Sensor, S4,     GYRO,           sensorI2CHiTechnicGyro)
+#pragma config(Sensor, S3,     GYRO,           sensorI2CHiTechnicGyro)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorC,          right,         tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C1_1,     DRIVE_NW,      tmotorTetrix, PIDControl, encoder)
@@ -21,9 +21,9 @@
 
 //#include "JoystickDriver.c"
 #include "../headers/scaleJoy_1.h"
-#include "../headers/helpers_1.h"
 #include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
+#include "../headers/helpers_1.h"
 
 task main()
 {
@@ -33,7 +33,7 @@ task main()
 	//motor[DRIVE_NW]
 	StartTask(updateBearing);
 	wait1Msec(1000);
-	drive(E, 40, 3000, kModeGyro);
-	drive(E, 40, 3000, kModeDumb);
+//	drive(E, 40, 3000, kModeGyro);
+//	drive(E, 40, 3000, kModeDumb);
 	PlayImmediateTone(200,200);
 }

@@ -39,3 +39,15 @@
 #define down ){
 #define otherwise }else{
 #define end }
+
+#ifdef GYRO_INCLUDED
+void go_to_bearing(int target)
+{
+	float k_p = 9;
+	while(abs(target - bearing) > 4) {
+		int error = bearing - target;
+		writeDebugStreamLine("err: %i  bear: %i", error, bearing);
+		drive(CW, error*k_p, 0);
+	}
+}
+#endif
