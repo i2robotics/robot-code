@@ -33,6 +33,10 @@
 #define bLSTICK  0x800
 #define bRSTICK 0x1000
 
+#define kNxtBtnRight 1
+#define kNxtBtnLeft 2
+#define kNxtBtnCenter 3
+
 #define action_joy1  current_joystick = joystick.joy1_Buttons; if(false) {
 #define action_joy2  current_joystick = joystick.joy2_Buttons; if(false) {
 #define state }else if(current_joystick &
