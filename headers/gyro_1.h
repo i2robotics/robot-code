@@ -18,6 +18,7 @@
 #define GYRO_INCLUDED indeed
 
 float bearing = 0;
+bool do_reset = false;
 
 task updateBearing ()
 {
@@ -31,7 +32,8 @@ task updateBearing ()
 	{
 		time1[T3] = 0;
 		current_rate = HTGYROreadRot(GYRO);
-		nxtDisplayBigTextLine(3, "rate: %i", current_rate);
+		nxtDisplayTextLine(3, "rate: %i", current_rate);
+		nxtDisplayTextLine(5, "pos: %i", bearing);
 		prev_bear = bearing;
 		bearing = prev_bear + current_rate*delta_T;
 
@@ -41,4 +43,9 @@ task updateBearing ()
 		wait1Msec(50);
 		delta_T = ((float)time1[T3]) / 1000;
 	}
+}
+
+void resetBearing()
+{
+	do_reset = true;
 }

@@ -18,7 +18,7 @@
  * drivers.
  * License: You may use this code as you wish, provided you give credit where its due.
  *
- * THIS CODE WILL ONLY WORK WITH ROBOTC VERSION 3.59 AND HIGHER. 
+ * THIS CODE WILL ONLY WORK WITH ROBOTC VERSION 3.59 AND HIGHER.
 
  *
  * Changelog:
@@ -38,11 +38,11 @@
 #define __HTSMUX_SUPPORT__
 
 #ifndef SPORT
-#define SPORT(X)  (X / 4)         /*!< Convert tMUXSensor to sensor port number */
+#define SPORT(X)  (X / 3)         /*!< Convert tMUXSensor to sensor port number */
 #endif
 
 #ifndef MPORT
-#define MPORT(X)  (X % 4)         /*!< Convert tMUXSensor to MUX port number */
+#define MPORT(X)  (X % 3)         /*!< Convert tMUXSensor to MUX port number */
 #endif
 
 #ifndef MAX_ARR_SIZE

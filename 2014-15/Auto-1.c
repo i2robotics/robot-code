@@ -24,9 +24,9 @@
 
 #include "JoystickDriver.c"
 #include "../headers/scaleJoy_1.h"
-#include "../headers/helpers_1.h"
 #include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
+#include "../headers/helpers_1.h"
 
 typedef enum {
 	kAllianceRed,
@@ -51,13 +51,8 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
 		drive(CW, 30, 900);
 		break;
 	case 3:
-
-		//PlayImmediateTone(900,100);
-		//PlayImmediateTone(849,100);
-		//PlayImmediateTone(801,100);
-		//PlayImmediateTone(756,220);
-		wait10Msec(500);
-		nMotorEncoder[DRIVE_NE]=0;
+		wait1Msec(500);
+		//nMotorEncoder[DRIVE_NE]=0;
 		drive(CW, 50, 900);
 		drive(N, 50, 600);
 		drive(CCW, 50, 900);
@@ -68,23 +63,30 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
 
 void mission_ramp(Alliance_t alliance)
 {
-	drive(N, 40, 2750);
+	drive(S, 40, 500);
+	drive(N, 1, 1000);
+	drive(S, 2, 500);
+	drive(N, 1, 100);
+	drive(S, 20, 900);
+
+
 }
 
 
 task main() //*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
 {
 	//waitForStart();
-	//StartTask(updateBearing);
+	StartTask(updateBearing);
 	Alliance_t cur_alli = kAllianceRed;
 	wait1Msec(500);
 
+		mission_ramp(cur_alli);
+	/*
 
 	int first_IR = SensorValue[IR_SEEK];
 	drive(N, 40, 1200);
 	int second_IR = SensorValue[IR_SEEK];
 	writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
-
 
 	if (first_IR <= 3) {
 		mission_monolith(cur_alli, 1);
@@ -95,8 +97,9 @@ task main() //*/*\*/*\*/*\*/*\*/*\*/*\*/*\*/
 	else {
 		mission_monolith(cur_alli, 2);
 	}
-
+*/
 	halt();
+	bFloatDuringInactiveMotorPWM = true;
 	PlayImmediateTone(200,200);
 	wait1Msec(1000);
 }

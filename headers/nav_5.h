@@ -160,7 +160,7 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb) {		//
 		default:
 			x = cos((-d+90.0)*0.017453278);			//Trigonometry to travel at specified angle.
 			y = sin((-d+90.0)*0.017453278);			//0.017453278 = pi/180
-			writeDebugStreamLine("x: %f, y: %f", x, y);
+			//writeDebugStreamLine("x: %f, y: %f", x, y);
 
 			ne = (y-x);
 			se = (y+x);
@@ -168,7 +168,7 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb) {		//
 			sw = (y-x);
 			break;
 		}
-		writeDebugStreamLine(":%f,%f,%f,%f",ne,se,nw,sw);//For debuging purposes.
+		//writeDebugStreamLine(":%f,%f,%f,%f",ne,se,nw,sw);//For debuging purposes.
 
 		ne = ne*s;
 		se = se*s;
@@ -187,7 +187,7 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb) {		//
 	motor[DRIVE_NW] = nw;
 	motor[DRIVE_SW] = sw;
 
-writeDebugStreamLine(":%f,%f,%f,%f",ne,se,nw,sw);//For debuging purposes.
+//writeDebugStreamLine(":%f,%f,%f,%f",ne,se,nw,sw);//For debuging purposes.
 
 	if (mode==kModeGyro)
 	{
