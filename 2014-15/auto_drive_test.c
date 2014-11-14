@@ -30,32 +30,9 @@
 
 task main()
 {
-	StartTask(updateBearing);
-	drive(CW, 80, 1000);
-	go_to_bearing(270);
-	/*
-motor[DRIVE_NE] = 50;
-wait1Msec(1000);
-motor[DRIVE_NE] = 0;
+	//StartTask(updateBearing);
 
-motor[DRIVE_SE] = 50;
-wait1Msec(1000);
-motor[DRIVE_SE] = 0;
-
-motor[DRIVE_SW] = 50;
-wait1Msec(1000);
-motor[DRIVE_SW] = 0;
-
-motor[DRIVE_NW] = 50;
-wait1Msec(1000);
-motor[DRIVE_NW] = 0;
-
-	bFloatDuringInactiveMotorPWM = true;
-	motor[DRIVE_NE] = 80;
-	motor[DRIVE_SE] = -80;
-		//drive(FWD-16, 32, 1100);
-		//drive(FWD+16, 32, 1100);
-*/
+	drive_enc(N,100,1000);
 
 halt();
 PlayImmediateTone(200,200);

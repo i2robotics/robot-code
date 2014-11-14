@@ -46,7 +46,8 @@
 typedef enum
 {
   kModeDumb,
-  kModeGyro
+  kModeGyro,
+  kModeEnc
 } driveMode_t;
 
 void halt()
@@ -57,14 +58,7 @@ void halt()
   motor[DRIVE_SW] = 0;
 }
 
-#ifndef CLION_INCLUDED
 void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb) {		//3 imputs: direction, speed, and time to wait.
-#else
-
-void drive(int d, int s, short t)
-{    //3 imputs: direction, speed, and time to wait.
-  driveMode_t mode = kModeDumb;
-#endif
   float ne = 0;              //Values that will eventually become motor values.
   float se = 0;
   float nw = 0;
@@ -251,6 +245,7 @@ void drive(int d, int s, short t)
 
   writeDebugStreamLine(":%f,%f,%f,%f", ne, se, nw, sw);//For debuging purposes.
 
+#ifdef GYRO_INCLUDED
   if (mode == kModeGyro) {
     time1[T2] = 0;
     float k_p = .01;
@@ -264,8 +259,21 @@ void drive(int d, int s, short t)
     }
     halt();
   }
-  else if (t != 0) {      //Unless time to wait is 0,
+#endif
+  if (mode == kModeEnc) {
+  	nMotorEncoder[DRIVE_SW] = 0;
+  	while (abs(nMotorEncoder[DRIVE_SW]) < abs(t)) {
+  		writeDebugStreamLine("enc: %i, target:%i", nMotorEncoder[DRIVE_SW], t);
+  	  wait1Msec(2);
+  	}
+  	halt();
+  } else if (t != 0) {      //Unless time to wait is 0,
     wait1Msec(t);        // Wait that time, and then stop all motors.
     halt();              // This way, if time is 0, motors continue indefinitely
   }
+}
+
+void drive_enc(int d, byte s = 100, short t = 0)
+{
+	drive(d, s, t, kModeEnc);
 }

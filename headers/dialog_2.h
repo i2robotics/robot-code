@@ -9,19 +9,19 @@
 #include "../headers/clion_1.h"
 #endif
 
-void dialog(const string Plan_s[], Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_delay)
-{
+void dialog(const string *Plan_s, Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_delay) {
   const string Alliance_s[] = {"Red", "Blue"};
   int sel_option = 0;
-  struct {
+  typedef struct {
     Alliance_t alliance;
     Plan_t plan;
     int useless;
     int delay;
-  } options;
+  } Options_t;
   //set default options
-  options.alliance = 0;
-  options.plan = 0;
+  Options_t options;
+  options.alliance = (Alliance_t)0;
+  options.plan = (Alliance_t)0;
   options.useless = 0;
   options.delay = 0;
 
