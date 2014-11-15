@@ -96,10 +96,10 @@ task main()
 		state bRT down
 		servo[roof] = 180;
 		wait1Msec(350);
-		servo[flip] = 255;
+		servo[flip] = 0;
 		state bRB down
-		servo[flip] =20;
-		wait1Msec(1200);
+		servo[flip] =255;
+		wait1Msec(750);
 		servo[roof] = 60;
 		end
 
