@@ -1,7 +1,6 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
 #pragma config(Hubs,  S2, HTMotor,  HTMotor,  HTServo,  none)
-#pragma config(Sensor, S3,     HTSMUX,         sensorI2CCustom)
-#pragma config(Sensor, S4,     HTSPB,          sensorI2CCustom9V)
+#pragma config(Sensor, S3,     HTSPB,          sensorI2CCustom9V)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorC,          right,         tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed)
@@ -54,6 +53,8 @@ task main()
 		action_joy1
 		state bB down
 		servo[guides] = 255;
+		wait1Msec(500);
+		servo[guides] = 0;
 		end
 
 		action_joy1
@@ -65,9 +66,8 @@ task main()
 		motor[FEEDER] = 0;
 		end
 		if (joy1Btn(2) == 1)
-			if (change_grab == 0)
+			if (change_grab == 0) {
 				// button was just pressed
-			{
 			change_grab = 1; //Set flag saying we've done it.
 
 			nxtDisplayTextLine(2, "Change: %d", change_grab);

@@ -31,6 +31,7 @@
 //#include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
 #include "../headers/helpers_1.h"
+#include "../drivers/HTSPB-driver.h"
 
 //==================  Config Definitions  ==================
 typedef enum {
@@ -50,7 +51,7 @@ const string Plan_s[] = {"Kick", "Ramp"};
 //==================  Missions  ==================
 void mission_monolith(Alliance_t alliance, int monolith_position)
 {
-		writeDebugStreamLine("%i", monolith_position);
+	writeDebugStreamLine("%i", monolith_position);
 
 	switch (monolith_position) {
 	case 1:
@@ -93,23 +94,25 @@ void mission_ramp(Alliance_t alliance)
 //==================  Main Task  ==================
 task main()
 {
+	HTSPBsetupIO(HTSPB, 0x10);
+
 	Alliance_t cur_alli = kAllianceRed;
 	Plan_t cur_plan = kPlanKick;
 	int delay;
-//	dialog(Plan_s, (Alliance_t *)cur_alli, (Plan_t *)cur_plan, (int *)delay); // Run Dialog for user imput of parameters
+	//	dialog(Plan_s, (Alliance_t *)cur_alli, (Plan_t *)cur_plan, (int *)delay); // Run Dialog for user imput of parameters
 
-//	waitForStart();
-//	StartTask(updateBearing);
+	//	waitForStart();
+	//	StartTask(updateBearing);
 
 	wait1Msec(500);
 
 	switch (cur_plan) {
-		case kPlanRamp: //================== Plan Ramp
-			mission_ramp(cur_alli);
-			break;
+	case kPlanRamp: //================== Plan Ramp
+		mission_ramp(cur_alli);
+		break;
 
 
-		case kPlanKick: //================== Plan Kick
+	case kPlanKick: //================== Plan Kick
 		int first_IR = SensorValue[IR_SEEK];
 		drive_enc(N, 20, 2250);
 		int second_IR = SensorValue[IR_SEEK]; //157.56
@@ -117,17 +120,26 @@ task main()
 
 		if (first_IR <= 3) {
 			mission_monolith(cur_alli, 1);
-		} else if (second_IR == 5) {
+			} else if (second_IR == 5) {
 			mission_monolith(cur_alli, 3);
-		} else {
+			} else {
 			mission_monolith(cur_alli, 2);
 		}
 		drive_enc(CW, 80, 2000);
 		break;
 	}
-//==================  Ending  ==================
 	halt();
-	bFloatDuringInactiveMotorPWM = true;
+	servo[guides] = 255;
+	wait1Msec(500);
+	servo[guides] = 0;
+
+	motor[LIFT] = 100;
+	while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
+	motor[LIFT] = 0;
+
+	//==================  Ending  ==================
+	halt();
+	//bFloatDuringInactiveMotorPWM = true;
 	PlayImmediateTone(200,200);
 	wait1Msec(1000);
 }
