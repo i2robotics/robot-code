@@ -48,6 +48,15 @@ const string Plan_s[] = {"Kick", "Ramp"};
 
 #include "../headers/dialog_2.h"
 
+void initialize_servos()
+{
+	servo[grab1]  = 232;
+	servo[grab2]  = 16;
+	servo[guides] = 0;
+	servo[roof] = 180;
+	servo[flip] = 0;
+}
+
 //==================  Missions  ==================
 void mission_monolith(Alliance_t alliance, int monolith_position)
 {
@@ -82,13 +91,71 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
 
 void mission_ramp(Alliance_t alliance)
 {
-	drive_enc(S, 40, 500);
-	drive_enc(N, 1, 1000);
-	drive_enc(S, 2, 500);
-	drive_enc(N, 1, 100);
-	drive_enc(S, 20, 900);
+	drive(S, 40, 500);
+	drive(N, 1, 1000);
+	drive(S, 2, 500);
+	drive(N, 1, 100);
+	drive(S, 20, 900);
 
+	servo[guides] = 255;
+	wait1Msec(500);
+	servo[guides] = 0;
 
+	drive(CCW, 40, 200);
+
+	drive_enc(S, 20, 1300);
+	drive(CCW, 40, 200);
+	drive_enc(S, 15, 1000);
+
+	servo[grab1] = 8;
+	servo[grab2] = 239;
+
+	motor[LIFT] = 100;
+	wait1Msec(6200);
+	motor[LIFT] = 0;
+
+	servo[flip] =255;
+	wait1Msec(750);
+	servo[roof] = 60;
+	wait1Msec(1000);
+
+	servo[flip] = 245;
+	wait1Msec(100);
+	servo[flip] = 255;
+	wait1Msec(50);
+	servo[flip] = 245;
+	wait1Msec(100);
+	servo[flip] = 255;
+	wait1Msec(50);
+	servo[flip] = 245;
+	wait1Msec(100);
+	servo[flip] = 255;
+	wait1Msec(1000);
+
+	drive_enc(CCW, 100, 3000);
+	drive_enc(S, 40, 800);
+
+	servo[grab1]  = 232; // release
+	servo[grab2]  = 16;
+
+	drive_enc(N, 40, 800);
+	drive_enc(CW, 100, 3700);
+	drive(S, 20, 1200);
+
+	servo[grab1] = 8; // grab
+	servo[grab2] = 239;
+	wait1Msec(1000);
+
+	drive(N, 30, 500);
+	drive(CCW, 100, 1400);
+	drive(S, 30, 500);
+
+	servo[grab1]  = 232; // release
+	servo[grab2]  = 16;
+
+	motor[LIFT] = 100;
+		while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
+		motor[LIFT] = 0;
 }
 
 //==================  Main Task  ==================
@@ -97,14 +164,16 @@ task main()
 	HTSPBsetupIO(HTSPB, 0x10);
 
 	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanKick;
-	int delay;
-	//	dialog(Plan_s, (Alliance_t *)cur_alli, (Plan_t *)cur_plan, (int *)delay); // Run Dialog for user imput of parameters
+	Plan_t cur_plan = kPlanRamp;
+	int delay = 0;
+	dialog(Plan_s, (Alliance_t *)cur_alli, (Plan_t *)cur_plan, (int *)delay); // Run Dialog for user imput of parameters
 
-	//	waitForStart();
-	//	StartTask(updateBearing);
+	initialize_servos();
+	//  waitForStart();
+	//  StartTask(updateBearing);
 
 	wait1Msec(500);
+	wait1Msec(delay);
 
 	switch (cur_plan) {
 	case kPlanRamp: //================== Plan Ramp
@@ -126,16 +195,15 @@ task main()
 			mission_monolith(cur_alli, 2);
 		}
 		drive_enc(CW, 80, 2000);
+		servo[guides] = 255;
+		wait1Msec(500);
+		servo[guides] = 0;
+		motor[LIFT] = 100;
+		while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
+		motor[LIFT] = 0;
 		break;
 	}
 	halt();
-	servo[guides] = 255;
-	wait1Msec(500);
-	servo[guides] = 0;
-
-	motor[LIFT] = 100;
-	while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
-	motor[LIFT] = 0;
 
 	//==================  Ending  ==================
 	halt();
