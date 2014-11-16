@@ -111,6 +111,13 @@ task main()
 		end
 
 		//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+		action_joy2
+		state bY down
+		servo[roof] = ServoValue[roof] - 2;
+		state bA down
+		servo[roof] = ServoValue[roof] + 2;
+		end
+
 		HTSPBsetupIO(HTSPB, 0x10);
 		if(HTSPBreadIO(HTSPB, 0x01) != 1) {
 			nxtDisplayTextLine(1, "Magnet absent");
