@@ -54,7 +54,7 @@ task main()
 		state bB down
 		servo[guides] = 255;
 		wait1Msec(500);
-		servo[guides] = 0;
+		servo[guides] = 25;
 		end
 
 		action_joy1
@@ -69,8 +69,6 @@ task main()
 			if (change_grab == 0) {
 				// button was just pressed
 			change_grab = 1; //Set flag saying we've done it.
-
-			nxtDisplayTextLine(2, "Change: %d", change_grab);
 			if (toggle_grab == true) //grab
 			{
 				toggle_grab = false;
@@ -91,6 +89,19 @@ task main()
 	  //see if the button has been released
 	  if (joy1Btn(2) == 0)
 	  	change_grab= 0;
+
+	  action_joy2
+	  state bLB down
+	  //servo[roof] = 180;
+		wait1Msec(350);
+		servo[flip] = 0;
+		wait1Msec(450);
+		servo[roof] = 0;
+	  state bLT down
+	  servo[flip] =255;
+		wait1Msec(750);
+		servo[roof] = 60;
+	  end
 
 		action_joy2
 		state bRT down
