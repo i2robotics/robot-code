@@ -58,7 +58,8 @@ void halt()
   motor[DRIVE_SW] = 0;
 }
 
-void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb) {		//3 imputs: direction, speed, and time to wait.
+void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
+{		//3 inputs: direction, speed, and time to wait.
   float ne = 0;              //Values that will eventually become motor values.
   float se = 0;
   float nw = 0;
@@ -261,12 +262,12 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb) {		//
   }
 #endif
   if (mode == kModeEnc) {
-  	nMotorEncoder[DRIVE_SW] = 0;
-  	while (abs(nMotorEncoder[DRIVE_SW]) < abs(t)) {
-  		writeDebugStreamLine("enc: %i, target:%i", nMotorEncoder[DRIVE_SW], t);
-  	  wait1Msec(2);
-  	}
-  	halt();
+    nMotorEncoder[DRIVE_SW] = 0;
+    while (abs(nMotorEncoder[DRIVE_SW]) < abs(t)) {
+      writeDebugStreamLine("enc: %i, target:%i", nMotorEncoder[DRIVE_SW], t);
+      wait1Msec(2);
+    }
+    halt();
   } else if (t != 0) {      //Unless time to wait is 0,
     wait1Msec(t);        // Wait that time, and then stop all motors.
     halt();              // This way, if time is 0, motors continue indefinitely

@@ -34,14 +34,16 @@
 #include "../drivers/HTSPB-driver.h"
 
 //==================  Config Definitions  ==================
-typedef enum {
-	kAllianceRed,
-	kAllianceBlu
+typedef enum
+{
+  kAllianceRed,
+  kAllianceBlu
 } Alliance_t;
 
-typedef enum {
-	kPlanKick,
-	kPlanRamp
+typedef enum
+{
+  kPlanKick,
+  kPlanRamp
 } Plan_t;
 const string Plan_s[] = {"Kick", "Ramp"};
 
@@ -50,164 +52,164 @@ const string Plan_s[] = {"Kick", "Ramp"};
 
 void initialize_servos()
 {
-	servo[grab1]  = 232;
-	servo[grab2]  = 16;
-	servo[guides] = 0;
-	servo[roof] = 180;
-	servo[flip] = 0;
+  servo[grab1] = 232;
+  servo[grab2] = 16;
+  servo[guides] = 0;
+  servo[roof] = 180;
+  servo[flip] = 0;
 }
 
 //==================  Missions  ==================
 void mission_monolith(Alliance_t alliance, int monolith_position)
 {
-	writeDebugStreamLine("%i", monolith_position);
+  writeDebugStreamLine("%i", monolith_position);
 
-	switch (monolith_position) {
-	case 1:
-		PlayImmediateTone(400,200);
-		drive_enc(N, 20, 650);
-		drive_enc(CW, 50, 1100);
-		drive_enc(N, 50, 2200);
-		drive(S, -2, 1200);
-		break;
-	case 2:
-		PlayImmediateTone(650,200);
-		drive_enc(N, 40, 840);
-		drive_enc(CW, 80, 1000);
-		drive_enc(N, 90, 2800);
-		drive(S, -2, 1200);
-		break;
-	case 3:
-		drive_enc(CW, 50, 900);
-		drive_enc(N, 50, 800);
-		drive(CCW, 50, 900);
-		drive_enc(N, 50, 600);
-		drive(CW, 40, 1400);
-		drive_enc(N, 58, 2000);
-		//drive(S, -20, 1800);
-		break;
-	}
+  switch (monolith_position) {
+    case 1:
+      PlayImmediateTone(400, 200);
+      drive_enc(N, 20, 650);
+      drive_enc(CW, 50, 1100);
+      drive_enc(N, 50, 2200);
+      drive(S, -2, 1200);
+      break;
+    case 2:
+      PlayImmediateTone(650, 200);
+      drive_enc(N, 40, 840);
+      drive_enc(CW, 80, 1000);
+      drive_enc(N, 90, 2800);
+      drive(S, -2, 1200);
+      break;
+    case 3:
+      drive_enc(CW, 50, 900);
+      drive_enc(N, 50, 800);
+      drive(CCW, 50, 900);
+      drive_enc(N, 50, 600);
+      drive(CW, 40, 1400);
+      drive_enc(N, 58, 2000);
+      //drive(S, -20, 1800);
+      break;
+  }
 }
 
 void mission_ramp(Alliance_t alliance)
 {
-	drive(S, 40, 500);
-	drive(N, 1, 1000);
-	drive(S, 2, 500);
-	drive(N, 1, 100);
-	drive(S, 20, 900);
+  drive(S, 40, 500);
+  drive(N, 1, 1000);
+  drive(S, 2, 500);
+  drive(N, 1, 100);
+  drive(S, 20, 900);
 
-	servo[guides] = 255;
-	wait1Msec(500);
-	servo[guides] = 0;
+  servo[guides] = 255;
+  wait1Msec(500);
+  servo[guides] = 0;
 
-	drive(CCW, 40, 200);
+  drive(CCW, 40, 200);
 
-	drive_enc(S, 20, 1300);
-	drive(CCW, 40, 200);
-	drive_enc(S, 15, 1000);
+  drive_enc(S, 20, 1300);
+  drive(CCW, 40, 200);
+  drive_enc(S, 15, 1000);
 
-	servo[grab1] = 8;
-	servo[grab2] = 239;
+  servo[grab1] = 8;
+  servo[grab2] = 239;
 
-	motor[LIFT] = 100;
-	wait1Msec(6200);
-	motor[LIFT] = 0;
+  motor[LIFT] = 100;
+  wait1Msec(6200);
+  motor[LIFT] = 0;
 
-	servo[flip] =255;
-	wait1Msec(750);
-	servo[roof] = 60;
-	wait1Msec(1000);
+  servo[flip] = 255;
+  wait1Msec(750);
+  servo[roof] = 60;
+  wait1Msec(1000);
 
-	servo[flip] = 245;
-	wait1Msec(100);
-	servo[flip] = 255;
-	wait1Msec(50);
-	servo[flip] = 245;
-	wait1Msec(100);
-	servo[flip] = 255;
-	wait1Msec(50);
-	servo[flip] = 245;
-	wait1Msec(100);
-	servo[flip] = 255;
-	wait1Msec(1000);
+  servo[flip] = 245;
+  wait1Msec(100);
+  servo[flip] = 255;
+  wait1Msec(50);
+  servo[flip] = 245;
+  wait1Msec(100);
+  servo[flip] = 255;
+  wait1Msec(50);
+  servo[flip] = 245;
+  wait1Msec(100);
+  servo[flip] = 255;
+  wait1Msec(1000);
 
-	drive_enc(CCW, 100, 3000);
-	drive_enc(S, 40, 800);
+  drive_enc(CCW, 100, 3000);
+  drive_enc(S, 40, 800);
 
-	servo[grab1]  = 232; // release
-	servo[grab2]  = 16;
+  servo[grab1] = 232; // release
+  servo[grab2] = 16;
 
-	drive_enc(N, 40, 800);
-	drive_enc(CW, 100, 3700);
-	drive(S, 20, 1200);
+  drive_enc(N, 40, 800);
+  drive_enc(CW, 100, 3700);
+  drive(S, 20, 1200);
 
-	servo[grab1] = 8; // grab
-	servo[grab2] = 239;
-	wait1Msec(1000);
+  servo[grab1] = 8; // grab
+  servo[grab2] = 239;
+  wait1Msec(1000);
 
-	drive(N, 30, 500);
-	drive(CCW, 100, 1400);
-	drive(S, 30, 500);
+  drive(N, 30, 500);
+  drive(CCW, 100, 1400);
+  drive(S, 30, 500);
 
-	servo[grab1]  = 232; // release
-	servo[grab2]  = 16;
+  servo[grab1] = 232; // release
+  servo[grab2] = 16;
 
-	motor[LIFT] = 100;
-		while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
-		motor[LIFT] = 0;
+  motor[LIFT] = 100;
+  while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
+  motor[LIFT] = 0;
 }
 
 //==================  Main Task  ==================
 task main()
 {
-	HTSPBsetupIO(HTSPB, 0x10);
+  HTSPBsetupIO(HTSPB, 0x10);
 
-	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanRamp;
-	int delay = 0;
-	dialog(Plan_s, (Alliance_t *)cur_alli, (Plan_t *)cur_plan, (int *)delay); // Run Dialog for user imput of parameters
+  Alliance_t cur_alli = kAllianceRed;
+  Plan_t cur_plan = kPlanRamp;
+  int delay = 0;
+  dialog(Plan_s, (Alliance_t *) cur_alli, (Plan_t *) cur_plan, (int *) delay); // Run Dialog for user imput of parameters
 
-	initialize_servos();
-	//  waitForStart();
-	//  StartTask(updateBearing);
+  initialize_servos();
+  //  waitForStart();
+  //  StartTask(updateBearing);
 
-	wait1Msec(500);
-	wait1Msec(delay);
+  wait1Msec(500);
+  wait1Msec(delay);
 
-	switch (cur_plan) {
-	case kPlanRamp: //================== Plan Ramp
-		mission_ramp(cur_alli);
-		break;
+  switch (cur_plan) {
+    case kPlanRamp: //================== Plan Ramp
+      mission_ramp(cur_alli);
+      break;
 
 
-	case kPlanKick: //================== Plan Kick
-		int first_IR = SensorValue[IR_SEEK];
-		drive_enc(N, 20, 2250);
-		int second_IR = SensorValue[IR_SEEK]; //157.56
-		writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
+    case kPlanKick: //================== Plan Kick
+      int first_IR = SensorValue[IR_SEEK];
+      drive_enc(N, 20, 2250);
+      int second_IR = SensorValue[IR_SEEK]; //157.56
+      writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
 
-		if (first_IR <= 3) {
-			mission_monolith(cur_alli, 1);
-			} else if (second_IR == 5) {
-			mission_monolith(cur_alli, 3);
-			} else {
-			mission_monolith(cur_alli, 2);
-		}
-		drive_enc(CW, 80, 2000);
-		servo[guides] = 255;
-		wait1Msec(500);
-		servo[guides] = 0;
-		motor[LIFT] = 100;
-		while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
-		motor[LIFT] = 0;
-		break;
-	}
-	halt();
+      if (first_IR <= 3) {
+        mission_monolith(cur_alli, 1);
+      } else if (second_IR == 5) {
+        mission_monolith(cur_alli, 3);
+      } else {
+        mission_monolith(cur_alli, 2);
+      }
+      drive_enc(CW, 80, 2000);
+      servo[guides] = 255;
+      wait1Msec(500);
+      servo[guides] = 0;
+      motor[LIFT] = 100;
+      while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
+      motor[LIFT] = 0;
+      break;
+  }
+  halt();
 
-	//==================  Ending  ==================
-	halt();
-	//bFloatDuringInactiveMotorPWM = true;
-	PlayImmediateTone(200,200);
-	wait1Msec(1000);
+  //==================  Ending  ==================
+  halt();
+  //bFloatDuringInactiveMotorPWM = true;
+  PlayImmediateTone(200, 200);
+  wait1Msec(1000);
 }

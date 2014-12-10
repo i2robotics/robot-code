@@ -29,141 +29,137 @@
 #include "../drivers/HTSPB-driver.h"
 
 //#include "../headers/liftControl_1.h"
-bool toggle_grab = false;
-int change_grab = 0;
+bool grab_state = false;
+int do_grab_change = 0;
 float J1X1;
 float J1Y1;
 float J1X2;
 
 float J2Y2;
 short current_joystick;
+
 task main()
 {
-	//nMotorEncoder[DRIVE_SE] = 0;
-	// nMotorEncoder[DRIVE_SW] = 0;
-	//StartTask(updateBearing);
-	while (true) {
-		getJoystickSettings(joystick);
-		J1X1 = scaleJoy(joystick.joy1_x1);
-		J1X2 = scaleJoy(joystick.joy1_x2);
-		J1Y1 = scaleJoy(joystick.joy1_y1);
+  //nMotorEncoder[DRIVE_SE] = 0;
+  // nMotorEncoder[DRIVE_SW] = 0;
+  //StartTask(updateBearing);
+  while (true) {
+    getJoystickSettings(joystick);
+    J1X1 = scaleJoy(joystick.joy1_x1);
+    J1X2 = scaleJoy(joystick.joy1_x2);
+    J1Y1 = scaleJoy(joystick.joy1_y1);
 
 
-		J2Y2 = scaleJoy(joystick.joy2_y2);
+    J2Y2 = scaleJoy(joystick.joy2_y2);
 
-		//nxtDisplayTextLine(2, "SE:%i, SW:%i", nMotorEncoder[DRIVE_SE], nMotorEncoder[DRIVE_SW]);
+    //nxtDisplayTextLine(2, "SE:%i, SW:%i", nMotorEncoder[DRIVE_SE], nMotorEncoder[DRIVE_SW]);
 
-		//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-		action_joy1
-		state bB down
-		servo[guides] = 255;
-		wait1Msec(500);
-		servo[guides] = 25;
-		end
-
-		action_joy1
-		state bLB down
-		motor[FEEDER] = 100;
-		state bLT down
-		motor[FEEDER] = -100;
-		otherwise
-		motor[FEEDER] = 0;
-		end
-
-		action_joy1
-		state bA down
-			if (change_grab == 0) {
-				// button was just pressed
-			change_grab = 1; //Set flag saying we've done it.
-			if (toggle_grab == true) //grab
-			{
-				toggle_grab = false;
-			}else  //release
-			{
-				toggle_grab = true;
-			}
-
-			if (toggle_grab == true) {
-				servo[grab1] = 8;
-				servo[grab2] = 239;
-				} else if (toggle_grab == false) {
-				servo[grab1] = 232;
-				servo[grab2] = 16;
-			}
-	  otherwise
-	  	change_grab = 0;
+    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+    action_joy1
+    state bB down
+      servo[guides] = 255;
+      wait1Msec(500);
+      servo[guides] = 25;
     end
 
-	  action_joy2
-	  state bLB down
-	  //servo[roof] = 180;
-		wait1Msec(350);
-		servo[flip] = 0;
-		wait1Msec(450);
-		servo[roof] = 0;
-	  state bLT down
-	  servo[flip] =255;
-		wait1Msec(750);
-		servo[roof] = 60;
-	  end
+    action_joy1
+    state bLB down
+      motor[FEEDER] = 100;
+    state bLT down
+      motor[FEEDER] = -100;
+    otherwise
+      motor[FEEDER] = 0;
+    end
 
-		action_joy2
-		state bRT down
-		servo[roof] = 180;
-		wait1Msec(350);
-		servo[flip] = 0;
-		state bRB down
-		servo[flip] =255;
-		wait1Msec(750);
-		servo[roof] = 60;
-		end
+    action_joy1
+    state bA down
+      if (do_grab_change) {
+        // button was just pressed
+        do_grab_change = false; //Set flag saying we've done it.
+        grab_state = !grab_state;
 
-		action_joy2
-		state bB down
-		motor[POPPER] = 100;
-		otherwise
-		motor[POPPER] = 0;
-		end
+        if (grab_state == true) {
+          servo[grab1] = 8;
+          servo[grab2] = 239;
+        } else if (grab_state == false) {
+          servo[grab1] = 232;
+          servo[grab2] = 16;
+        }
+      }
+    otherwise
+      do_grab_change = true;
+    end
 
-		action_joy2
-		state bY down
-		servo[roof] = ServoValue[roof] - 2;
-		state bA down
-		servo[roof] = ServoValue[roof] + 2;
-		end
+    action_joy2
+    state bLB down
+      //servo[roof] = 180;
+      wait1Msec(350);
+      servo[flip] = 0;
+      wait1Msec(450);
+      servo[roof] = 0;
+    state bLT down
+      servo[flip] = 255;
+      wait1Msec(750);
+      servo[roof] = 60;
+    end
 
-			//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+    action_joy2
+    state bRT down
+      servo[roof] = 180;
+      wait1Msec(350);
+      servo[flip] = 0;
+    state bRB down
+      servo[flip] = 255;
+      wait1Msec(750);
+      servo[roof] = 60;
+    end
 
-		HTSPBsetupIO(HTSPB, 0x10);
-		if(HTSPBreadIO(HTSPB, 0x01) != 1) {
-			nxtDisplayTextLine(1, "Magnet absent");
-			//HTSPBwriteIO(HTSPB, 0x10);
-			} else {
-			nxtDisplayTextLine(1, "Magnet present");
-			//HTSPBwriteIO(HTSPB, 0x00);
-		}
-		//StartTask(lift_control);
-		if (HTSPBreadIO(HTSPB, 0x01) != 1 || J2Y2<0) {
-			motor[LIFT] = J2Y2;
-			} else {
-			motor[LIFT] = 0;
-		}
-		//nxtDisplayTextLine(1, "Height: %i", lift_height);
-		//action_joy2
-		// state bA down
-		// 	height = 0;
-		// end
+    action_joy2
+    state bB down
+      motor[POPPER] = 100;
+    otherwise
+      motor[POPPER] = 0;
+    end
 
-		//if (height == 0 && (HTSPBreadIO(HTSPB, 0x01) != 1)) {
-		//	motor[LIFT] = 100;
-		//} else {
-		//	motor[LIFT] = 0;
-		//	height = 1;
-		//}
-		motor[DRIVE_NE] = (J1Y1 - J1X1 - J1X2);
-		motor[DRIVE_SE] = (J1Y1 + J1X1 - J1X2);
-		motor[DRIVE_NW] = (J1Y1 + J1X1 + J1X2);
-		motor[DRIVE_SW] = (J1Y1 - J1X1 + J1X2);
-		writeDebugStreamLine("Y1:%g, X1:%g, X2:%g", J1Y1, J1X1, J1X2);
-	}
+    action_joy2
+    state bY down
+      servo[roof] = ServoValue[roof] - 2;
+    state bA down
+      servo[roof] = ServoValue[roof] + 2;
+    end
+
+    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
+
+    HTSPBsetupIO(HTSPB, 0x10);
+    if (HTSPBreadIO(HTSPB, 0x01) != 1) {
+      nxtDisplayTextLine(1, "Magnet absent");
+      //HTSPBwriteIO(HTSPB, 0x10);
+    } else {
+      nxtDisplayTextLine(1, "Magnet present");
+      //HTSPBwriteIO(HTSPB, 0x00);
+    }
+    //StartTask(lift_control);
+    if (HTSPBreadIO(HTSPB, 0x01) != 1 || J2Y2 < 0) {
+      motor[LIFT] = J2Y2;
+    } else {
+      motor[LIFT] = 0;
+    }
+    //nxtDisplayTextLine(1, "Height: %i", lift_height);
+    //action_joy2
+    // state bA down
+    // 	height = 0;
+    // end
+
+    //if (height == 0 && (HTSPBreadIO(HTSPB, 0x01) != 1)) {
+    //	motor[LIFT] = 100;
+    //} else {
+    //	motor[LIFT] = 0;
+    //	height = 1;
+    //}
+    motor[DRIVE_NE] = (J1Y1 - J1X1 - J1X2);
+    motor[DRIVE_SE] = (J1Y1 + J1X1 - J1X2);
+    motor[DRIVE_NW] = (J1Y1 + J1X1 + J1X2);
+    motor[DRIVE_SW] = (J1Y1 - J1X1 + J1X2);
+    writeDebugStreamLine("Y1:%g, X1:%g, X2:%g", J1Y1, J1X1, J1X2);
+  }
 }

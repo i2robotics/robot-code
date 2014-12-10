@@ -61,5 +61,8 @@ void writeDebugStreamLine(string string, ...) {}
 float cos(double number) {}
 float sin(double number) {}
 void getJoystickSettings(struct cLion_Joystick_t joystick) {}
+void drive(int d, int p, int t);
+void drive_enc(int d, int p, int e);
+double abs(float);
 
 #endif
