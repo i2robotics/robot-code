@@ -69,7 +69,9 @@ task main()
 		otherwise
 		motor[FEEDER] = 0;
 		end
-		if (joy1Btn(2) == 1)
+
+		action_joy1
+		state bA down
 			if (change_grab == 0) {
 				// button was just pressed
 			change_grab = 1; //Set flag saying we've done it.
@@ -88,11 +90,9 @@ task main()
 				servo[grab1] = 232;
 				servo[grab2] = 16;
 			}
-	  }
-
-	  //see if the button has been released
-	  if (joy1Btn(2) == 0)
-	  	change_grab= 0;
+	  otherwise
+	  	change_grab = 0;
+    end
 
 	  action_joy2
 	  state bLB down
@@ -125,13 +125,14 @@ task main()
 		motor[POPPER] = 0;
 		end
 
-		//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 		action_joy2
 		state bY down
 		servo[roof] = ServoValue[roof] - 2;
 		state bA down
 		servo[roof] = ServoValue[roof] + 2;
 		end
+
+			//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
 		HTSPBsetupIO(HTSPB, 0x10);
 		if(HTSPBreadIO(HTSPB, 0x01) != 1) {

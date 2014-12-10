@@ -49,6 +49,7 @@ int motor[4];
 int servo[6];
 int nMotorEncoder[4];
 int SensorValue[9];
+int ServoValue[8];
 
 void ClearTimer(int t) {}
 void nxtDisplayStringAt(int x, int y, string string, ...) {}
