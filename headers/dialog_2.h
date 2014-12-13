@@ -58,7 +58,7 @@ void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_delay)
               // Here I'm leveraging the fact that an integer with value 0 evalues to false in C.
               break;
             case 1: // Plan
-              options.plan = options.plan ? options.plan-1 : 1; //<-- Max (we'll have more eventually)
+              options.plan = options.plan ? options.plan - 1 : 1; //<-- Max (we'll have more eventually)
               // if plan > 0, decrement.      If it's 0, set it back to the max value
               break;
             case 2: // NYI
@@ -95,7 +95,6 @@ void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_delay)
     wait1Msec(20);
   }
 
- writeDebugStreamLine("delay in %i", options.delay);
   *ret_plan = options.plan;
   *ret_alliance = options.alliance;
   *ret_delay = options.delay;

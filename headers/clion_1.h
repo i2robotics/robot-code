@@ -9,6 +9,8 @@
 #ifndef CLION_INCLUDED
 #define CLION_INCLUDED
 #include <Kernel/stdbool.h>
+#include <stdbool.h>
+
 typedef const char *string;
 typedef int byte;
 typedef void task;
