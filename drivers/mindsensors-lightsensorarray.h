@@ -22,7 +22,7 @@
  *
  * License: You may use this code as you wish, provided you give credit where it's due.
  *
- * THIS CODE WILL ONLY WORK WITH ROBOTC VERSION 3.59 AND HIGHER. 
+ * THIS CODE WILL ONLY WORK WITH ROBOTC VERSION 3.59 AND HIGHER.
 
  * \author Xander Soldaat
  * \date 29 September 2012
@@ -147,7 +147,7 @@ bool MSLSAreadRawSensors(tSensors link, int *values)
   }
 
   // copy the new values (first 8 bytes)
-  memcpy(values, MSLSA_I2CReply, 8);
+  // memcpy(values, MSLSA_I2CReply, 8);
 
   return true;
 }
