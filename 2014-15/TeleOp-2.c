@@ -158,10 +158,10 @@ task main()
     //	motor[LIFT] = 0;
     //	height = 1;
     //}
-    motor[DRIVE_NE] = (J1Y1 - J1X1 - J1X2);
-    motor[DRIVE_SE] = (J1Y1 + J1X1 - J1X2);
-    motor[DRIVE_NW] = (J1Y1 + J1X1 + J1X2);
-    motor[DRIVE_SW] = (J1Y1 - J1X1 + J1X2);
+    motor[DRIVE_NE] = (J1Y1 + J1X1 - J1X2);
+    motor[DRIVE_SE] = (J1Y1 - J1X1 - J1X2);
+    motor[DRIVE_NW] = (J1Y1 - J1X1 + J1X2);
+    motor[DRIVE_SW] = (J1Y1 + J1X1 + J1X2);
     writeDebugStreamLine("Y1:%g, X1:%g, X2:%g", J1Y1, J1X1, J1X2);
   }
 }

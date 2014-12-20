@@ -264,7 +264,6 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
   if (mode == kModeEnc) {
     nMotorEncoder[DRIVE_SW] = 0;
     while (abs(nMotorEncoder[DRIVE_SW]) < abs(t)) {
-      writeDebugStreamLine("enc: %i, target:%i", nMotorEncoder[DRIVE_SW], t);
       wait1Msec(2);
     }
     halt();

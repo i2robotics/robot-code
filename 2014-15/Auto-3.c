@@ -25,6 +25,7 @@
 #ifdef USING_CLION
 #include "../headers/clion_1.h"
 #endif
+#define DEBUG_IR
 
 #include "Joystickdriver.c"
 #include "../headers/scaleJoy_1.h"
@@ -67,14 +68,13 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
 
   switch (monolith_position) {
     case 1:
-      PlayImmediateTone(400, 200);
-      drive_enc(N, 30, 970);
+      drive_enc(N, 30, 2500);
       drive_enc(CW, 70, 1100);
-      drive_enc(N, 70, 2200);
+      drive_enc(N, 70, 3000);
       drive(S, -2, 1200);
       break;
     case 2:
-      PlayImmediateTone(650, 200);
+    	drive_enc(E, 20, 500);
       drive_enc(N, 55, 840);
       drive_enc(CW, 100, 1000);
       drive_enc(N, 100, 2800);
@@ -173,7 +173,7 @@ task main()
 
   //dialog( &cur_alli, &cur_plan,  &delay); // Run Dialog for user input of parameters
 
-  initialize_servos();
+  //initialize_servos();
   //  waitForStart();
   //  StartTask(updateBearing);
 
@@ -188,18 +188,41 @@ task main()
 
     case kPlanKick: //================== Plan Kick
       int first_IR = SensorValue[IR_SEEK];
-      drive_enc(N, 20, 3590);
+      drive_enc(N, 20, 2000);
       int second_IR = SensorValue[IR_SEEK]; //157.56
-      writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
 
+      int monolith_position;
       if (first_IR <= 3) {
-        mission_monolith(cur_alli, 1);
+        monolith_position = 1;
       } else if (second_IR == 5) {
-        mission_monolith(cur_alli, 3);
+        monolith_position = 3;
       } else {
-        mission_monolith(cur_alli, 2);
+        monolith_position = 2;
       }
-      drive_enc(CW, 80, 2000);
+#ifdef DEBUG_IR
+      writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
+      switch (monolith_position) {
+      case 1:
+        PlayImmediateTone(900, 300);
+      break;
+      case 2:
+        PlayImmediateTone(650, 190);
+        wait1Msec(10);
+        PlayImmediateTone(650, 190);
+        wait1Msec(10);
+      break;
+      case 3:
+        PlayImmediateTone(400, 90);
+        wait1Msec(10);
+        PlayImmediateTone(400, 90);
+        wait1Msec(10);
+        PlayImmediateTone(400, 90);
+        wait1Msec(10);
+      }
+      wait1Msec(2000);
+#endif
+      mission_monolith(cur_alli, monolith_position);
+      drive_enc(CW, 80, 6000);
       /*
       servo[guides] = 255;
       wait1Msec(500);
@@ -213,7 +236,6 @@ task main()
 
   //==================  Ending  ==================
   halt();
-  //bFloatDuringInactiveMotorPWM = true;
   PlayImmediateTone(200, 200);
   wait1Msec(1000);
 }
