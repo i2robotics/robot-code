@@ -32,7 +32,7 @@
 #include "../headers/nav_5.h"
 #include "../headers/helpers_1.h"
 
-#include "../drivers/HTSPB-driver.h"
+#include "../drivers/hitechnic-superpro.h"
 
 //==================  Config Definitions  ==================
 typedef enum
@@ -171,7 +171,7 @@ task main()
   Plan_t cur_plan = kPlanKick;
   int delay = 0;
 
-  //dialog((Alliance_t *) cur_alli, (Plan_t *) cur_plan, (int *) delay); // Run Dialog for user imput of parameters
+  //dialog( &cur_alli, &cur_plan,  &delay); // Run Dialog for user input of parameters
 
   initialize_servos();
   //  waitForStart();
