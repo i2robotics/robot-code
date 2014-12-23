@@ -3,7 +3,7 @@
 #pragma config(Sensor, S1,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSPB,          sensorI2CCustom9V)
-#pragma config(Sensor, S4,     IR_SEEK,        sensorHiTechnicIRSeeker1200)
+#pragma config(Sensor, S4,     HTSMUX,         sensorI2CCustom)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorC,          right,         tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed, encoder)
@@ -28,12 +28,17 @@
 #define DEBUG_IR
 
 #include "Joystickdriver.c"
+
+#include "../drivers/hitechnic-sensormux.h"
+#include "../drivers/hitechnic-irseeker-v1.h"
+#include "../drivers/hitechnic-superpro.h"
+
 #include "../headers/scaleJoy_1.h"
-//#include "../headers/gyro_1.h"
+#include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
 #include "../headers/helpers_1.h"
 
-#include "../drivers/hitechnic-superpro.h"
+#define IR_SEEK_VAL HTIRSreadDir(msensor_S4_1)
 
 //==================  Config Definitions  ==================
 typedef enum
@@ -75,7 +80,7 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
       break;
     case 2:
       drive_enc(N, 55, 840);
-      drive(FWD+25, 55, 800);
+      drive(FWD + 25, 55, 800);
       drive_enc(CW, 100, 1000);
       drive_enc(N, 100, 2800);
       drive(S, -2, 1200);
@@ -171,14 +176,14 @@ task main()
   Plan_t cur_plan = kPlanKick;
   int delay = 0;
 
-  //dialog( &cur_alli, &cur_plan,  &delay); // Run Dialog for user input of parameters
+  dialog(&cur_alli, &cur_plan, &delay); // Run Dialog for user input of parameters
 
   //initialize_servos();
   //  waitForStart();
   //  StartTask(updateBearing);
 
   wait1Msec(500);
-  wait1Msec(delay*1000);
+  wait1Msec(delay * 1000);
 
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
@@ -187,9 +192,9 @@ task main()
 
 
     case kPlanKick: //================== Plan Kick
-      int first_IR = SensorValue[IR_SEEK];
+      int first_IR = IR_SEEK_VAL;
       drive_enc(N, 20, 2000);
-      int second_IR = SensorValue[IR_SEEK]; //157.56
+      int second_IR = IR_SEEK_VAL; //157.56
 
       int monolith_position;
       if (first_IR <= 3) {
@@ -203,22 +208,23 @@ task main()
       writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
       writeDebugStreamLine("result: %i", monolith_position);
       switch (monolith_position) {
-      case 1:
-        PlayImmediateTone(900, 300);
-      break;
-      case 2:
-        PlayImmediateTone(650, 190);
-        wait1Msec(100);
-        PlayImmediateTone(650, 190);
-        wait1Msec(10);
-      break;
-      case 3:
-        PlayImmediateTone(400, 90);
-        wait1Msec(10);
-        PlayImmediateTone(400, 90);
-        wait1Msec(10);
-        PlayImmediateTone(400, 90);
-        wait1Msec(10);
+        case 1:
+          PlayImmediateTone(900, 300);
+          break;
+        case 2:
+          PlayImmediateTone(650, 190);
+          wait1Msec(100);
+          PlayImmediateTone(650, 190);
+          wait1Msec(10);
+          break;
+        case 3:
+          PlayImmediateTone(400, 90);
+          wait1Msec(10);
+          PlayImmediateTone(400, 90);
+          wait1Msec(10);
+          PlayImmediateTone(400, 90);
+          wait1Msec(10);
+          break;
       }
       wait1Msec(2000);
 #endif

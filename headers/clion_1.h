@@ -37,7 +37,6 @@ struct cLion_Joystick_t {
 #define POPPER 1
 #define HTSPB 1
 #define LIFT 1
-#define IR_SEEK 1
 #define guides 2
 
 const int T1;
