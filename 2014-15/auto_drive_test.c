@@ -37,7 +37,7 @@ task main()
 {
 	//StartTask(updateBearing);
 
-	drive(W,90,1000);
+	drive(FWD+25, 55, 2000);
 	/*
 	while (true)
 	{

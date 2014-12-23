@@ -74,17 +74,17 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
       drive(S, -2, 1200);
       break;
     case 2:
-    	drive_enc(E, 20, 500);
       drive_enc(N, 55, 840);
+      drive(FWD+25, 55, 800);
       drive_enc(CW, 100, 1000);
       drive_enc(N, 100, 2800);
       drive(S, -2, 1200);
       break;
     case 3:
-      drive_enc(CW, 50, 900);
-      drive_enc(N, 50, 800);
-      drive(CCW, 50, 900);
-      drive_enc(N, 50, 600);
+      drive_enc(W, 100, 1500);
+      drive_enc(N, 55, 2600);
+      drive(ACW, 70, 250);
+      drive_enc(N, 55, 900);
       drive(CW, 40, 1400);
       drive_enc(N, 58, 2000);
       //drive(S, -20, 1800);
@@ -201,13 +201,14 @@ task main()
       }
 #ifdef DEBUG_IR
       writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
+      writeDebugStreamLine("result: %i", monolith_position);
       switch (monolith_position) {
       case 1:
         PlayImmediateTone(900, 300);
       break;
       case 2:
         PlayImmediateTone(650, 190);
-        wait1Msec(10);
+        wait1Msec(100);
         PlayImmediateTone(650, 190);
         wait1Msec(10);
       break;
@@ -222,7 +223,7 @@ task main()
       wait1Msec(2000);
 #endif
       mission_monolith(cur_alli, monolith_position);
-      drive_enc(CW, 80, 6000);
+      drive_enc(CW, 80, 5000);
       /*
       servo[guides] = 255;
       wait1Msec(500);
