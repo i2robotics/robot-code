@@ -17,12 +17,12 @@
 
   ```c
   switch (i) {
-  case 0:
-    ...
-    break;
-  case 1:
-    ...
-    break;
+    case 0:
+      ...
+      break;
+    case 1:
+      ...
+      break;
   }
   ``` 
 - Follow [K&R Style](http://en.wikipedia.org/wiki/Indent_style#K.26R_style) for Indentation Style
