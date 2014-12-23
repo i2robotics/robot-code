@@ -15,7 +15,7 @@
 - No spaces after `!`.
 - Format `switch` statements as follows
 
-  ```
+  ```c
   switch (i) {
   case 0:
     ...
