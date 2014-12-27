@@ -1,18 +1,18 @@
 /*--------------------------------------------------
  *
- *		Navigation v. 5
- *			utility for Mecanum wheel operation
- *			during Autonomous.
- *		v. 5: to add intelegent feedback control
+ *    Navigation v. 5
+ *      utility for Mecanum wheel operation
+ *      during Autonomous.
+ *    v. 5: to add intelegent feedback control
  *
  *------------------------------------------------*/
 #ifdef USING_CLION
 #include "../headers/clion_1.h"
 #endif
 
-/*#define N 0							//These macros make it easy for the programmer to see
-#define S 180							// which direction they are making the robot go,
-#define E 90							// instead of needing to figure out an angle
+/*#define N 0             //These macros make it easy for the programmer to see
+#define S 180             // which direction they are making the robot go,
+#define E 90              // instead of needing to figure out an angle
 #define W 270
 #define NE 45
 #define SE 135
@@ -59,7 +59,7 @@ void halt()
 }
 
 void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
-{		//3 inputs: direction, speed, and time to wait.
+{   //3 inputs: direction, speed, and time to wait.
   float ne = 0;              //Values that will eventually become motor values.
   float se = 0;
   float nw = 0;
@@ -132,16 +132,16 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
       wait1Msec(100);
     }
     /* ::EXPANDED FORM:: (for readability)
-    if ((512&d)==512) {				//if the bit is set (had to use base-ten here)
-      v = 2*((512^d)-50);			//Turns value from 512 to 612 into a value +/-50
-      ne=s;se=s;nw=s;sw=s;		//Initally sets all values to desired speed & direction
+    if ((512&d)==512) {       //if the bit is set (had to use base-ten here)
+      v = 2*((512^d)-50);     //Turns value from 512 to 612 into a value +/-50
+      ne=s;se=s;nw=s;sw=s;    //Initally sets all values to desired speed & direction
 
-      if (v<0) {					//If turning left
-        nw-=v;sw-=v;			//Subtract from the left side
+      if (v<0) {          //If turning left
+        nw-=v;sw-=v;      //Subtract from the left side
       }
-      else if (v>0) {				//If turning right
-        ne-=v;se-=v;			//Subtract from the right side
-      }							//(or in other directions, add to a negative value)
+      else if (v>0) {       //If turning right
+        ne-=v;se-=v;      //Subtract from the right side
+      }             //(or in other directions, add to a negative value)
     }
     */
   }
@@ -225,7 +225,6 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
         sw = (y - x);
         break;
     }
-    writeDebugStreamLine(":%f,%f,%f,%f", ne, se, nw, sw);//For debuging purposes.
 
     ne = ne * s;
     se = se * s;
@@ -235,8 +234,6 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
 
 #ifdef GYRO_INCLUDED
   float targetBearing = bearing;
-#else
-	float targetBearing;
 #endif
 
   motor[DRIVE_NE] = ne;        //Finally set the motor values
@@ -244,12 +241,12 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
   motor[DRIVE_NW] = nw;
   motor[DRIVE_SW] = sw;
 
-  writeDebugStreamLine(":%f,%f,%f,%f", ne, se, nw, sw);//For debuging purposes.
+ // writeDebugStreamLine(":%i,%i,%i,%i <:NavLn245", ne, se, nw, sw);
 
 #ifdef GYRO_INCLUDED
   if (mode == kModeGyro) {
     time1[T2] = 0;
-    float k_p = .01;
+    float k_p = 0.8;
     float error;
     while (time1[T2] < t) {
       error = k_p * (bearing - targetBearing);
@@ -257,6 +254,9 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
       motor[DRIVE_SE] = se - error;
       motor[DRIVE_NW] = nw + error;
       motor[DRIVE_SW] = sw + error;
+      //if (error != 0) {
+        writeDebugStreamLine("err: %f, bear: %f, targ:%f <:NavLn254", error, bearing, targetBearing);
+      //}
     }
     halt();
   }
@@ -275,5 +275,5 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
 
 void drive_enc(int d, byte s = 100, short t = 0)
 {
-	drive(d, s, t, kModeEnc);
+  drive(d, s, t, kModeEnc);
 }

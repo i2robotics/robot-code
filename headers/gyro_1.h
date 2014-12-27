@@ -15,7 +15,7 @@
 
 #include "../drivers/hitechnic-gyro.h"
 
-#define GYRO_INCLUDED indeed
+#define GYRO_INCLUDED
 
 float bearing = 0;
 bool do_reset = false;
@@ -26,13 +26,14 @@ task updateBearing ()
 	float delta_T = 0;
 	float prev_bear = 0;
 
-	GYRO_CAL;
+	//GYRO_CAL;
 
 	while(true)
 	{
 		time1[T3] = 0;
 		current_rate = GYRO_VAL;
-		nxtDisplayTextLine(3, "rate: %i", current_rate);
+		writeDebugStreamLine("rate: %f <:gyroLn35", current_rate);
+		nxtDisplayTextLine(1, "rate: %i", current_rate);
 		nxtDisplayTextLine(5, "pos: %i", bearing);
 		prev_bear = bearing;
 		bearing = prev_bear + current_rate*delta_T;
