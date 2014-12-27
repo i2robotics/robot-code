@@ -39,6 +39,8 @@
 #include "../headers/helpers_1.h"
 
 #define IR_SEEK_VAL HTIRSreadDir(msensor_S4_1)
+#define GYRO_VAL HTIRSreadDir(msensor_S4_2)
+#define GYRO_CAL HTIRSreadDir(msensor_S4_1)
 
 //==================  Config Definitions  ==================
 typedef enum
