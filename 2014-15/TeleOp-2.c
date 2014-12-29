@@ -84,11 +84,11 @@ task main()
         // roof = 80
         // roof = 120
         if (grab_state == true) {
-          servo[GRAB1] = 8;
-          servo[GRAB2] = 239;
+          servo[GRAB1] = 175;
+          servo[GRAB2] = 100;
         } else if (grab_state == false) {
-          servo[GRAB1] = 232;
-          servo[GRAB2] = 16;
+          servo[GRAB1] = 15;
+          servo[GRAB2] = 255;
         }
       }
     otherwise

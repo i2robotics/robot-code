@@ -64,6 +64,8 @@ void initialize_servos()
   servo[ROOF] = 255;
   servo[FLAP] = 25;
   servo[SPOUT] = 0;
+  servo[GRAB1] = 15;
+  servo[GRAB2] = 255;
 }
 
 //==================  Missions  ==================
@@ -100,17 +102,22 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
 void mission_ramp(Alliance_t alliance)
 {
 	int start_bearing = bearing;
-  drive_t(S, 40, 600, true);
-  drive_t(N, 1, 1000, true);
-  drive_t(S, 2, 500, true);
-  drive_t(N, 1, 100, true);
-  drive_t(S, 20, 900, true);
+  drive_t(S, 40, 600);
+  drive_t(N, 1, 1000);
+  drive_t(S, 2, 500);
+  drive_t(N, 1, 100);
+  drive_t(S, 20, 900);
   drive_e(CCW, 40, 300);
   drive_t(S, 20, 200, true);
   drive_e(W, 100, 800);
+
+
     PlayImmediateTone(200,200);
   drive_e(CW, 40, 100);
-  drive_t(S, 20, 3000, true);
+  drive_t(S, 20, 2000, true);
+  servo[GRAB1] = 175;
+  servo[GRAB2] = 100;
+  drive_t(S, 20, 1000, true);
 
   wait1Msec(10000);
   motor[FORK] = 100;
