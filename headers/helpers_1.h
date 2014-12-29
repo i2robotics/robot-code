@@ -48,10 +48,10 @@
 void go_to_bearing(int target)
 {
 	float k_p = 9;
-	while(abs(target - bearing) > 4) {
+	while(abs(target - bearing) > 1) {
 		int error = bearing - target;
-		writeDebugStreamLine("err: %i  bear: %i", error, bearing);
-		drive(CW, error*k_p, 0);
+		writeDebugStreamLine("err: %i  bear: %i <:HelpLn53", error, bearing);
+		drive_t(CW, error*k_p, 0);
 	}
 }
 #endif

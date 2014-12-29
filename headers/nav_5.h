@@ -43,13 +43,6 @@
 // the bit, will be a usable value from 0 to 100
 #define zero 0.01
 
-typedef enum
-{
-  kModeDumb,
-  kModeGyro,
-  kModeEnc
-} driveMode_t;
-
 void halt()
 {              //Convinience function to stop all motors.
   motor[DRIVE_NE] = 0;
@@ -58,8 +51,8 @@ void halt()
   motor[DRIVE_SW] = 0;
 }
 
-void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
-{   //3 inputs: direction, speed, and time to wait.
+void drive(int d, byte s, unsigned int t, bool useGyro, bool useEnc)
+{
   float ne = 0;              //Values that will eventually become motor values.
   float se = 0;
   float nw = 0;
@@ -152,12 +145,14 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
         se = -1;
         nw = 1;
         sw = 1;
+        useGyro = false;
         break;
       case ACW: //Counter-Clockwise / AntiClockwise
         ne = 1;
         se = 1;
         nw = -1;
         sw = -1;
+        useGyro = false;
         break;
         //
         //Old Stuffs: The trig functions below inexplicably stopped working, so I had to
@@ -243,37 +238,48 @@ void drive(int d, byte s = 100, short t = 0, driveMode_t mode = kModeDumb)
 
  // writeDebugStreamLine(":%i,%i,%i,%i <:NavLn245", ne, se, nw, sw);
 
-#ifdef GYRO_INCLUDED
-  if (mode == kModeGyro) {
-    time1[T2] = 0;
-    float k_p = 0.8;
-    float error;
-    while (time1[T2] < t) {
-      error = k_p * (bearing - targetBearing);
-      motor[DRIVE_NE] = ne - error;
-      motor[DRIVE_SE] = se - error;
-      motor[DRIVE_NW] = nw + error;
-      motor[DRIVE_SW] = sw + error;
-      //if (error != 0) {
-        writeDebugStreamLine("err: %f, bear: %f, targ:%f <:NavLn254", error, bearing, targetBearing);
-      //}
-    }
-    halt();
-  }
-#endif
-  if (mode == kModeEnc) {
+  if (useEnc) {
     nMotorEncoder[DRIVE_SW] = 0;
+    float k_p = 0.08;
+    float error;
     while (abs(nMotorEncoder[DRIVE_SW]) < abs(t)) {
+    	  error = k_p * (s/100.0) * (bearing - targetBearing);
+  motor[DRIVE_NE] = ne - error;
+  motor[DRIVE_SE] = se - error;
+  motor[DRIVE_NW] = nw + error;
+  motor[DRIVE_SW] = sw + error;
+#ifdef DEBUG_GYRO
+    writeDebugStreamLine("err: %f, bear: %f, targ:%f <:NavLn254", error, bearing, targetBearing);
+#endif
       wait1Msec(2);
     }
     halt();
-  } else if (t != 0) {      //Unless time to wait is 0,
-    wait1Msec(t);        // Wait that time, and then stop all motors.
-    halt();              // This way, if time is 0, motors continue indefinitely
+  } else if (useGyro && t != 0) {
+    time1[T2] = 0;
+    float k_p = 0.08;
+    float error;
+    while (time1[T2] < t) {
+       error = k_p * (s/100.0) * (bearing - targetBearing);
+       motor[DRIVE_NE] = ne - error;
+       motor[DRIVE_SE] = se - error;
+       motor[DRIVE_NW] = nw + error;
+       motor[DRIVE_SW] = sw + error;
+#ifdef DEBUG_GYRO
+       //  writeDebugStreamLine("err: %f, bear: %f, targ:%f <:NavLn268", error, bearing, targetBearing);
+#endif
+    }
+    halt();
+  } else if (t != 0) {
+    wait1Msec(t);
+    halt();
   }
 }
 
-void drive_enc(int d, byte s = 100, short t = 0)
+void drive_t(int d, byte s = 100, unsigned int t = 0, bool g = false)
 {
-  drive(d, s, t, kModeEnc);
+	drive(d, s, t, g, false);
+}
+void drive_e(int d, byte s = 100, unsigned int t = 0, bool g = false)
+{
+  drive(d, s, t, g, true);
 }

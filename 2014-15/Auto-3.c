@@ -25,6 +25,8 @@
 #endif
 
 #define DEBUG_IR
+#define USE_GYRO
+
 #define IR_SEEK_VAL HTIRSreadDir(msensor_S4_1)
 #define GYRO_VAL HTIRSreadDir(msensor_S4_2)
 #define GYRO_CAL HTIRSreadDir(msensor_S4_2)
@@ -71,45 +73,46 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
 
   switch (monolith_position) {
   case 1:
-    drive_enc(N, 30, 2500);
-    drive_enc(CW, 70, 1100);
-    drive_enc(N, 70, 3000);
-    drive(S, -2, 1200);
+    drive_e(N, 30, 2500);
+    drive_e(CW, 70, 1100);
+    drive_e(N, 70, 3000);
+    drive_t(S, -2, 1200);
     break;
   case 2:
-    drive_enc(N, 55, 840);
-    drive(FWD + 25, 55, 800);
-    drive_enc(CW, 100, 1000);
-    drive_enc(N, 100, 2800);
-    drive(S, -2, 1200);
+    drive_e(N, 55, 840);
+    drive_t(FWD + 25, 55, 800);
+    drive_e(CW, 100, 1000);
+    drive_e(N, 100, 2800);
+    drive_t(S, -2, 1200);
     break;
   case 3:
-    drive_enc(W, 100, 1500);
-    drive_enc(N, 55, 2600);
-    drive(ACW, 70, 250);
-    drive_enc(N, 55, 900);
-    drive(CW, 40, 1400);
-    drive_enc(N, 58, 2000);
-    //drive(S, -20, 1800);
+    drive_e(W, 100, 1500);
+    drive_e(N, 55, 2600);
+    drive_t(ACW, 70, 250);
+    drive_e(N, 55, 900);
+    drive_t(CW, 40, 1400);
+    drive_e(N, 58, 2000);
+    //drive_t(S, -20, 1800);
     break;
   }
 }
 
 void mission_ramp(Alliance_t alliance)
 {
-  drive(S, 40, 500);
-  drive(N, 1, 1000);
-  drive(S, 2, 500);
-  drive(N, 1, 100);
-  drive(S, 20, 900);
-  drive(CCW, 40, 200);
-  drive(S, 20, 200);
-  drive(W, 100, 500);
-  PlayImmediateTone(200,200);
-  drive(S, 20, 1400);
-//  drive(CCW, 40, 200);
-  drive_enc(S, 15, 1300);
+	int start_bearing = bearing;
+  drive_t(S, 40, 600, true);
+  drive_t(N, 1, 1000, true);
+  drive_t(S, 2, 500, true);
+  drive_t(N, 1, 100, true);
+  drive_t(S, 20, 900, true);
+  drive_e(CCW, 40, 300);
+  drive_t(S, 20, 200, true);
+  drive_e(W, 100, 800);
+    PlayImmediateTone(200,200);
+  drive_e(CW, 40, 100);
+  drive_t(S, 20, 3000, true);
 
+  wait1Msec(10000);
   motor[FORK] = 100;
   wait1Msec(1500);
   motor[FORK] = 0;
@@ -160,7 +163,7 @@ task main()
 
   case kPlanKick: //================== Plan Kick
     int first_IR = IR_SEEK_VAL;
-    drive_enc(N, 20, 2000);
+    drive_e(N, 20, 2000);
     int second_IR = IR_SEEK_VAL; //157.56
 
     int monolith_position;
@@ -196,7 +199,7 @@ task main()
     wait1Msec(2000);
 #endif
     mission_monolith(cur_alli, monolith_position);
-    drive_enc(CW, 80, 5000);
+    drive_e(CW, 80, 5000);
     /*
     servo[guides] = 255;
     wait1Msec(500);

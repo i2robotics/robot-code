@@ -29,6 +29,8 @@
 #define GYRO_VAL HTGYROreadRot(msensor_S4_2)
 #define GYRO_CAL HTGYROstartCal(msensor_S4_2)
 
+#define DEBUG_GYRO
+
 #include "../headers/scaleJoy_1.h"
 #include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
@@ -43,7 +45,7 @@ task main()
 	//motor[DRIVE_NW]
 	StartTask(updateBearing);
 	wait1Msec(1000);
-	drive(S, 10, 5000, kModeGyro);
+	drive_t(S, 40, 5000, true);
 	//	drive(E, 40, 3000, kModeDumb);
 
 	halt();
