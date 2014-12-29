@@ -104,7 +104,7 @@ task main()
     state bRB down // open normal
       servo[SPOUT] = 255;
       wait1Msec(1000);
-      servo[ROOF] = 200;
+      servo[ROOF] = 127;
       wait1Msec(250);
       servo[FLAP] = 80;
     state bLB down // open for center
@@ -113,7 +113,7 @@ task main()
       wait1Msec(350);
       servo[SPOUT] = 0;
     	wait1Msec(1000);
-    	servo[ROOF] = 80;
+    	servo[ROOF] = 90;
     	wait1Msec(250);
     	servo[FLAP] = 210;
     end
