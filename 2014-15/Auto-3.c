@@ -101,7 +101,7 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
 
 void mission_ramp(Alliance_t alliance)
 {
-	int start_bearing = bearing;
+  int start_bearing = bearing;
   drive_t(S, 40, 600);
   drive_t(N, 1, 1000);
   drive_t(S, 2, 500);
@@ -112,7 +112,7 @@ void mission_ramp(Alliance_t alliance)
   drive_e(W, 100, 800);
 
 
-    PlayImmediateTone(200,200);
+  PlayImmediateTone(200, 200);
   drive_e(CW, 40, 100);
   drive_t(S, 20, 2000, true);
   servo[GRAB1] = 175;
@@ -163,58 +163,58 @@ task main()
   wait1Msec(delay * 1000);
 
   switch (cur_plan) {
-  case kPlanRamp: //================== Plan Ramp
-    mission_ramp(cur_alli);
-    break;
+    case kPlanRamp: //================== Plan Ramp
+      mission_ramp(cur_alli);
+      break;
 
 
-  case kPlanKick: //================== Plan Kick
-    int first_IR = IR_SEEK_VAL;
-    drive_e(N, 20, 2000);
-    int second_IR = IR_SEEK_VAL; //157.56
+    case kPlanKick: //================== Plan Kick
+      int first_IR = IR_SEEK_VAL;
+      drive_e(N, 20, 2000);
+      int second_IR = IR_SEEK_VAL; //157.56
 
-    int monolith_position;
-    if (first_IR <= 3) {
-      monolith_position = 1;
+      int monolith_position;
+      if (first_IR <= 3) {
+        monolith_position = 1;
       } else if (second_IR == 5) {
-      monolith_position = 3;
+        monolith_position = 3;
       } else {
-      monolith_position = 2;
-    }
+        monolith_position = 2;
+      }
 #ifdef DEBUG_IR
-    writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
-    writeDebugStreamLine("result: %i", monolith_position);
-    switch (monolith_position) {
-    case 1:
-      PlayImmediateTone(900, 300);
-      break;
-    case 2:
-      PlayImmediateTone(650, 190);
-      wait1Msec(100);
-      PlayImmediateTone(650, 190);
-      wait1Msec(10);
-      break;
-    case 3:
-      PlayImmediateTone(400, 90);
-      wait1Msec(10);
-      PlayImmediateTone(400, 90);
-      wait1Msec(10);
-      PlayImmediateTone(400, 90);
-      wait1Msec(10);
-      break;
-    }
-    wait1Msec(2000);
+      writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
+      writeDebugStreamLine("result: %i", monolith_position);
+      switch (monolith_position) {
+        case 1:
+          PlayImmediateTone(900, 300);
+          break;
+        case 2:
+          PlayImmediateTone(650, 190);
+          wait1Msec(100);
+          PlayImmediateTone(650, 190);
+          wait1Msec(10);
+          break;
+        case 3:
+          PlayImmediateTone(400, 90);
+          wait1Msec(10);
+          PlayImmediateTone(400, 90);
+          wait1Msec(10);
+          PlayImmediateTone(400, 90);
+          wait1Msec(10);
+          break;
+      }
+      wait1Msec(2000);
 #endif
-    mission_monolith(cur_alli, monolith_position);
-    drive_e(CW, 80, 5000);
-    /*
-    servo[guides] = 255;
-    wait1Msec(500);
-    servo[guides] = 0;
-    motor[TUBE] = 100;
-    while (HTSPBreadIO(HTSPB, 0x01) != 1) {}*/
-    motor[TUBE] = 0;
-    break;
+      mission_monolith(cur_alli, monolith_position);
+      drive_e(CW, 80, 5000);
+      /*
+      servo[guides] = 255;
+      wait1Msec(500);
+      servo[guides] = 0;
+      motor[TUBE] = 100;
+      while (HTSPBreadIO(HTSPB, 0x01) != 1) {}*/
+      motor[TUBE] = 0;
+      break;
   }
   halt();
 

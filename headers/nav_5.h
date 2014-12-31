@@ -124,19 +124,6 @@ void drive(int d, byte s, unsigned int t, bool useGyro, bool useEnc)
       PlayImmediateTone(200, 200);
       wait1Msec(100);
     }
-    /* ::EXPANDED FORM:: (for readability)
-    if ((512&d)==512) {       //if the bit is set (had to use base-ten here)
-      v = 2*((512^d)-50);     //Turns value from 512 to 612 into a value +/-50
-      ne=s;se=s;nw=s;sw=s;    //Initally sets all values to desired speed & direction
-
-      if (v<0) {          //If turning left
-        nw-=v;sw-=v;      //Subtract from the left side
-      }
-      else if (v>0) {       //If turning right
-        ne-=v;se-=v;      //Subtract from the right side
-      }             //(or in other directions, add to a negative value)
-    }
-    */
   }
   else {
     switch (d) {
@@ -236,20 +223,20 @@ void drive(int d, byte s, unsigned int t, bool useGyro, bool useEnc)
   motor[DRIVE_NW] = nw;
   motor[DRIVE_SW] = sw;
 
- // writeDebugStreamLine(":%i,%i,%i,%i <:NavLn245", ne, se, nw, sw);
+  // writeDebugStreamLine(":%i,%i,%i,%i <:NavLn245", ne, se, nw, sw);
 
   if (useEnc) {
     nMotorEncoder[DRIVE_SW] = 0;
     float k_p = 0.08;
     float error;
     while (abs(nMotorEncoder[DRIVE_SW]) < abs(t)) {
-    	  error = k_p * (s/100.0) * (bearing - targetBearing);
-  motor[DRIVE_NE] = ne - error;
-  motor[DRIVE_SE] = se - error;
-  motor[DRIVE_NW] = nw + error;
-  motor[DRIVE_SW] = sw + error;
+      error = k_p * (s / 100.0) * (bearing - targetBearing);
+      motor[DRIVE_NE] = ne - error;
+      motor[DRIVE_SE] = se - error;
+      motor[DRIVE_NW] = nw + error;
+      motor[DRIVE_SW] = sw + error;
 #ifdef DEBUG_GYRO
-    writeDebugStreamLine("err: %f, bear: %f, targ:%f <:NavLn254", error, bearing, targetBearing);
+      writeDebugStreamLine("err: %f, bear: %f, targ:%f <:NavLn254", error, bearing, targetBearing);
 #endif
       wait1Msec(2);
     }
@@ -259,13 +246,13 @@ void drive(int d, byte s, unsigned int t, bool useGyro, bool useEnc)
     float k_p = 0.08;
     float error;
     while (time1[T2] < t) {
-       error = k_p * (s/100.0) * (bearing - targetBearing);
-       motor[DRIVE_NE] = ne - error;
-       motor[DRIVE_SE] = se - error;
-       motor[DRIVE_NW] = nw + error;
-       motor[DRIVE_SW] = sw + error;
+      error = k_p * (s / 100.0) * (bearing - targetBearing);
+      motor[DRIVE_NE] = ne - error;
+      motor[DRIVE_SE] = se - error;
+      motor[DRIVE_NW] = nw + error;
+      motor[DRIVE_SW] = sw + error;
 #ifdef DEBUG_GYRO
-       //  writeDebugStreamLine("err: %f, bear: %f, targ:%f <:NavLn268", error, bearing, targetBearing);
+      //  writeDebugStreamLine("err: %f, bear: %f, targ:%f <:NavLn268", error, bearing, targetBearing);
 #endif
     }
     halt();

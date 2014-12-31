@@ -30,14 +30,15 @@ struct cLion_Joystick_t {
 #define DRIVE_NW 2
 #define DRIVE_SW 3
 #define FEEDER 1
-#define grab1 1
-#define grab2 1
-#define roof 1
-#define flip 1
+#define GRAB1 1
+#define GRAB2 1
+#define ROOF 1
+#define SPOUT 1
 #define POPPER 1
 #define HTSPB 1
-#define LIFT 1
-#define guides 2
+#define FORK 1
+#define FLAP 2
+#define TUBE 2
 
 const int T1;
 const int T2;
@@ -62,8 +63,8 @@ void writeDebugStreamLine(string string, ...) {}
 float cos(double number) {}
 float sin(double number) {}
 void getJoystickSettings(struct cLion_Joystick_t joystick) {}
-void drive(int d, int p, int t);
-void drive_enc(int d, int p, int e);
+void drive_t(int d, int p, int t);
+void drive_e(int d, int p, int e);
 double abs(float);
 
 #endif

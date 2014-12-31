@@ -30,8 +30,8 @@
 #include "../drivers/hitechnic-superpro.h"
 
 //#include "../headers/liftControl_1.h"
-bool grab_state = true;
-int do_grab_change = 0;
+bool grab_state = false;
+bool grab_lock = false;
 float J1X1;
 float J1Y1;
 float J1X2;
@@ -50,13 +50,12 @@ task main()
     J1X2 = scaleJoy(joystick.joy1_x2);
     J1Y1 = scaleJoy(joystick.joy1_y1);
 
-
     J2Y2 = scaleJoy(joystick.joy2_y2);
 
     //nxtDisplayTextLine(2, "SE:%i, SW:%i", nMotorEncoder[DRIVE_SE], nMotorEncoder[DRIVE_SW]);
 
     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
-    action_joy1
+    action_joy1 // Feeder
     state bLB down
       motor[FEEDER] = 100;
     state bLT down
@@ -65,66 +64,43 @@ task main()
       motor[FEEDER] = 0;
     end
 
-    action_joy1
+    action_joy1 // Rolling Goal Forklift
     state bRB down
-    	motor[FORK] = 100;
+      motor[FORK] = 100;
     state bRT down
-    	motor[FORK] = -100;
+      motor[FORK] = -100;
     otherwise
-    	motor[FORK] = 0;
-		end
-
-    action_joy1 //grabbing roling goals
-    state bA down
-      if (do_grab_change) {
-        // button was just pressed
-        do_grab_change = false; //Set flag saying we've done it.
-        grab_state = !grab_state;
-// open all 210 closed 25 playing 100?
-        // roof = 80
-        // roof = 120
-      }
-    otherwise
-      do_grab_change = true;
+      motor[FORK] = 0;
     end
 
-    if (LEFT_GRABBER_SWITCH != 0 && RIGHT_GRABBER_SWITCH != 0 && do_grab_change == true) {
-    	grab_state = true;
-  }
-  	if (joystick.joy1_Buttons == bB && do_grab_change == true) {
-    	grab_state = true;
-  }
 
-    if (grab_state == true) {
-          servo[GRAB1] = 215;
-          servo[GRAB2] = 60;
-        } else if (grab_state == false) {
-          servo[GRAB1] = 55;
-          servo[GRAB2] = 215;
-        }
+    if (LEFT_GRABBER_SWITCH != 0 && RIGHT_GRABBER_SWITCH != 0) { // If limit switches are active
+      if (!grab_lock) { // Unless auto-grabbing has already happened
+        grab_lock = true; // Prevent auto-grabbing from occurring repeatedly
+        grab_state = true; // Engage grabbers
+      }
+    } else if (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0) { // If both limit switches have been released
+      grab_lock = false; // Allow auto-grabbing to occur in the future
+    }
 
-		//action_joy1
-		//state bA down
-		//	servo[GRAB1] = 55;
-  //    servo[GRAB2] = 215;
-		////otherwise
-		////state bB down
-		////	servo[GRAB1] = 215;
-		////	servo[GRAB2] = 60;
-  //  otherwise
-		//	if (LEFT_GRABBER_SWITCH != 0 && RIGHT_GRABBER_SWITCH != 0) {
-		//		do_grab_change = true;
-		//		servo[GRAB1] = 215;
-		//		servo[GRAB2] = 60;
-		//	} else {
-		//		servo[GRAB2] = 215;
-		//		servo[GRAB1] = 55;
-		//	}
-		//end
+    action_joy1 // (Manual) grabbing of rolling goals
+    state bA down // Close
+      grab_state = true;
+    state bB down // Open
+      grab_state = false;
+    end
+
+    if (grab_state == true) { //activate servos
+      servo[GRAB1] = 215;
+      servo[GRAB2] = 60;
+    } else if (grab_state == false) {
+      servo[GRAB1] = 55;
+      servo[GRAB2] = 215;
+    }
 
     action_joy2 //adjusting ball dispenser
     state bRT down // close
-    	servo[FLAP] = 25;
+      servo[FLAP] = 25;
       servo[ROOF] = 255;
       wait1Msec(350);
       servo[SPOUT] = 0;
@@ -134,15 +110,15 @@ task main()
       servo[ROOF] = 127;
       wait1Msec(250);
       servo[FLAP] = 80;
-    state bLB down // open for center
-   		servo[FLAP] = 25;
+    state bLB down // open for center goal
+      servo[FLAP] = 25;
       servo[ROOF] = 255;
       wait1Msec(350);
       servo[SPOUT] = 0;
-    	wait1Msec(1000);
-    	servo[ROOF] = 90;
-    	wait1Msec(250);
-    	servo[FLAP] = 210;
+      wait1Msec(1000);
+      servo[ROOF] = 90;
+      wait1Msec(250);
+      servo[FLAP] = 210;
     end
 
     action_joy2 // run popper
@@ -162,35 +138,26 @@ task main()
     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
     HTSPBsetupIO(HTSPB, 0x10);
-    if (LIFT_SWITCH != 1) {
-      nxtDisplayTextLine(1, "Magnet absent");
-      //HTSPBwriteIO(HTSPB, 0x10);
-    } else {
-      nxtDisplayTextLine(1, "Magnet present");
-      //HTSPBwriteIO(HTSPB, 0x00);
-    }
-    //StartTask(lift_control);
+//    if (LIFT_SWITCH != 1) {
+//      nxtDisplayTextLine(1, "Magnet absent");
+//      //HTSPBwriteIO(HTSPB, 0x10);
+//    } else {
+//      nxtDisplayTextLine(1, "Magnet present");
+//      //HTSPBwriteIO(HTSPB, 0x00);
+//    }
+
     if (LIFT_SWITCH != 1 || J2Y2 < 0) {
       motor[TUBE] = J2Y2;
     } else {
       motor[TUBE] = 0;
     }
-    //nxtDisplayTextLine(1, "Height: %i", lift_height);
-    //action_joy2
-    // state bA down
-    // 	height = 0;
-    // end
 
-    //if (height == 0 && (LIFT_SWITCH != 1)) {
-    //	motor[LIFT] = 100;
-    //} else {
-    //	motor[LIFT] = 0;
-    //	height = 1;
-    //}
     motor[DRIVE_NE] = (J1Y1 + J1X1 - J1X2);
     motor[DRIVE_SE] = (J1Y1 - J1X1 - J1X2);
     motor[DRIVE_NW] = (J1Y1 - J1X1 + J1X2);
     motor[DRIVE_SW] = (J1Y1 + J1X1 + J1X2);
+#ifdef DEBUG_DRIVING
     writeDebugStreamLine("Y1:%g, X1:%g, X2:%g", J1Y1, J1X1, J1X2);
+#endif
   }
 }
