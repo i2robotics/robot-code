@@ -64,12 +64,12 @@ void initialize_servos()
   servo[ROOF] = 255;
   servo[FLAP] = 25;
   servo[SPOUT] = 0;
-  servo[GRAB1] = 15;
-  servo[GRAB2] = 255;
+  servo[GRAB1] = 55;
+  servo[GRAB2] = 215;
 }
 
 //==================  Missions  ==================
-void mission_monolith(Alliance_t alliance, int monolith_position)
+void mission_monolith(int monolith_position)
 {
   writeDebugStreamLine("%i", monolith_position);
 
@@ -99,7 +99,7 @@ void mission_monolith(Alliance_t alliance, int monolith_position)
   }
 }
 
-void mission_ramp(Alliance_t alliance)
+void mission_ramp()
 {
   int start_bearing = bearing;
   drive_t(S, 40, 600);
@@ -110,16 +110,21 @@ void mission_ramp(Alliance_t alliance)
   drive_e(CCW, 40, 300);
   drive_t(S, 20, 200, true);
   drive_e(W, 100, 800);
-
-
+  go_to_bearing(start_bearing);
   PlayImmediateTone(200, 200);
-  drive_e(CW, 40, 100);
-  drive_t(S, 20, 2000, true);
-  servo[GRAB1] = 175;
-  servo[GRAB2] = 100;
-  drive_t(S, 20, 1000, true);
+}
 
-  wait1Msec(10000);
+void mission_goals()
+{
+
+  drive_t(S, 20, 0);
+  time1[T3] = 0;
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T3] < 2700) {}
+  servo[GRAB1] = 215;
+  servo[GRAB2] = 60;
+  wait1Msec(300);
+  halt();
+
   motor[FORK] = 100;
   wait1Msec(1500);
   motor[FORK] = 0;
@@ -137,7 +142,27 @@ void mission_ramp(Alliance_t alliance)
   motor[POPPER] = 100;
   wait1Msec(2000);
   motor[POPPER] = 0;
-  /*
+// */
+
+  int before_spin_bearing = bearing;
+  drive_e(CCW, 100, 5000);
+  drive_e(S, 50, 4000);
+  servo[GRAB1] = 55;
+  servo[GRAB2] = 215;
+  drive_e(N, 50, 2000);
+  drive_e(CW, 100, 5500);
+ 	PlayImmediateTone(200,200);
+ 	wait1Msec(1000);
+ 	//go_to_bearing(before_spin_bearing);
+  drive_e(E, 90, 400);
+  drive_t(S, 20, 0);
+  time1[T3] = 0;
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T3] < 1700) {}
+  servo[GRAB1] = 215;
+  servo[GRAB2] = 60;
+  wait1Msec(300);
+  halt();
+
   motor[TUBE] = 100;
   while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
   motor[TUBE] = 0;
@@ -157,14 +182,15 @@ task main()
 
   initialize_servos();
   //  waitForStart();
-  //  StartTask(updateBearing);
+  StartTask(updateBearing);
 
   wait1Msec(500);
   wait1Msec(delay * 1000);
 
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
-      mission_ramp(cur_alli);
+      //mission_ramp();
+      mission_goals();
       break;
 
 
@@ -205,7 +231,7 @@ task main()
       }
       wait1Msec(2000);
 #endif
-      mission_monolith(cur_alli, monolith_position);
+      mission_monolith(monolith_position);
       drive_e(CW, 80, 5000);
       /*
       servo[guides] = 255;
