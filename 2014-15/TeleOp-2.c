@@ -30,7 +30,7 @@
 #include "../drivers/hitechnic-superpro.h"
 
 //#include "../headers/liftControl_1.h"
-bool grab_state = false;
+bool grab_state = true;
 int do_grab_change = 0;
 float J1X1;
 float J1Y1;
@@ -83,17 +83,44 @@ task main()
 // open all 210 closed 25 playing 100?
         // roof = 80
         // roof = 120
-        if (grab_state == true) {
-          servo[GRAB1] = 175;
-          servo[GRAB2] = 100;
-        } else if (grab_state == false) {
-          servo[GRAB1] = 15;
-          servo[GRAB2] = 255;
-        }
       }
     otherwise
       do_grab_change = true;
     end
+
+    if (LEFT_GRABBER_SWITCH != 0 && RIGHT_GRABBER_SWITCH != 0 && do_grab_change == true) {
+    	grab_state = true;
+  }
+  	if (joystick.joy1_Buttons == bB && do_grab_change == true) {
+    	grab_state = true;
+  }
+
+    if (grab_state == true) {
+          servo[GRAB1] = 215;
+          servo[GRAB2] = 60;
+        } else if (grab_state == false) {
+          servo[GRAB1] = 55;
+          servo[GRAB2] = 215;
+        }
+
+		//action_joy1
+		//state bA down
+		//	servo[GRAB1] = 55;
+  //    servo[GRAB2] = 215;
+		////otherwise
+		////state bB down
+		////	servo[GRAB1] = 215;
+		////	servo[GRAB2] = 60;
+  //  otherwise
+		//	if (LEFT_GRABBER_SWITCH != 0 && RIGHT_GRABBER_SWITCH != 0) {
+		//		do_grab_change = true;
+		//		servo[GRAB1] = 215;
+		//		servo[GRAB2] = 60;
+		//	} else {
+		//		servo[GRAB2] = 215;
+		//		servo[GRAB1] = 55;
+		//	}
+		//end
 
     action_joy2 //adjusting ball dispenser
     state bRT down // close
@@ -135,7 +162,7 @@ task main()
     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
     HTSPBsetupIO(HTSPB, 0x10);
-    if (HTSPBreadIO(HTSPB, 0x01) != 1) {
+    if (LIFT_SWITCH != 1) {
       nxtDisplayTextLine(1, "Magnet absent");
       //HTSPBwriteIO(HTSPB, 0x10);
     } else {
@@ -143,7 +170,7 @@ task main()
       //HTSPBwriteIO(HTSPB, 0x00);
     }
     //StartTask(lift_control);
-    if (HTSPBreadIO(HTSPB, 0x01) != 1 || J2Y2 < 0) {
+    if (LIFT_SWITCH != 1 || J2Y2 < 0) {
       motor[TUBE] = J2Y2;
     } else {
       motor[TUBE] = 0;
@@ -154,7 +181,7 @@ task main()
     // 	height = 0;
     // end
 
-    //if (height == 0 && (HTSPBreadIO(HTSPB, 0x01) != 1)) {
+    //if (height == 0 && (LIFT_SWITCH != 1)) {
     //	motor[LIFT] = 100;
     //} else {
     //	motor[LIFT] = 0;
