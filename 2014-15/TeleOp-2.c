@@ -41,6 +41,10 @@ short current_joystick;
 
 task main()
 {
+			servo[FLAP] = 25;
+      servo[ROOF] = 255;
+      wait1Msec(350);
+      servo[SPOUT] = 0;
   //nMotorEncoder[DRIVE_SE] = 0;
   // nMotorEncoder[DRIVE_SW] = 0;
   //StartTask(updateBearing);
@@ -79,7 +83,7 @@ task main()
         grab_lock = true; // Prevent auto-grabbing from occurring repeatedly
         grab_state = true; // Engage grabbers
       }
-    } else if (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0) { // If both limit switches have been released
+    } else { // If both limit switches have been released
       grab_lock = false; // Allow auto-grabbing to occur in the future
     }
 
@@ -105,17 +109,24 @@ task main()
       wait1Msec(350);
       servo[SPOUT] = 0;
     state bRB down // open normal
+    	if (ServoValue[ROOF] != 255) {
+      	servo[FLAP] = 25;
+      	servo[ROOF] = 255;
+      	wait1Msec(350);
+      }
       servo[SPOUT] = 255;
       wait1Msec(1000);
       servo[ROOF] = 127;
       wait1Msec(250);
       servo[FLAP] = 80;
-    state bLB down // open for center goal
-      servo[FLAP] = 25;
-      servo[ROOF] = 255;
-      wait1Msec(350);
-      servo[SPOUT] = 0;
-      wait1Msec(1000);
+    state bX down // open for center goal
+  		if (ServoValue[SPOUT] != 0) {
+      	servo[FLAP] = 25;
+      	servo[ROOF] = 255;
+      	wait1Msec(350);
+      	servo[SPOUT] = 0;
+      	wait1Msec(1000);
+      }
       servo[ROOF] = 90;
       wait1Msec(250);
       servo[FLAP] = 210;
@@ -130,9 +141,16 @@ task main()
 
     action_joy2 // manually adjust roof
     state bY down
-      servo[ROOF] = ServoValue[ROOF] - 2;
+      servo[FLAP] = ServoValue[FLAP] - 2;
     state bA down
-      servo[ROOF] = ServoValue[ROOF] + 2;
+      servo[FLAP] = ServoValue[FLAP] + 2;
+    end
+
+    action_joy2
+    state bLB down
+    	servo[ROOF] = ServoValue[ROOF] - 2;
+    state bLT down
+    	servo[ROOF] = ServoValue[ROOF] + 2;
     end
 
     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
