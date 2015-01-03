@@ -1,5 +1,7 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
 #pragma config(Hubs,  S2, HTMotor,  HTMotor,  HTServo,  none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
+#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSPB,          sensorI2CCustom9V)
 #pragma config(Sensor, S4,     SMUX,           sensorI2CCustom)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
@@ -68,6 +70,21 @@ void initialize_servos()
   servo[GRAB2] = 215;
 }
 
+task initialize_motors()
+{
+	wait1Msec(800);
+	motor[FORK] = -100;
+	wait1Msec(4200);
+	motor[FORK] = 0;
+}
+
+task tube_to_top()
+{
+	motor[TUBE] = 100;
+  while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
+  motor[TUBE] = 0;
+}
+
 //==================  Missions  ==================
 void mission_monolith(int monolith_position)
 {
@@ -116,21 +133,17 @@ void mission_ramp()
 
 void mission_goals()
 {
-
+	drive_t(S, 20, 1000);
   drive_t(S, 20, 0);
-  time1[T3] = 0;
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T3] < 2700) {}
+  ClearTimer(T3);
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T3] < 1000) {}
   servo[GRAB1] = 215;
   servo[GRAB2] = 60;
   wait1Msec(300);
   halt();
 
-  motor[FORK] = 100;
-  wait1Msec(1500);
-  motor[FORK] = 0;
-
   motor[TUBE] = 100;
-  wait1Msec(6200);
+  wait1Msec(6500);
   motor[TUBE] = 0;
 
   servo[SPOUT] = 255;
@@ -143,29 +156,29 @@ void mission_goals()
   wait1Msec(2000);
   motor[POPPER] = 0;
 // */
+	StartTask(tube_to_top);
 
   int before_spin_bearing = bearing;
+  drive_e(W, 100, 2000);
   drive_e(CCW, 100, 5000);
-  drive_e(S, 50, 4000);
+  drive_e(S, 50, 3000);
   servo[GRAB1] = 55;
   servo[GRAB2] = 215;
-  drive_e(N, 50, 2000);
+  drive_e(N, 50, 1000);
   drive_e(CW, 100, 5500);
  	PlayImmediateTone(200,200);
  	wait1Msec(1000);
  	//go_to_bearing(before_spin_bearing);
-  drive_e(E, 90, 400);
+  drive_e(E, 100, 2000);
   drive_t(S, 20, 0);
-  time1[T3] = 0;
+  ClearTimer(T3);
   while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T3] < 1700) {}
   servo[GRAB1] = 215;
   servo[GRAB2] = 60;
   wait1Msec(300);
   halt();
 
-  motor[TUBE] = 100;
-  while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
-  motor[TUBE] = 0;
+
   //  */
 }
 
@@ -183,13 +196,12 @@ task main()
   initialize_servos();
   //  waitForStart();
   StartTask(updateBearing);
-
-  wait1Msec(500);
+	StartTask(initialize_motors);
   wait1Msec(delay * 1000);
 
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
-      //mission_ramp();
+      mission_ramp();
       mission_goals();
       break;
 
