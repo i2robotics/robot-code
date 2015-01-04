@@ -189,9 +189,10 @@ task main()
 
   Alliance_t cur_alli = kAllianceRed;
   Plan_t cur_plan = kPlanRamp;
+  int tubes = 0;
   int delay = 0;
 
-  //dialog(&cur_alli, &cur_plan, &delay); // Run Dialog for user input of parameters
+  dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
 
   initialize_servos();
   //  waitForStart();

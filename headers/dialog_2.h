@@ -9,9 +9,10 @@
 #include "../headers/clion_1.h"
 #endif
 
-void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_delay)
+void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_tubes, int *ret_delay)
 {
   const string Alliance_s[] = {"Red", "Blue"};
+  const string Bool_s[] = {"False", "True"};
   DEF_PLAN_STRINGS
 
   int sel_option = 0;
@@ -19,14 +20,14 @@ void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_delay)
   {
     Alliance_t alliance;
     Plan_t plan;
-    int useless;
+    int tubes;
     int delay;
   } Options_t;
   //set default options
   Options_t options;
   options.alliance = (Alliance_t) 0;
   options.plan = (Plan_t) 0;
-  options.useless = 0;
+  options.tubes = 0;
   options.delay = 0;
 
   bool ready = false;
@@ -35,7 +36,7 @@ void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_delay)
     eraseDisplay();
     nxtDisplayStringAt(15, 62, "Alli.:");
     nxtDisplayStringAt(15, 52, "Plan :");
-    nxtDisplayStringAt(15, 42, "_____:");
+    nxtDisplayStringAt(15, 42, "Tubes:");
     nxtDisplayStringAt(15, 32, "Delay:");
     nxtDrawLine(0, 22, 100, 22);
     nxtDisplayStringAt(5, 18, "Ext Batt: %.2f", ((float) externalBatteryAvg) / 1000);
@@ -44,7 +45,7 @@ void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_delay)
 
     nxtDisplayStringAt(55, 62, "%s", Alliance_s[options.alliance]);
     nxtDisplayStringAt(55, 52, "%s", Plan_s[options.plan]);
-    nxtDisplayStringAt(55, 42, "____");
+    nxtDisplayStringAt(55, 42, "%s", Bool_s[options.tubes]);
     nxtDisplayStringAt(55, 32, "%i", options.delay);
     nxtDisplayStringAt(5, 62 - sel_option * 10, ">");
 
@@ -62,7 +63,8 @@ void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_delay)
               // if plan > 0, decrement.      If it's 0, set it back to the max value
               break;
             case 2: // NYI
-              PlayImmediateTone(200, 20);
+              options.tubes = options.tubes ? 0 : 1;
+
               break;
             case 3: // Delay
               if (options.delay < 20) { // Can't use a special trick here
@@ -97,6 +99,7 @@ void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_delay)
 
   *ret_plan = options.plan;
   *ret_alliance = options.alliance;
+  *ret_tubes = options.tubes;
   *ret_delay = options.delay;
   return;
 }
