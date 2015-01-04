@@ -9,7 +9,7 @@
 #pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     TUBE,          tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C2_2,     FEEDER,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C2_2,     FEEDER,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S2_C1_1,     POPPER,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S2_C1_2,     FORK,          tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S2_C2_1,     DRIVE_SW,      tmotorTetrix, openLoop, encoder)
@@ -96,9 +96,9 @@ task main()
     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
     action_joy1 // Feeder
     state bLB down
-      motor[FEEDER] = 100;
-    state bLT down
       motor[FEEDER] = -100;
+    state bLT down
+      motor[FEEDER] = 100;
     otherwise
       motor[FEEDER] = 0;
     end

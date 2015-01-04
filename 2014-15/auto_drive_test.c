@@ -1,5 +1,7 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
 #pragma config(Hubs,  S2, HTMotor,  HTMotor,  HTServo,  none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
+#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSPB,          sensorI2CCustom9V)
 #pragma config(Sensor, S4,     SMUX,           sensorI2CCustom)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
@@ -37,9 +39,12 @@
 
 task main()
 {
-	//StartTask(updateBearing);
-
-	drive(BWD+20, 40, 500);
+	StartTask(updateBearing);
+  servo[GRAB1] = 215;
+  servo[GRAB2] = 60;
+	drive_t(E, 100, 4000, true);
+	PlayTone(999, 200);
+	drive_t(W, 100, 4000, false);
 	/*
 	while (true)
 	{

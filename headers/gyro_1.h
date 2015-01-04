@@ -31,9 +31,11 @@ task updateBearing()
   while (true) {
     time1[T3] = 0;
     current_rate = GYRO_VAL;
+#ifdef DEBUG_GYRO
     writeDebugStreamLine("rate: %f <:gyroLn35", current_rate);
     nxtDisplayTextLine(1, "rate: %i", current_rate);
     nxtDisplayTextLine(5, "pos: %i", bearing);
+#endif
     prev_bear = bearing;
     bearing = prev_bear + current_rate * delta_T;
 

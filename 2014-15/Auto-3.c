@@ -9,7 +9,7 @@
 #pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     TUBE,          tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C2_2,     FEEDER,        tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C2_2,     FEEDER,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S2_C1_1,     POPPER,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S2_C1_2,     FORK,          tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S2_C2_1,     DRIVE_SW,      tmotorTetrix, openLoop, encoder)
@@ -26,7 +26,7 @@
 #include "../headers/clion_1.h"
 #endif
 
-#define DEBUG_IR
+//#define DEBUG_IR
 #define USE_GYRO
 
 #define IR_SEEK_VAL HTIRSreadDir(msensor_S4_1)
@@ -85,6 +85,12 @@ task tube_to_top()
   motor[TUBE] = 0;
 }
 
+task grabber_lights()
+{
+	motor[left] = (LEFT_GRABBER_SWITCH == 0) ? 0 : 100;
+	motor[right] = (RIGHT_GRABBER_SWITCH == 0) ? 0 : 100;
+}
+
 //==================  Missions  ==================
 void mission_monolith(int monolith_position)
 {
@@ -123,11 +129,12 @@ void mission_ramp()
   drive_t(N, 1, 1000);
   drive_t(S, 2, 500);
   drive_t(N, 1, 100);
-  drive_t(S, 20, 900);
-  drive_e(CCW, 40, 300);
-  drive_t(S, 20, 200, true);
-  drive_e(W, 100, 800);
-  go_to_bearing(start_bearing);
+  drive_t(S, 20, 1000);
+  //wait10Msec(100);
+  drive_e(CW, 40, 300);
+  drive_t(S, 20, 300);
+  drive_e(W, 100, 600);
+  //go_to_bearing(start_bearing);
   PlayImmediateTone(200, 200);
 }
 
@@ -135,17 +142,20 @@ void mission_goals()
 {
 	drive_t(S, 20, 1000);
   drive_t(S, 20, 0);
-  ClearTimer(T3);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T3] < 1000) {}
+  ClearTimer(T1);
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
   servo[GRAB1] = 215;
   servo[GRAB2] = 60;
   wait1Msec(300);
   halt();
 
+  servo[ROOF] = 20;
   motor[TUBE] = 100;
   wait1Msec(6500);
   motor[TUBE] = 0;
+  servo[ROOF] = 255;
 
+  wait1Msec(500);
   servo[SPOUT] = 255;
   wait1Msec(1200);
   servo[ROOF] = 127;
@@ -155,31 +165,48 @@ void mission_goals()
   motor[POPPER] = 100;
   wait1Msec(2000);
   motor[POPPER] = 0;
+  wait1Msec(300);
+  servo[ROOF] = 255;
+  wait1Msec(500);
+  servo[SPOUT] = 140;
+  motor[FORK] = 100;
+  wait1Msec(500);
+  motor[FORK] = 0;
 // */
 	StartTask(tube_to_top);
 
-  int before_spin_bearing = bearing;
-  drive_e(W, 100, 2000);
-  drive_e(CCW, 100, 5000);
-  drive_e(S, 50, 3000);
+	motor[FEEDER] = 100;
+  drive_e(W, 100, 4000, true);
+  motor[FORK] = -100;
+  wait1Msec(500);
+  motor[FORK] = 0;
   servo[GRAB1] = 55;
   servo[GRAB2] = 215;
-  drive_e(N, 50, 1000);
-  drive_e(CW, 100, 5500);
+  drive_e(N, 50, 1200);
+  drive_e(E, 100, 4000, true);
  	PlayImmediateTone(200,200);
  	wait1Msec(1000);
  	//go_to_bearing(before_spin_bearing);
-  drive_e(E, 100, 2000);
   drive_t(S, 20, 0);
-  ClearTimer(T3);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T3] < 1700) {}
+  ClearTimer(T1);
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 2800) {writeDebugStreamLine("T1:%i", time1[T1]);}
   servo[GRAB1] = 215;
   servo[GRAB2] = 60;
-  wait1Msec(300);
   halt();
 
+  servo[ROOF] = 255;
+  wait1Msec(500);
+  servo[SPOUT] = 255;
+  wait1Msec(1200);
+  servo[ROOF] = 127;
+  wait1Msec(500);
+  servo[FLAP] = 80;
 
-  //  */
+  motor[POPPER] = 100;
+  wait1Msec(2000);
+  motor[POPPER] = 0;
+  motor[FEEDER] = 0;
+  drive_t(N, 30, 1500);
 }
 
 //==================  Main Task  ==================
@@ -192,13 +219,14 @@ task main()
   int tubes = 0;
   int delay = 0;
 
-  dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
+  //dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
 
   initialize_servos();
   //  waitForStart();
   StartTask(updateBearing);
-	StartTask(initialize_motors);
+	StartTask(grabber_lights);
   wait1Msec(delay * 1000);
+	StartTask(initialize_motors);
 
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
