@@ -1,9 +1,11 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
 #pragma config(Hubs,  S2, HTMotor,  HTMotor,  HTServo,  none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
+#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSPB,          sensorI2CCustom9V)
 #pragma config(Sensor, S4,     SMUX,           sensorI2CCustom)
-#pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
-#pragma config(Motor,  motorC,          right,         tmotorNXT, PIDControl, encoder)
+#pragma config(Motor,  motorB,          RIGHT_LIGHT,   tmotorNXT, PIDControl, encoder)
+#pragma config(Motor,  motorC,          LEFT_LIGHT,    tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     TUBE,          tmotorTetrix, openLoop)
@@ -38,6 +40,39 @@ float J1X2;
 
 float J2Y2;
 short current_joystick;
+
+task closeRoof() {
+	servo[FLAP] = 25;
+      servo[ROOF] = 255;
+      wait1Msec(350);
+      servo[SPOUT] = 0;
+}
+
+task scoringGoals() {
+	if (ServoValue[ROOF] != 255) {
+      	servo[FLAP] = 25;
+      	servo[ROOF] = 255;
+      	wait1Msec(350);
+      }
+      servo[SPOUT] = 255;
+      wait1Msec(1000);
+      servo[ROOF] = 127;
+      wait1Msec(250);
+      servo[FLAP] = 80;
+}
+
+task centerGoal() {
+		if (ServoValue[SPOUT] != 0) {
+      	servo[FLAP] = 25;
+      	servo[ROOF] = 255;
+      	wait1Msec(350);
+      	servo[SPOUT] = 0;
+      	wait1Msec(1000);
+      }
+      servo[ROOF] = 90;
+      wait1Msec(250);
+      servo[FLAP] = 210;
+}
 
 task main()
 {
@@ -77,6 +112,17 @@ task main()
       motor[FORK] = 0;
     end
 
+    if (LEFT_GRABBER_SWITCH != 0) {
+    	motor[LEFT_LIGHT] = 100;
+  	} else {
+  		motor[LEFT_LIGHT] = 0;
+  	}
+
+  	if (RIGHT_GRABBER_SWITCH != 0) {
+    	motor[RIGHT_LIGHT] = 100;
+  	} else {
+  		motor[RIGHT_LIGHT] = 0;
+  	}
 
     if (LEFT_GRABBER_SWITCH != 0 && RIGHT_GRABBER_SWITCH != 0) { // If limit switches are active
       if (!grab_lock) { // Unless auto-grabbing has already happened
@@ -104,32 +150,11 @@ task main()
 
     action_joy2 //adjusting ball dispenser
     state bRT down // close
-      servo[FLAP] = 25;
-      servo[ROOF] = 255;
-      wait1Msec(350);
-      servo[SPOUT] = 0;
+      StartTask(closeRoof);
     state bRB down // open normal
-    	if (ServoValue[ROOF] != 255) {
-      	servo[FLAP] = 25;
-      	servo[ROOF] = 255;
-      	wait1Msec(350);
-      }
-      servo[SPOUT] = 255;
-      wait1Msec(1000);
-      servo[ROOF] = 127;
-      wait1Msec(250);
-      servo[FLAP] = 80;
+    	StartTask(scoringGoals);
     state bX down // open for center goal
-  		if (ServoValue[SPOUT] != 0) {
-      	servo[FLAP] = 25;
-      	servo[ROOF] = 255;
-      	wait1Msec(350);
-      	servo[SPOUT] = 0;
-      	wait1Msec(1000);
-      }
-      servo[ROOF] = 90;
-      wait1Msec(250);
-      servo[FLAP] = 210;
+  		StartTask(centerGoal);
     end
 
     action_joy2 // run popper
