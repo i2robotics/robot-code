@@ -72,23 +72,17 @@ void initialize_servos()
 
 task initialize_motors()
 {
-	wait1Msec(800);
-	motor[FORK] = -100;
-	wait1Msec(4200);
-	motor[FORK] = 0;
+  wait1Msec(800);
+  motor[FORK] = -100;
+  wait1Msec(4200);
+  motor[FORK] = 0;
 }
 
 task tube_to_top()
 {
-	motor[TUBE] = 100;
+  motor[TUBE] = 100;
   while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
   motor[TUBE] = 0;
-}
-
-task grabber_lights()
-{
-	motor[left] = (LEFT_GRABBER_SWITCH == 0) ? 0 : 100;
-	motor[right] = (RIGHT_GRABBER_SWITCH == 0) ? 0 : 100;
 }
 
 //==================  Missions  ==================
@@ -97,28 +91,28 @@ void mission_monolith(int monolith_position)
   writeDebugStreamLine("%i", monolith_position);
 
   switch (monolith_position) {
-  case 1:
-    drive_e(N, 30, 2500);
-    drive_e(CW, 70, 1100);
-    drive_e(N, 70, 3000);
-    drive_t(S, -2, 1200);
-    break;
-  case 2:
-    drive_e(N, 55, 840);
-    drive_t(FWD + 25, 55, 800);
-    drive_e(CW, 100, 1000);
-    drive_e(N, 100, 2800);
-    drive_t(S, -2, 1200);
-    break;
-  case 3:
-    drive_e(W, 100, 1500);
-    drive_e(N, 55, 2600);
-    drive_t(ACW, 70, 250);
-    drive_e(N, 55, 900);
-    drive_t(CW, 40, 1400);
-    drive_e(N, 58, 2000);
-    //drive_t(S, -20, 1800);
-    break;
+    case 1:
+      drive_e(N, 30, 2500);
+      drive_e(CW, 70, 1100);
+      drive_e(N, 70, 3000);
+      drive_t(S, -2, 1200);
+      break;
+    case 2:
+      drive_e(N, 55, 840);
+      drive_t(FWD + 25, 55, 800);
+      drive_e(CW, 100, 1000);
+      drive_e(N, 100, 2800);
+      drive_t(S, -2, 1200);
+      break;
+    case 3:
+      drive_e(W, 100, 1500);
+      drive_e(N, 55, 2600);
+      drive_t(ACW, 70, 250);
+      drive_e(N, 55, 900);
+      drive_t(CW, 40, 1400);
+      drive_e(N, 58, 2000);
+      //drive_t(S, -20, 1800);
+      break;
   }
 }
 
@@ -140,7 +134,7 @@ void mission_ramp()
 
 void mission_goals()
 {
-	drive_t(S, 20, 1000);
+  drive_t(S, 20, 1000);
   drive_t(S, 20, 0);
   ClearTimer(T1);
   while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
@@ -173,9 +167,9 @@ void mission_goals()
   wait1Msec(500);
   motor[FORK] = 0;
 // */
-	StartTask(tube_to_top);
+  StartTask(tube_to_top);
 
-	motor[FEEDER] = 100;
+  motor[FEEDER] = 100;
   drive_e(W, 100, 4000, true);
   motor[FORK] = -100;
   wait1Msec(500);
@@ -184,9 +178,9 @@ void mission_goals()
   servo[GRAB2] = 215;
   drive_e(N, 50, 1200);
   drive_e(E, 100, 4000, true);
- 	PlayImmediateTone(200,200);
- 	wait1Msec(1000);
- 	//go_to_bearing(before_spin_bearing);
+  PlayImmediateTone(200, 200);
+  wait1Msec(1000);
+  //go_to_bearing(before_spin_bearing);
   drive_t(S, 20, 0);
   ClearTimer(T1);
   while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 2800) {writeDebugStreamLine("T1:%i", time1[T1]);}
@@ -219,14 +213,14 @@ task main()
   int tubes = 0;
   int delay = 0;
 
-  //dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
+  dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
 
   initialize_servos();
   //  waitForStart();
   StartTask(updateBearing);
-	StartTask(grabber_lights);
+  StartTask(grabber_lights);
   wait1Msec(delay * 1000);
-	StartTask(initialize_motors);
+  StartTask(initialize_motors);
 
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
