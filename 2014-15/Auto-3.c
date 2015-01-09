@@ -27,11 +27,9 @@
 #endif
 
 //#define DEBUG_IR
-#define USE_GYRO
 
 #define IR_SEEK_VAL HTIRSreadDir(msensor_S4_1)
-#define GYRO_VAL HTIRSreadDir(msensor_S4_2)
-#define GYRO_CAL HTIRSreadDir(msensor_S4_2)
+#define GYRO_VAL HTGYROreadRot(msensor_S4_2)
 
 #include "Joystickdriver.c"
 
@@ -118,11 +116,10 @@ void mission_monolith(int monolith_position)
 
 void mission_ramp()
 {
-  int start_bearing = bearing;
   drive_t(S, 40, 600);
-  drive_t(N, 1, 1000);
+  drive_t(N, 1, 500);
   drive_t(S, 2, 500);
-  drive_t(N, 1, 100);
+  drive_t(N, 1, 300);
   drive_t(S, 20, 1000);
   //wait10Msec(100);
   drive_e(CW, 40, 300);
@@ -134,8 +131,8 @@ void mission_ramp()
 
 void mission_goals()
 {
-  drive_t(S, 20, 1000);
-  drive_t(S, 20, 0);
+  drive_t(S, 20, 1000); //.
+  drive_t(S, 20, 0); //.
   ClearTimer(T1);
   while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
   servo[GRAB1] = 215;
@@ -178,12 +175,12 @@ void mission_goals()
   servo[GRAB2] = 215;
   drive_e(N, 50, 1200);
   drive_e(E, 100, 4000, true);
-  PlayImmediateTone(200, 200);
-  wait1Msec(1000);
+  PlayImmediateTone(200, 200);//.
+  wait1Msec(1000);//.
   //go_to_bearing(before_spin_bearing);
-  drive_t(S, 20, 0);
+  drive_t(S, 20, 0);//.
   ClearTimer(T1);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 2800) {writeDebugStreamLine("T1:%i", time1[T1]);}
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 2800) {}
   servo[GRAB1] = 215;
   servo[GRAB2] = 60;
   halt();
@@ -200,7 +197,7 @@ void mission_goals()
   wait1Msec(2000);
   motor[POPPER] = 0;
   motor[FEEDER] = 0;
-  drive_t(N, 30, 1500);
+  drive_t(N, 30, 1500); //.
 }
 
 //==================  Main Task  ==================
@@ -214,9 +211,9 @@ task main()
   int delay = 0;
 
   dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
-
+  HTGYROstartCal(msensor_S4_2);
   initialize_servos();
-  //  waitForStart();
+  waitForStart();
   StartTask(updateBearing);
   StartTask(grabber_lights);
   wait1Msec(delay * 1000);
@@ -225,7 +222,8 @@ task main()
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
       mission_ramp();
-      mission_goals();
+      if(tubes)
+        mission_goals();
       break;
 
 

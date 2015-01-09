@@ -63,8 +63,10 @@ void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_tubes, int *ret
               // if plan > 0, decrement.      If it's 0, set it back to the max value
               break;
             case 2: // NYI
-              options.tubes = options.tubes ? 0 : 1;
-
+              if (options.plan == kPlanRamp)
+                options.tubes = options.tubes ? 0 : 1;
+              else
+                PlayImmediateTone(200, 30);
               break;
             case 3: // Delay
               if (options.delay < 20) { // Can't use a special trick here
