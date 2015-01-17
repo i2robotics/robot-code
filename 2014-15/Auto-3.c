@@ -3,17 +3,17 @@
 #pragma config(Sensor, S1,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSPB,          sensorI2CCustom9V)
-#pragma config(Sensor, S4,     SMUX,           sensorI2CCustom)
+#pragma config(Sensor, S4,     HTSMUX,         sensorI2CCustom)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorC,          right,         tmotorNXT, PIDControl, encoder)
-#pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed, encoder)
-#pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, PIDControl, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, PIDControl, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     TUBE,          tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C2_2,     FEEDER,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S2_C1_1,     POPPER,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S2_C1_2,     FORK,          tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S2_C2_1,     DRIVE_SW,      tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S2_C2_2,     DRIVE_NW,      tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S2_C2_1,     DRIVE_SW,      tmotorTetrix, PIDControl, encoder)
+#pragma config(Motor,  mtr_S2_C2_2,     DRIVE_NW,      tmotorTetrix, PIDControl, encoder)
 #pragma config(Servo,  srvo_S2_C3_1,    GRAB1,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_2,    GRAB2,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_3,    SPOUT,                tServoStandard)
@@ -26,15 +26,19 @@
 #include "../headers/clion_1.h"
 #endif
 
-//#define DEBUG_IR
+#define DEBUG_IR
 
 #define IR_SEEK_VAL HTIRSreadDir(msensor_S4_1)
 #define GYRO_VAL HTGYROreadRot(msensor_S4_2)
+#define SMUX_TOUCH TSreadState(msensor_S4_4)
+#define ULTRA_VAL USreadDist(msensor_S4_3)
 
 #include "Joystickdriver.c"
 
 #include "../drivers/hitechnic-sensormux.h"
 #include "../drivers/hitechnic-irseeker-v1.h"
+#include "../drivers/lego-touch.h"
+#include "../drivers/lego-ultrasound.h"
 #include "../drivers/hitechnic-superpro.h"
 
 #include "../headers/scaleJoy_1.h"
@@ -72,7 +76,7 @@ task initialize_motors()
 {
   wait1Msec(800);
   motor[FORK] = -100;
-  wait1Msec(4200);
+  wait1Msec(4100);
   motor[FORK] = 0;
 }
 
@@ -83,6 +87,16 @@ task tube_to_top()
   motor[TUBE] = 0;
 }
 
+task verify_smux()
+{
+	int coun = 0;
+	while(! SMUX_TOUCH) {
+		PlayImmediateTone(coun*100, 200);
+		coun++;
+		coun = coun % 127;
+		wait1Msec(200);
+	}
+}
 //==================  Missions  ==================
 void mission_monolith(int monolith_position)
 {
@@ -91,19 +105,20 @@ void mission_monolith(int monolith_position)
   switch (monolith_position) {
     case 1:
       drive_e(N, 30, 2500);
-      drive_e(CW, 70, 1100);
+      drive_t(CW, 70, 1200);
+      wait10Msec(100);
       drive_e(N, 70, 3000);
       drive_t(S, -2, 1200);
       break;
     case 2:
       drive_e(N, 55, 840);
-      drive_t(FWD + 25, 55, 800);
+      drive_t(FWD + 25, 55, 1000);
       drive_e(CW, 100, 1000);
       drive_e(N, 100, 2800);
       drive_t(S, -2, 1200);
       break;
     case 3:
-      drive_e(W, 100, 1500);
+      drive_e(W, 100, 2200);
       drive_e(N, 55, 2600);
       drive_t(ACW, 70, 250);
       drive_e(N, 55, 900);
@@ -116,12 +131,17 @@ void mission_monolith(int monolith_position)
 
 void mission_ramp()
 {
-  drive_t(S, 40, 600);
+	int start_bearing = bearing;
+  /*drive_t(S, 40, 600);
   drive_t(N, 1, 500);
   drive_t(S, 2, 500);
   drive_t(N, 1, 300);
-  drive_t(S, 20, 1000);
-  //wait10Msec(100);
+  drive_t(S, 20, 1000);*/
+  drive_e(SE, 24, 3000);
+  motor[SE] = 25;
+  motor[SW] = 25;
+  //drive_e(S, 24, 1000);
+  wait10Msec(100);
   drive_e(CW, 40, 300);
   drive_t(S, 20, 300);
   drive_e(W, 100, 600);
@@ -131,10 +151,12 @@ void mission_ramp()
 
 void mission_goals()
 {
-  drive_t(S, 20, 1000); //.
+  drive_t(S, 40, 1000); //.
   drive_t(S, 20, 0); //.
   ClearTimer(T1);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {
+  	writeDebugStreamLine("Ultra: %i cm", ULTRA_VAL);
+  }
   servo[GRAB1] = 215;
   servo[GRAB2] = 60;
   wait1Msec(300);
@@ -142,7 +164,7 @@ void mission_goals()
 
   servo[ROOF] = 20;
   motor[TUBE] = 100;
-  wait1Msec(6500);
+  wait1Msec(6700);
   motor[TUBE] = 0;
   servo[ROOF] = 255;
 
@@ -166,21 +188,22 @@ void mission_goals()
 // */
   StartTask(tube_to_top);
 
-  motor[FEEDER] = 100;
-  drive_e(W, 100, 4000, true);
+  drive_t(CCW, 100, 1500);
   motor[FORK] = -100;
   wait1Msec(500);
   motor[FORK] = 0;
   servo[GRAB1] = 55;
   servo[GRAB2] = 215;
+  drive_e(S, 50, 1200);
   drive_e(N, 50, 1200);
-  drive_e(E, 100, 4000, true);
-  PlayImmediateTone(200, 200);//.
-  wait1Msec(1000);//.
-  //go_to_bearing(before_spin_bearing);
-  drive_t(S, 20, 0);//.
+  drive_t(CW, 100, 1200);
+
+  writeDebugStreamLine("Ultra: %i cm", ULTRA_VAL);
+
+  motor[FEEDER] = 80;
+  drive_t(S, 40, 0);//.
   ClearTimer(T1);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 2800) {}
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 2400) {  writeDebugStreamLine("Ultra: %i cm", ULTRA_VAL);}
   servo[GRAB1] = 215;
   servo[GRAB2] = 60;
   halt();
@@ -197,7 +220,7 @@ void mission_goals()
   wait1Msec(2000);
   motor[POPPER] = 0;
   motor[FEEDER] = 0;
-  drive_t(N, 30, 1500); //.
+  drive_t(N, 100, 500); //.
 }
 
 //==================  Main Task  ==================
@@ -207,17 +230,17 @@ task main()
 
   Alliance_t cur_alli = kAllianceRed;
   Plan_t cur_plan = kPlanRamp;
-  int tubes = 0;
-  int delay = 0;
+  int tubes = 1;
+  int delay = 3;
 
-  dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
-  HTGYROstartCal(msensor_S4_2);
+  //StartTask(verify_smux);
+  //dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
+  //HTGYROstartCal(msensor_S4_2);
   initialize_servos();
-  waitForStart();
+  //waitForStart();
   StartTask(updateBearing);
-  StartTask(grabber_lights);
   wait1Msec(delay * 1000);
-  StartTask(initialize_motors);
+  //StartTask(initialize_motors);
 
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
@@ -231,6 +254,7 @@ task main()
       int first_IR = IR_SEEK_VAL;
       drive_e(N, 20, 2000);
       int second_IR = IR_SEEK_VAL; //157.56
+
 
       int monolith_position;
       if (first_IR <= 3) {
@@ -249,22 +273,22 @@ task main()
           break;
         case 2:
           PlayImmediateTone(650, 190);
-          wait1Msec(100);
+          wait1Msec(200);
           PlayImmediateTone(650, 190);
-          wait1Msec(10);
+          wait1Msec(200);
           break;
         case 3:
           PlayImmediateTone(400, 90);
-          wait1Msec(10);
+          wait1Msec(100);
           PlayImmediateTone(400, 90);
-          wait1Msec(10);
+          wait1Msec(100);
           PlayImmediateTone(400, 90);
-          wait1Msec(10);
+          wait1Msec(100);
           break;
       }
       wait1Msec(2000);
 #endif
-      mission_monolith(monolith_position);
+      mission_monolith(2);
       drive_e(CW, 80, 5000);
       /*
       servo[guides] = 255;

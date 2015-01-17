@@ -58,9 +58,9 @@ task scoringGoals()
   }
   servo[SPOUT] = 255;
   wait1Msec(1000);
-  servo[ROOF] = 127;
+  servo[ROOF] = 185;
   wait1Msec(250);
-  servo[FLAP] = 80;
+  servo[FLAP] = 130;
 }
 
 task centerGoal()
@@ -72,7 +72,7 @@ task centerGoal()
     servo[SPOUT] = 0;
     wait1Msec(1000);
   }
-  servo[ROOF] = 90;
+  servo[ROOF] = 146;
   wait1Msec(250);
   servo[FLAP] = 210;
 }
@@ -82,7 +82,7 @@ task main()
   servo[FLAP] = 25;
   servo[ROOF] = 255;
   wait1Msec(350);
-  servo[SPOUT] = 0;
+  servo[SPOUT] = 255;
   //nMotorEncoder[DRIVE_SE] = 0;
   // nMotorEncoder[DRIVE_SW] = 0;
   //StartTask(updateBearing);
@@ -168,9 +168,9 @@ task main()
     end
 
     action_joy2 // manually adjust flap
-    state bY down
-      servo[FLAP] = ServoValue[FLAP] - 2;
     state bA down
+      servo[FLAP] = ServoValue[FLAP] - 2;
+    state bY down
       servo[FLAP] = ServoValue[FLAP] + 2;
     end
 

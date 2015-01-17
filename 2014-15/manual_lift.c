@@ -33,7 +33,7 @@ task main()
 			motor[LIFT] = -100;
 		}
 		else{
-		motor[LIFT]=0;
+		motor[LIFT] = 0;
 		}
 	}
 }

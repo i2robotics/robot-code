@@ -47,11 +47,13 @@
 #ifdef GYRO_INCLUDED
 void go_to_bearing(int target)
 {
-	float k_p = 0.1;
-	while(abs(target - bearing) > 4) {
-		int error = (bearing - target) * k_p;
+	float k_p = 0.5;
+	while(abs(target - bearing) > 10) {
+		int error = (bearing - target) * k_p;		writeDebugStreamLine("err: %i  bear: %i <:HelpLn53", error, bearing);
+		if (abs(error) < 10) { break; }
+		if (abs(error) < 25) { error = -25 * sgn(error); }
 		writeDebugStreamLine("err: %i  bear: %i <:HelpLn53", error, bearing);
-		drive_t(CW, error, 0, false);
+		drive_t(CCW, error, 0, false);
 	}
 }
 #endif

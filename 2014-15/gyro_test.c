@@ -46,11 +46,11 @@ task main()
 	StartTask(updateBearing);
 	wait1Msec(1000);
 	resetBearing();
-	go_to_bearing(100);
+	go_to_bearing(40);/*
 	go_to_bearing(180);
 	go_to_bearing(90);
 	go_to_bearing(360);
-	go_to_bearing(0);
+	go_to_bearing(0);*/
 	//	drive(E, 40, 3000, kModeDumb);
 
 	halt();
