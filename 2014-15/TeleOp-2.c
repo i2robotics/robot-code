@@ -56,11 +56,11 @@ task scoringGoals()
     servo[ROOF] = 255;
     wait1Msec(350);
   }
-  servo[SPOUT] = 255;
+ servo[SPOUT] = 255;
   wait1Msec(1000);
-  servo[ROOF] = 185;
+  servo[ROOF] = 170;
   wait1Msec(250);
-  servo[FLAP] = 130;
+  servo[FLAP] = 80;
 }
 
 task centerGoal()

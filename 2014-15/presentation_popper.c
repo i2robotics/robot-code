@@ -35,7 +35,7 @@ task main()
   }
   servo[SPOUT] = 255;
   wait1Msec(1000);
-  servo[ROOF] = 127;
+  servo[ROOF] = 170;
   wait1Msec(250);
   servo[FLAP] = 80;
 	while (true)
