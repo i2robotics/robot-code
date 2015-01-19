@@ -39,10 +39,10 @@ task updateBearing()
     prev_bear = bearing;
     bearing = prev_bear + current_rate * delta_T;
 
-    if (bearing > 360) bearing -= 360;
-    else if (bearing < 0) bearing += 360;
+    //if (bearing > 360) bearing -= 360;
+    //else if (bearing < 0) bearing += 360;
 
-    wait1Msec(50);
+    wait1Msec(5);
     delta_T = ((float) time1[T3]) / 1000;
   }
 }

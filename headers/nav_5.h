@@ -223,7 +223,7 @@ void drive(int d, byte s, unsigned int t, bool useGyro, bool useEnc)
   motor[DRIVE_NW] = nw;
   motor[DRIVE_SW] = sw;
 
-   writeDebugStreamLine(":%i,%i,%i,%i, speed: %i <:NavLn245", ne, se, nw, sw, s);
+   //writeDebugStreamLine(":%i,%i,%i,%i, speed: %i <:NavLn245", ne, se, nw, sw, s);
 
   if (useEnc) {
     nMotorEncoder[DRIVE_SW] = 0;

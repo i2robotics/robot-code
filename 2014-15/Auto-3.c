@@ -6,14 +6,14 @@
 #pragma config(Sensor, S4,     HTSMUX,         sensorI2CCustom)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  motorC,          right,         tmotorNXT, PIDControl, encoder)
-#pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, PIDControl, reversed, encoder)
-#pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, PIDControl, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C1_1,     DRIVE_SE,      tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C1_2,     DRIVE_NE,      tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     TUBE,          tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C2_2,     FEEDER,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S2_C1_1,     POPPER,        tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S2_C1_2,     FORK,          tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S2_C2_1,     DRIVE_SW,      tmotorTetrix, PIDControl, encoder)
-#pragma config(Motor,  mtr_S2_C2_2,     DRIVE_NW,      tmotorTetrix, PIDControl, encoder)
+#pragma config(Motor,  mtr_S2_C2_1,     DRIVE_SW,      tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S2_C2_2,     DRIVE_NW,      tmotorTetrix, openLoop, encoder)
 #pragma config(Servo,  srvo_S2_C3_1,    GRAB1,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_2,    GRAB2,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_3,    SPOUT,                tServoStandard)
@@ -26,7 +26,7 @@
 #include "../headers/clion_1.h"
 #endif
 
-#define DEBUG_IR
+//#define DEBUG_IR
 
 #define IR_SEEK_VAL HTIRSreadDir(msensor_S4_1)
 #define GYRO_VAL HTGYROreadRot(msensor_S4_2)
@@ -132,17 +132,14 @@ void mission_monolith(int monolith_position)
 void mission_ramp()
 {
 	int start_bearing = bearing;
-  /*drive_t(S, 40, 600);
+  drive_t(S, 40, 600);
   drive_t(N, 1, 500);
   drive_t(S, 2, 500);
   drive_t(N, 1, 300);
-  drive_t(S, 20, 1000);*/
-  drive_e(SE, 24, 3000);
-  motor[SE] = 25;
-  motor[SW] = 25;
-  //drive_e(S, 24, 1000);
+  drive_t(S, 20, 1000);
+  drive_e(S, 24, 1000);
   wait10Msec(100);
-  drive_e(CW, 40, 300);
+  //drive_e(CW, 40, 300);
   drive_t(S, 20, 300);
   drive_e(W, 100, 600);
   //go_to_bearing(start_bearing);
@@ -155,13 +152,14 @@ void mission_goals()
   drive_t(S, 20, 0); //.
   ClearTimer(T1);
   while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {
-  	writeDebugStreamLine("Ultra: %i cm", ULTRA_VAL);
+  	//writeDebugStreamLine("Ultra: %i cm", ULTRA_VAL);
   }
   servo[GRAB1] = 215;
   servo[GRAB2] = 60;
   wait1Msec(300);
   halt();
-
+  int first_bear = bearing;
+    writeDebugStreamLine("==Gyro goal 1: %i", bearing);
   servo[ROOF] = 20;
   motor[TUBE] = 100;
   wait1Msec(6700);
@@ -171,7 +169,7 @@ void mission_goals()
   wait1Msec(500);
   servo[SPOUT] = 255;
   wait1Msec(1200);
-  servo[ROOF] = 127;
+  servo[ROOF] = 170;
   wait1Msec(500);
   servo[FLAP] = 80;
 
@@ -195,18 +193,20 @@ void mission_goals()
   servo[GRAB1] = 55;
   servo[GRAB2] = 215;
   drive_e(S, 50, 1200);
-  drive_e(N, 50, 1200);
-  drive_t(CW, 100, 1200);
-
-  writeDebugStreamLine("Ultra: %i cm", ULTRA_VAL);
+  drive_e(N, 50, 1300);
+  drive_t(CW, 100, 1400);
+        writeDebugStreamLine("==Gyro goal 2: %i", bearing);
+  //go_to_bearing(first_bear);
+  PlayImmediateTone(200,200);
 
   motor[FEEDER] = 80;
   drive_t(S, 40, 0);//.
   ClearTimer(T1);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 2400) {  writeDebugStreamLine("Ultra: %i cm", ULTRA_VAL);}
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 2400) {}
   servo[GRAB1] = 215;
   servo[GRAB2] = 60;
   halt();
+      writeDebugStreamLine("==Gyro goal 3: %i", bearing);
 
   servo[ROOF] = 255;
   wait1Msec(500);
@@ -235,15 +235,15 @@ task main()
 
   //StartTask(verify_smux);
   //dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
-  //HTGYROstartCal(msensor_S4_2);
+  HTGYROstartCal(msensor_S4_2);
   initialize_servos();
   //waitForStart();
   StartTask(updateBearing);
-  wait1Msec(delay * 1000);
-  //StartTask(initialize_motors);
+  wait1Msec(delay * 1000 + 500);
 
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
+      StartTask(initialize_motors);
       mission_ramp();
       if(tubes)
         mission_goals();
