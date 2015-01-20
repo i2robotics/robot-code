@@ -26,9 +26,9 @@
 #include "../headers/clion_1.h"
 #endif
 
-//#define DEBUG_IR
+#define DEBUG_IR
 
-#define IR_SEEK_VAL HTIRSreadDir(msensor_S4_1)
+#define IR_SEEK_VAL HTIRS2readACDir(msensor_S4_1)
 #define GYRO_VAL HTGYROreadRot(msensor_S4_2)
 #define SMUX_TOUCH TSreadState(msensor_S4_4)
 #define ULTRA_VAL USreadDist(msensor_S4_3)
@@ -36,7 +36,7 @@
 #include "Joystickdriver.c"
 
 #include "../drivers/hitechnic-sensormux.h"
-#include "../drivers/hitechnic-irseeker-v1.h"
+#include "../drivers/hitechnic-irseeker-v2.h"
 #include "../drivers/lego-touch.h"
 #include "../drivers/lego-ultrasound.h"
 #include "../drivers/hitechnic-superpro.h"
@@ -45,6 +45,7 @@
 #include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
 #include "../headers/helpers_1.h"
+#include "../headers/servoValues_1.h"
 
 //==================  Config Definitions  ==================
 typedef enum
@@ -65,11 +66,11 @@ typedef enum
 
 void initialize_servos()
 {
-  servo[ROOF] = 255;
-  servo[FLAP] = 25;
-  servo[SPOUT] = 0;
-  servo[GRAB1] = 55;
-  servo[GRAB2] = 215;
+  servo[ROOF]  = kRoofClosed;
+  servo[FLAP]  = kFlapClosed;
+  servo[SPOUT] = kSpoutClosed;
+  servo[GRAB1] = kGrab1Open;
+  servo[GRAB2] = kGrab2Open;
 }
 
 task initialize_motors()
@@ -112,7 +113,7 @@ void mission_monolith(int monolith_position)
       break;
     case 2:
       drive_e(N, 55, 840);
-      drive_t(FWD + 25, 55, 1000);
+      drive_t(FWD + 23, 55, 1200);
       drive_e(CW, 100, 1000);
       drive_e(N, 100, 2800);
       drive_t(S, -2, 1200);
@@ -154,32 +155,30 @@ void mission_goals()
   while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {
   	//writeDebugStreamLine("Ultra: %i cm", ULTRA_VAL);
   }
-  servo[GRAB1] = 215;
-  servo[GRAB2] = 60;
+  servo[GRAB1] = kGrab1Closed;
+  servo[GRAB2] = kGrab2Closed;
   wait1Msec(300);
   halt();
   int first_bear = bearing;
     writeDebugStreamLine("==Gyro goal 1: %i", bearing);
-  servo[ROOF] = 20;
   motor[TUBE] = 100;
   wait1Msec(6700);
   motor[TUBE] = 0;
-  servo[ROOF] = 255;
 
   wait1Msec(500);
-  servo[SPOUT] = 255;
+  servo[SPOUT] = kSpoutOpen;
   wait1Msec(1200);
-  servo[ROOF] = 170;
+  servo[ROOF] = kRoofOpen;
   wait1Msec(500);
-  servo[FLAP] = 80;
+  servo[FLAP] = kFlapOpen;
 
   motor[POPPER] = 100;
-  wait1Msec(2000);
+  wait1Msec(3000);
   motor[POPPER] = 0;
   wait1Msec(300);
-  servo[ROOF] = 255;
+  servo[ROOF] = kRoofClosed;
   wait1Msec(500);
-  servo[SPOUT] = 140;
+  servo[SPOUT] = kSpoutMiddle;
   motor[FORK] = 100;
   wait1Msec(500);
   motor[FORK] = 0;
@@ -190,31 +189,32 @@ void mission_goals()
   motor[FORK] = -100;
   wait1Msec(500);
   motor[FORK] = 0;
-  servo[GRAB1] = 55;
-  servo[GRAB2] = 215;
+  servo[GRAB1] = kGrab1Open;
+  servo[GRAB2] = kGrab2Open;
   drive_e(S, 50, 1200);
   drive_e(N, 50, 1300);
   drive_t(CW, 100, 1400);
         writeDebugStreamLine("==Gyro goal 2: %i", bearing);
   //go_to_bearing(first_bear);
   PlayImmediateTone(200,200);
+  drive_t(E, 100, 300);
 
   motor[FEEDER] = 80;
   drive_t(S, 40, 0);//.
   ClearTimer(T1);
   while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 2400) {}
-  servo[GRAB1] = 215;
-  servo[GRAB2] = 60;
+  servo[GRAB1] = kGrab1Closed;
+  servo[GRAB2] = kGrab2Closed;
   halt();
       writeDebugStreamLine("==Gyro goal 3: %i", bearing);
 
-  servo[ROOF] = 255;
+  servo[ROOF] = kRoofClosed;
   wait1Msec(500);
-  servo[SPOUT] = 255;
+  servo[SPOUT] = kSpoutOpen;
   wait1Msec(1200);
-  servo[ROOF] = 127;
+  servo[ROOF] = kRoofOpen;
   wait1Msec(500);
-  servo[FLAP] = 80;
+  servo[FLAP] = kFlapOpen;
 
   motor[POPPER] = 100;
   wait1Msec(2000);
@@ -229,9 +229,9 @@ task main()
   HTSPBsetupIO(HTSPB, 0x10);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanRamp;
+  Plan_t cur_plan = kPlanKick;
   int tubes = 1;
-  int delay = 3;
+  int delay = 0;
 
   //StartTask(verify_smux);
   //dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
@@ -239,7 +239,8 @@ task main()
   initialize_servos();
   //waitForStart();
   StartTask(updateBearing);
-  wait1Msec(delay * 1000 + 500);
+  wait1Msec(delay * 1000);
+  wait1Msec(500);
 
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
@@ -252,9 +253,16 @@ task main()
 
     case kPlanKick: //================== Plan Kick
       int first_IR = IR_SEEK_VAL;
+      while (first_IR > 10) {
+				writeDebugStreamLine("bad: %i", first_IR);
+      	first_IR = IR_SEEK_VAL;
+      }
       drive_e(N, 20, 2000);
-      int second_IR = IR_SEEK_VAL; //157.56
-
+      int second_IR = IR_SEEK_VAL;
+			while (second_IR > 10) {
+				writeDebugStreamLine("bad: %i", second_IR);
+      	second_IR = IR_SEEK_VAL;
+      }
 
       int monolith_position;
       if (first_IR <= 3) {
@@ -288,14 +296,8 @@ task main()
       }
       wait1Msec(2000);
 #endif
-      mission_monolith(2);
+      mission_monolith(monolith_position);
       drive_e(CW, 80, 5000);
-      /*
-      servo[guides] = 255;
-      wait1Msec(500);
-      servo[guides] = 0;
-      motor[TUBE] = 100;
-      while (HTSPBreadIO(HTSPB, 0x01) != 1) {}*/
       motor[TUBE] = 0;
       break;
   }
