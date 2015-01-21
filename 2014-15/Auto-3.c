@@ -98,6 +98,12 @@ task verify_smux()
 		wait1Msec(200);
 	}
 }
+
+void swerve()
+{
+  [0.6489265837500613, 0.9267654983341119, 0.9267654983341119, 0.6489265837500613]
+}
+
 //==================  Missions  ==================
 void mission_monolith(int monolith_position)
 {
