@@ -30,15 +30,14 @@
 
 #define IR_SEEK_VAL HTIRS2readACDir(msensor_S4_1)
 #define GYRO_VAL HTGYROreadRot(msensor_S4_2)
-#define SMUX_TOUCH TSreadState(msensor_S4_4)
-#define ULTRA_VAL USreadDist(msensor_S4_3)
+#define SIDE_TOUCH_S TSreadState(msensor_S4_4)
+#define SIDE_TOUCH_N TSreadState(msensor_S4_3)
 
 #include "Joystickdriver.c"
 
 #include "../drivers/hitechnic-sensormux.h"
 #include "../drivers/hitechnic-irseeker-v2.h"
 #include "../drivers/lego-touch.h"
-#include "../drivers/lego-ultrasound.h"
 #include "../drivers/hitechnic-superpro.h"
 
 #include "../headers/scaleJoy_1.h"
@@ -88,21 +87,57 @@ task tube_to_top()
   motor[TUBE] = 0;
 }
 
-task verify_smux()
+/*task verify_smux()
 {
 	int coun = 0;
-	while(! SMUX_TOUCH) {
+	while(! SIDE_TOUCH) {
 		PlayImmediateTone(coun*100, 200);
 		coun++;
 		coun = coun % 127;
 		wait1Msec(200);
 	}
+}*/
+
+void swerve(int  power, unsigned byte cycles, unsigned int time = 400)
+{
+	for(unsigned byte i = 0; i < cycles; i++) {
+		motor[DRIVE_NE] = power;
+    motor[DRIVE_SE] = power;
+    motor[DRIVE_NW] = 0;
+    motor[DRIVE_SW] = 0;
+    wait1Msec(400);
+
+    motor[DRIVE_NE] = 0;
+    motor[DRIVE_SE] = 0;
+    motor[DRIVE_NW] = power;
+    motor[DRIVE_SW] = power;
+    wait1Msec(400);
+  }
 }
 
-void swerve()
+void square()
 {
-  [0.6489265837500613, 0.9267654983341119, 0.9267654983341119, 0.6489265837500613]
+	drive_t(E, 88, 0);
+  ClearTimer(T1);
+  while (time1[T1] < 3000) {
+  	if(SIDE_TOUCH_N == 1) {
+  		motor[DRIVE_NE] = 0;
+      motor[DRIVE_NW] = 0;
+    }
+    if (SIDE_TOUCH_S == 1) {
+      motor[DRIVE_SE] = 0;
+      motor[DRIVE_SW] = 0;
+    }
+    if (SIDE_TOUCH_N == 1 && SIDE_TOUCH_S == 1) {
+    	halt();
+    	PlayImmediateTone(1500, 200);
+    	break;
+    }
+  }
+  wait1Msec(400);
+  drive_e(W, 100, 600); // was 750 worked
 }
+
 
 //==================  Missions  ==================
 void mission_monolith(int monolith_position)
@@ -148,19 +183,24 @@ void mission_ramp()
   wait10Msec(100);
   //drive_e(CW, 40, 300);
   drive_t(S, 20, 300);
-  drive_e(W, 100, 600);
   //go_to_bearing(start_bearing);
   PlayImmediateTone(200, 200);
 }
 
 void mission_goals()
 {
-  drive_t(S, 40, 1000); //.
-  drive_t(S, 20, 0); //.
-  ClearTimer(T1);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {
-  	//writeDebugStreamLine("Ultra: %i cm", ULTRA_VAL);
+	if (true) {
+    drive_t(S, 40, 300);
+    square();
+    drive_t(S, 40, 700);
+  } else {
+    drive_t(S, 40, 300);
+    square();
+    swerve(-90, 2);
   }
+  drive_t(S, 20, 0);
+  ClearTimer(T1);
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
   servo[GRAB1] = kGrab1Closed;
   servo[GRAB2] = kGrab2Closed;
   wait1Msec(300);
@@ -235,7 +275,7 @@ task main()
   HTSPBsetupIO(HTSPB, 0x10);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanKick;
+  Plan_t cur_plan = kPlanRamp;
   int tubes = 1;
   int delay = 0;
 
