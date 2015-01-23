@@ -43,46 +43,43 @@ short current_joystick;
 
 task closeRoof()
 {
-  servo[FLAP] = 25;
-  servo[ROOF] = 255;
+  servo[FLAP] = kFlapClosed;
+  servo[ROOF] = kRoofClosed;
   wait1Msec(350);
-  servo[SPOUT] = 0;
+  servo[SPOUT] = kSpoutClosed;
 }
 
 task scoringGoals()
 {
-  if (ServoValue[ROOF] != 255) {
-    servo[FLAP] = 25;
-    servo[ROOF] = 255;
+  if (ServoValue[ROOF] != kRoofClosed) {
+    servo[FLAP] = kFlapClosed;
+    servo[ROOF] = kRoofClosed;
     wait1Msec(350);
   }
- servo[SPOUT] = 255;
+ servo[SPOUT] = kSpotOpen;
   wait1Msec(1000);
-  servo[ROOF] = 170;
+  servo[ROOF] = kRoofOpen;
   wait1Msec(250);
-  servo[FLAP] = 80;
+  servo[FLAP] = kFlapOpen;
 }
 
 task centerGoal()
 {
-  if (ServoValue[SPOUT] != 0) {
-    servo[FLAP] = 25;
-    servo[ROOF] = 255;
+  if (ServoValue[SPOUT] != kSpoutClosed) {
+    servo[FLAP] = kFlapClosed;
+    servo[ROOF] = kRoofClosed;
     wait1Msec(350);
-    servo[SPOUT] = 0;
+    servo[SPOUT] = kSpoutClosed;
     wait1Msec(1000);
   }
-  servo[ROOF] = 146;
+  servo[ROOF] = kRoofHigh;
   wait1Msec(250);
-  servo[FLAP] = 210;
+  servo[FLAP] = kFlapHigh;
 }
 
 task main()
 {
-  servo[FLAP] = 25;
-  servo[ROOF] = 255;
-  wait1Msec(350);
-  servo[SPOUT] = 255;
+  StartTask(scoringGoals);
   //nMotorEncoder[DRIVE_SE] = 0;
   // nMotorEncoder[DRIVE_SW] = 0;
   //StartTask(updateBearing);
