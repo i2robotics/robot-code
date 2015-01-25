@@ -76,7 +76,7 @@ task initialize_motors()
 {
   wait1Msec(800);
   motor[FORK] = -100;
-  wait1Msec(4100);
+  wait1Msec(4200);
   motor[FORK] = 0;
 }
 
@@ -86,17 +86,6 @@ task tube_to_top()
   while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
   motor[TUBE] = 0;
 }
-
-/*task verify_smux()
-{
-	int coun = 0;
-	while(! SIDE_TOUCH) {
-		PlayImmediateTone(coun*100, 200);
-		coun++;
-		coun = coun % 127;
-		wait1Msec(200);
-	}
-}*/
 
 void swerve(int  power, unsigned byte cycles, unsigned int time = 400)
 {
@@ -119,7 +108,8 @@ void square()
 {
 	drive_t(E, 88, 0);
   ClearTimer(T1);
-  while (time1[T1] < 3000) {
+  time1[T1] = 0;
+  while (true) { //time1[T1] < 9000
   	if(SIDE_TOUCH_N == 1) {
   		motor[DRIVE_NE] = 0;
       motor[DRIVE_NW] = 0;
@@ -187,17 +177,18 @@ void mission_ramp()
   PlayImmediateTone(200, 200);
 }
 
-void mission_goals()
+void mission_goal1(bool pointed)
 {
-	if (true) {
-    drive_t(S, 40, 300);
-    square();
-    drive_t(S, 40, 700);
-  } else {
+	if (pointed) {
     drive_t(S, 40, 300);
     square();
     swerve(-90, 2);
+  } else {
+    drive_t(S, 40, 300);
+    square();
+    drive_t(S, 40, 700);
   }
+
   drive_t(S, 20, 0);
   ClearTimer(T1);
   while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
@@ -205,8 +196,7 @@ void mission_goals()
   servo[GRAB2] = kGrab2Closed;
   wait1Msec(300);
   halt();
-  int first_bear = bearing;
-    writeDebugStreamLine("==Gyro goal 1: %i", bearing);
+
   motor[TUBE] = 100;
   wait1Msec(6700);
   motor[TUBE] = 0;
@@ -222,15 +212,21 @@ void mission_goals()
   wait1Msec(3000);
   motor[POPPER] = 0;
   wait1Msec(300);
+
   servo[ROOF] = kRoofClosed;
   wait1Msec(500);
   servo[SPOUT] = kSpoutMiddle;
+
   motor[FORK] = 100;
   wait1Msec(500);
   motor[FORK] = 0;
-// */
-  StartTask(tube_to_top);
 
+}
+
+void mission_goal2(bool variant)
+{
+	StartTask(tube_to_top);
+	drive_e(W, 100, 300);
   drive_t(CCW, 100, 1500);
   motor[FORK] = -100;
   wait1Msec(500);
@@ -239,12 +235,15 @@ void mission_goals()
   servo[GRAB2] = kGrab2Open;
   drive_e(S, 50, 1200);
   drive_e(N, 50, 1300);
-  drive_t(CW, 100, 1400);
-        writeDebugStreamLine("==Gyro goal 2: %i", bearing);
-  //go_to_bearing(first_bear);
-  PlayImmediateTone(200,200);
-  drive_t(E, 100, 300);
+  drive_t(CW, 100, 1500);
 
+  PlayImmediateTone(200,200);
+  //wait1Msec(2000);
+
+  drive_t(E, 100, 300);
+	//wait1Msec(2000);
+  square();
+  //wait1Msec(5000);
   motor[FEEDER] = 80;
   drive_t(S, 40, 0);//.
   ClearTimer(T1);
@@ -252,7 +251,6 @@ void mission_goals()
   servo[GRAB1] = kGrab1Closed;
   servo[GRAB2] = kGrab2Closed;
   halt();
-      writeDebugStreamLine("==Gyro goal 3: %i", bearing);
 
   servo[ROOF] = kRoofClosed;
   wait1Msec(500);
@@ -280,20 +278,23 @@ task main()
   int delay = 0;
 
   //StartTask(verify_smux);
-  //dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
+  dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
   HTGYROstartCal(msensor_S4_2);
   initialize_servos();
-  //waitForStart();
-  StartTask(updateBearing);
+  waitForStart();
+  //StartTask(updateBearing);
   wait1Msec(delay * 1000);
   wait1Msec(500);
 
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
       StartTask(initialize_motors);
+
       mission_ramp();
-      if(tubes)
-        mission_goals();
+      if(tubes) {
+        mission_goal1(false);
+        mission_goal2(false);
+      }
       break;
 
 
