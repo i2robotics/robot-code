@@ -72,8 +72,8 @@ typedef enum
 
 void initialize_servos()
 {
-  servo[ROOF]  = kRoofClosed;
-  servo[FLAP]  = kFlapClosed;
+  servo[ROOF] = kRoofClosed;
+  servo[FLAP] = kFlapClosed;
   servo[SPOUT] = kSpoutClosed;
   servo[GRAB1] = kGrab1Open;
   servo[GRAB2] = kGrab2Open;
@@ -81,21 +81,21 @@ void initialize_servos()
 
 task initialize_motors()
 {
-	bool first_time_repeat = true;
+  bool first_time_repeat = true;
   wait1Msec(800);
   motor[FORK] = -100;
   //start timer
   ClearTimer(T2);
   time1[T2] = 0;
-	while ((SPATULA_DOWN & 0x08) != 8) {/*when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube*/
-		if (first_time_repeat == true) {
-			motor[TUBE] = 100;
-			first_time_repeat = false;
-			lockout_medium = true;
-		}
-	}
-	//when timer is greater than or equal to 7000 miliseconds stop the lift
-	motor[FORK] = 0;
+  while ((SPATULA_DOWN & 0x08) != 8) {/*when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube*/
+    if (first_time_repeat == true) {
+      motor[TUBE] = 100;
+      first_time_repeat = false;
+      lockout_medium = true;
+    }
+  }
+  //when timer is greater than or equal to 7000 miliseconds stop the lift
+  motor[FORK] = 0;
 
   while (time1[T2] < 7500) {}
   motor[TUBE] = 0;
@@ -110,10 +110,10 @@ task tube_to_top()
   motor[TUBE] = 0;
 }
 
-void swerve(int  power, unsigned byte cycles, unsigned int time = 400)
+void swerve(int power, unsigned byte cycles, unsigned int time = 400)
 {
-	for(unsigned byte i = 0; i < cycles; i++) {
-		motor[DRIVE_NE] = power;
+  for (unsigned byte i = 0; i < cycles; i++) {
+    motor[DRIVE_NE] = power;
     motor[DRIVE_SE] = power;
     motor[DRIVE_NW] = 0;
     motor[DRIVE_SW] = 0;
@@ -129,12 +129,12 @@ void swerve(int  power, unsigned byte cycles, unsigned int time = 400)
 
 void square()
 {
-	drive_t(E, 88, 0);
+  drive_t(E, 88, 0);
   ClearTimer(T1);
   time1[T1] = 0;
   while (true) { //time1[T1] < 9000
-  	if(SIDE_TOUCH_N == 1) {
-  		motor[DRIVE_NE] = 0;
+    if (SIDE_TOUCH_N == 1) {
+      motor[DRIVE_NE] = 0;
       motor[DRIVE_NW] = 0;
     }
     if (SIDE_TOUCH_S == 1) {
@@ -142,9 +142,9 @@ void square()
       motor[DRIVE_SW] = 0;
     }
     if (SIDE_TOUCH_N == 1 && SIDE_TOUCH_S == 1) {
-    	halt();
-    	PlayImmediateTone(1500, 200);
-    	break;
+      halt();
+      PlayImmediateTone(1500, 200);
+      break;
     }
   }
   wait1Msec(400);
@@ -186,62 +186,62 @@ void mission_monolith(int monolith_position)
 
 void mission30(int monolith_position)
 {
-	switch (monolith_position) {
-	case 3:
-	drive_t(CCW, 70, 1000);
-	drive_t(S, 90, 3000);
-	drive_t(S, 25, 1500);
-	drive_e(N, 90, 300);
-	drive_t(CW, 90, 1500);
-	 motor[FORK] = -100;
-  wait1Msec(4200);
-  motor[FORK] = 0;
-  ClearTimer(T1);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
-  servo[GRAB1] = kGrab1Closed;
-  servo[GRAB2] = kGrab2Closed;
-  wait1Msec(300);
-  halt();
+  switch (monolith_position) {
+    case 3:
+      drive_t(CCW, 70, 1000);
+      drive_t(S, 90, 3000);
+      drive_t(S, 25, 1500);
+      drive_e(N, 90, 300);
+      drive_t(CW, 90, 1500);
+      motor[FORK] = -100;
+      wait1Msec(4200);
+      motor[FORK] = 0;
+      ClearTimer(T1);
+      while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
+      servo[GRAB1] = kGrab1Closed;
+      servo[GRAB2] = kGrab2Closed;
+      wait1Msec(300);
+      halt();
 
-	break;
-	}
+      break;
+  }
 }
 
 void missionCenter(int monolith_position)
 {
-	switch (monolith_position) {
-	case 3:
-	drive_t(CCW, 70,200);
-	drive_e(N,90,5200);
-	drive_t(CCW, 70,500);
-	drive_e(S, 50, 1600);
-	drive_t(W, 90,500);
-	drive_t(CW, 70,200);
-	drive_t(W, 90,450);
-	//drive_t(CW, 70,100);
-	//drive_e(W, 70, 2000);
-	//drive_e(S, 70, 300);
-	if (ServoValue[SPOUT] != kSpoutClosed) {
-    servo[FLAP] = kFlapClosed;
-    servo[ROOF] = kRoofClosed;
-    wait1Msec(350);
-    servo[SPOUT] = kSpoutClosed;
-    wait1Msec(1000);
-  }
-  servo[ROOF] = kRoofHigh;
-  wait1Msec(250);
-  servo[FLAP] = kFlapHigh;
-  motor[POPPER]=100;
-  wait1Msec(3000);
-  motor[POPPER]=0;
+  switch (monolith_position) {
+    case 3:
+      drive_t(CCW, 70, 200);
+      drive_e(N, 90, 5200);
+      drive_t(CCW, 70, 500);
+      drive_e(S, 50, 1600);
+      drive_t(W, 90, 500);
+      drive_t(CW, 70, 200);
+      drive_t(W, 90, 450);
+      //drive_t(CW, 70,100);
+      //drive_e(W, 70, 2000);
+      //drive_e(S, 70, 300);
+      if (ServoValue[SPOUT] != kSpoutClosed) {
+        servo[FLAP] = kFlapClosed;
+        servo[ROOF] = kRoofClosed;
+        wait1Msec(350);
+        servo[SPOUT] = kSpoutClosed;
+        wait1Msec(1000);
+      }
+      servo[ROOF] = kRoofHigh;
+      wait1Msec(250);
+      servo[FLAP] = kFlapHigh;
+      motor[POPPER] = 100;
+      wait1Msec(3000);
+      motor[POPPER] = 0;
 
-	break;
-	}
+      break;
+  }
 }
 
 void mission_ramp()
 {
-	int start_bearing = bearing;
+  int start_bearing = bearing;
   drive_t(S, 40, 600);
   drive_t(N, 1, 500);
   drive_t(S, 2, 500);
@@ -260,7 +260,7 @@ void mission_ramp()
 void mission_goal1(bool pointed) //Get the ball in the first goal
 {
 
-	if (pointed) {
+  if (pointed) {
     drive_t(S, 40, 300); //drive forward and line up as well as swerve to make sure the goal is in the right direction
     square();
     swerve(-90, 2);
@@ -302,8 +302,8 @@ void mission_goal1(bool pointed) //Get the ball in the first goal
 
 void mission_goal2(bool variant)
 {
-	StartTask(tube_to_top);
-	drive_e(W, 100, 300);
+  StartTask(tube_to_top);
+  drive_e(W, 100, 300);
   drive_t(CCW, 100, 1500);
   ClearTimer(T2);
   motor[FORK] = -100;
@@ -315,11 +315,11 @@ void mission_goal2(bool variant)
   drive_e(N, 50, 1300);
   drive_t(CW, 100, 1300);
 
-  PlayImmediateTone(200,200);
+  PlayImmediateTone(200, 200);
   //wait1Msec(2000);
 
   drive_t(E, 100, 300);
-	//wait1Msec(2000);
+  //wait1Msec(2000);
   square();
   //wait1Msec(5000);
   motor[FEEDER] = 80;
@@ -369,7 +369,7 @@ task main()
       StartTask(initialize_motors);
 
       mission_ramp();
-      if(tubes) {
+      if (tubes) {
         mission_goal1(false);
         mission_goal2(false);
       }
@@ -379,14 +379,14 @@ task main()
     case kPlanKick: //================== Plan Kick
       int first_IR = IR_SEEK_VAL;
       while (first_IR > 10) {
-				writeDebugStreamLine("bad: %i", first_IR);
-      	first_IR = IR_SEEK_VAL;
+        writeDebugStreamLine("bad: %i", first_IR);
+        first_IR = IR_SEEK_VAL;
       }
       drive_e(N, 20, 2000);
       int second_IR = IR_SEEK_VAL;
-			while (second_IR > 10) {
-				writeDebugStreamLine("bad: %i", second_IR);
-      	second_IR = IR_SEEK_VAL;
+      while (second_IR > 10) {
+        writeDebugStreamLine("bad: %i", second_IR);
+        second_IR = IR_SEEK_VAL;
       }
 
       int monolith_position;
