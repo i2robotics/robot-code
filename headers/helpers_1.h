@@ -44,6 +44,9 @@
 #define otherwise }else{
 #define end }
 
+#define NEW_TIMEOUT time1[T4]
+#define CHECK_TIMEOUT(timeout_start, duration) ((time1[T4] - timeout_start) < duration ? true : false)
+
 #ifdef GYRO_INCLUDED
 void go_to_bearing(int target)
 {

@@ -110,21 +110,19 @@ task tube_to_top()
   motor[TUBE] = 0;
 }
 
-void swerve(int power, unsigned byte cycles, unsigned int time = 400)
+void swerve(int power, unsigned int time = 600)
 {
-  for (unsigned byte i = 0; i < cycles; i++) {
     motor[DRIVE_NE] = power;
     motor[DRIVE_SE] = power;
     motor[DRIVE_NW] = 0;
     motor[DRIVE_SW] = 0;
-    wait1Msec(400);
+    wait1Msec(time);
 
     motor[DRIVE_NE] = 0;
     motor[DRIVE_SE] = 0;
     motor[DRIVE_NW] = power;
     motor[DRIVE_SW] = power;
-    wait1Msec(400);
-  }
+    wait1Msec(time*2);
 }
 
 void square()
@@ -259,11 +257,12 @@ void mission_ramp()
 
 void mission_goal1(bool pointed) //Get the ball in the first goal
 {
-
   if (pointed) {
     drive_t(S, 40, 300); //drive forward and line up as well as swerve to make sure the goal is in the right direction
     square();
-    swerve(-90, 2);
+    //drive_e(S, 40, 00); //After this line, the tip of the spatula must be right in front of the seam.
+    wait10Msec(500);
+    swerve(-90);
   } else {
     drive_t(S, 40, 300); //drive forward and line up
     square();
@@ -298,9 +297,15 @@ void mission_goal1(bool pointed) //Get the ball in the first goal
   wait1Msec(500);
   motor[FORK] = 0;
 
+  if (pointed) {
+    motor[DRIVE_NW] = 90;
+    motor[DRIVE_SW] = 90;
+    wait1Msec(600);
+    halt();
+  }
 }
 
-void mission_goal2(bool variant)
+void mission_goal2(bool pointed)
 {
   StartTask(tube_to_top);
   drive_e(W, 100, 300);
@@ -319,15 +324,20 @@ void mission_goal2(bool variant)
   //wait1Msec(2000);
 
   drive_t(E, 100, 300);
-  //wait1Msec(2000);
-  square();
-  //wait1Msec(5000);
+
+  if (pointed) {
+    square();
+    swerve(-90);
+  } else {
+    square();
+  }
   motor[FEEDER] = 80;
-  drive_t(S, 30, 0);//.
+  drive_t(S, 25, 0);//.
   ClearTimer(T1);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 4000) {}
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 4200) {}
   servo[GRAB1] = kGrab1Closed;
   servo[GRAB2] = kGrab2Closed;
+  wait1Msec(300);
   halt();
 
   servo[ROOF] = kRoofClosed;
@@ -359,7 +369,8 @@ task main()
   //dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
   HTGYROstartCal(msensor_S4_2);
   initialize_servos();
-  //waitForStart();
+  waitForStart();
+  ClearTimer(T4);
   //StartTask(updateBearing);
   wait1Msec(delay * 1000);
   wait1Msec(500);
@@ -370,7 +381,7 @@ task main()
 
       mission_ramp();
       if (tubes) {
-        mission_goal1(false);
+        mission_goal1(true);
         mission_goal2(false);
       }
       break;
