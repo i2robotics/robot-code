@@ -14,6 +14,8 @@
 #pragma config(Motor,  mtr_S2_C1_2,     FORK,          tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S2_C2_1,     DRIVE_SW,      tmotorTetrix, openLoop, encoder)
 #pragma config(Motor,  mtr_S2_C2_2,     DRIVE_NW,      tmotorTetrix, openLoop, encoder)
+#pragma config(Servo,  srvo_S2_C3_1,    servo1,               tServoNone)
+#pragma config(Servo,  srvo_S2_C3_2,    servo2,               tServoNone)
 #pragma config(Servo,  srvo_S2_C3_3,    SPOUT,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_4,    ROOF,                 tServoStandard)
 #pragma config(Servo,  srvo_S2_C3_5,    servo5,               tServoNone)
@@ -205,35 +207,32 @@ void mission30(int monolith_position)
   }
 }
 
-void missionCenter(int monolith_position)
+void mission_center(int monolith_position)
 {
-  switch (monolith_position) {
-    case 3:
-      drive_t(CCW, 70, 200);
-      drive_e(N, 90, 5200);
-      drive_t(CCW, 70, 500);
-      drive_e(S, 50, 1600);
-      drive_t(W, 90, 500);
-      drive_t(CW, 70, 200);
-      drive_t(W, 90, 450);
-      //drive_t(CW, 70,100);
-      //drive_e(W, 70, 2000);
-      //drive_e(S, 70, 300);
-      if (ServoValue[SPOUT] != kSpoutClosed) {
-        servo[FLAP] = kFlapClosed;
-        servo[ROOF] = kRoofClosed;
-        wait1Msec(350);
-        servo[SPOUT] = kSpoutClosed;
-        wait1Msec(1000);
-      }
+  if (monolith_position == 3) {
+      drive_e(CW, 100, 4400);
+      servo[FLAP] = kFlapClosed;
+      servo[ROOF] = kRoofClosed;
+      wait1Msec(350);
+      servo[SPOUT] = kSpoutOpen;
+      wait1Msec(1000);
       servo[ROOF] = kRoofHigh;
       wait1Msec(250);
+      servo[SPOUT] = kSpoutMiddle;
       servo[FLAP] = kFlapHigh;
-      motor[POPPER] = 100;
-      wait1Msec(3000);
-      motor[POPPER] = 0;
 
-      break;
+      drive_e(S, 60, 2000);
+      drive_e(W, 100, 300);
+
+      motor[POPPER] = 100;
+      motor[FEEDER] = 50;
+      wait1Msec(5000);
+      motor[POPPER] = 0;
+      motor[FEEDER] = 0;
+
+      drive_e(E, 100, 300);
+      drive_e(N, 60, 2000);
+      drive_e(CCW, 100, 3800);
   }
 }
 
@@ -361,7 +360,7 @@ task main()
   HTSPBsetupIO(HTSPB, 0x10);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanRamp;
+  Plan_t cur_plan = kPlanKick;
   int tubes = 2;
   int delay = 0;
 
@@ -369,7 +368,7 @@ task main()
   //dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
   HTGYROstartCal(msensor_S4_2);
   initialize_servos();
-  waitForStart();
+  //waitForStart();
   ClearTimer(T4);
   //StartTask(updateBearing);
   wait1Msec(delay * 1000);
@@ -432,10 +431,10 @@ task main()
       }
       wait1Msec(2000);
 #endif
+      mission_center(monolith_position);
       mission_monolith(monolith_position);
       drive_e(CW, 80, 5000);
       motor[TUBE] = 0;
-      missionCenter(monolith_position);
       break;
   }
   halt();
