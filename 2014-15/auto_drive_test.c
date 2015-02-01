@@ -63,7 +63,7 @@ void square()
   drive_t(E, 88, 0);
   ClearTimer(T1);
   time1[T1] = 0;
-  while (time1[T1] < 9000) {
+  while (true) {
     if (SIDE_TOUCH_N == 1) {
       motor[DRIVE_NE] = 0;
       motor[DRIVE_NW] = 0;
@@ -107,19 +107,7 @@ task display()
 task main()
 {
 	square();
-	drive_e(S, 40, 800);
-	wait10Msec(100);
-  swerve(-90);
 
-  drive_t(S, 20, 0); // grab and score in first goal
-  ClearTimer(T1);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
-  wait1Msec(300);
-  halt();
-
-  do {
-  	PlayImmediateTone(200,200);
-  } while (false && )
 
 	halt();
 	PlayImmediateTone(200,200);

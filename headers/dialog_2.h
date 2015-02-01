@@ -9,7 +9,7 @@
 #include "../headers/clion_1.h"
 #endif
 
-void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_tubes, int *ret_delay)
+void dialog(Plan_t *ret_plan, int *ret_tubes, int *ret_point, int *ret_delay)
 {
   const string Alliance_s[] = {"Red", "Blue"};
   const string Bool_s[] = {"False", "True"};
@@ -30,6 +30,7 @@ void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_tubes, int *ret
   options.alliance = (Alliance_t) 0;
   options.plan = (Plan_t) 0;
   options.tubes = 0;
+  options.point = 0;
   options.delay = 0;
 
   bool ready = false;
@@ -97,8 +98,9 @@ void dialog(Alliance_t *ret_alliance, Plan_t *ret_plan, int *ret_tubes, int *ret
   }
 
   *ret_plan = options.plan;
-  *ret_alliance = options.alliance;
+  //*ret_alliance = options.alliance;
   *ret_tubes = options.tubes;
+  *ret_point = options.point;
   *ret_delay = options.delay;
   return;
 }

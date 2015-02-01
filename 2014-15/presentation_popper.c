@@ -36,9 +36,9 @@ task main()
   }
   servo[SPOUT] = kSpoutOpen;
   wait1Msec(1000);
-  servo[ROOF] = 17;
+  servo[ROOF] = kRoofOpen;
   wait1Msec(250);
-  servo[FLAP] = 80;
+  servo[FLAP] = kFlapOpen;
 	while (true)
 	{
 		HTSPBsetupIO(HTSPB, 0x10);
