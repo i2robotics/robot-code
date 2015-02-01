@@ -6,9 +6,9 @@
 *
 *------------------------------------------------*/
 
-const unsigned byte kFlapClosed = 25;
-const unsigned byte kFlapOpen   = 80;
-const unsigned byte kFlapHigh   = 180;
+const unsigned byte kFlapClosed = 60;
+const unsigned byte kFlapOpen   = 125;
+const unsigned byte kFlapHigh   = 255;
 
 const unsigned byte kRoofClosed = 255;
 const unsigned byte kRoofOpen   = 180;

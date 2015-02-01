@@ -43,12 +43,15 @@
 bool grab_state = false;
 bool grab_lock = false;
 bool lock_fork = false;
+bool popper_has_been_readied = false;
 float J1X1;
 float J1Y1;
 float J1X2;
 
 float J2Y2;
 short current_joystick;
+
+
 
 task spatulaDown() {
 	lock_fork = true;
@@ -95,6 +98,7 @@ task centerGoal()
 
 task main()
 {
+	ClearTimer(T1);
   StartTask(scoringGoals);
   //nMotorEncoder[DRIVE_SE] = 0;
   // nMotorEncoder[DRIVE_SW] = 0;
@@ -160,6 +164,7 @@ task main()
       motor[RIGHT_LIGHT] = 0;
     }
 
+
     if (LEFT_GRABBER_SWITCH != 0 && RIGHT_GRABBER_SWITCH != 0) { // If limit switches are active
       if (!grab_lock) { // Unless auto-grabbing has already happened
         grab_lock = true; // Prevent auto-grabbing from occurring repeatedly
@@ -193,8 +198,15 @@ task main()
       StartTask(centerGoal);
     end
 
+    if (POPPER_PRIMED == 0 && !popper_has_been_readied) {
+    	ClearTimer(T1);
+    	popper_has_been_readied = true;
+  	} else if (POPPER_PRIMED != 0) {
+  	  popper_has_been_readied = false;
+  	}
+
     action_joy2 // run popper
-    state bB down
+    state bB && time1[T1] >= 50 down
       motor[POPPER] = 100;
     otherwise
       motor[POPPER] = 0;
@@ -216,7 +228,7 @@ task main()
 
     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
-    HTSPBsetupIO(HTSPB, 0x10);
+    HTSPBsetupIO(HTSPB, 0x40);
 //    if (LIFT_SWITCH != 1) {
 //      nxtDisplayTextLine(1, "Magnet absent");
 //      //HTSPBwriteIO(HTSPB, 0x10);

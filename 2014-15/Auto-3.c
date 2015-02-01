@@ -32,7 +32,7 @@
 #include "../headers/clion_1.h"
 #endif
 
-#define DEBUG_IR
+//#define DEBUG_IR
 
 #define IR_SEEK_VAL HTIRS2readACDir(msensor_S4_1)
 #define GYRO_VAL HTGYROreadRot(msensor_S4_2)
@@ -161,7 +161,7 @@ void mission_monolith(int monolith_position)
     case 1:
       drive_e(N, 30, 2500);
       drive_t(CW, 70, 1200);
-      wait10Msec(100);
+      //wait10Msec(100);
       drive_e(N, 70, 3000);
       drive_t(S, -2, 1200);
       break;
@@ -246,11 +246,7 @@ void mission_ramp()
   drive_t(S, 20, 1000);
   drive_e(S, 24, 1000);
 
-  wait10Msec(100);
-  //drive_e(CW, 40, 300);
-
   drive_t(S, 20, 300);
-  //go_to_bearing(start_bearing);
   PlayImmediateTone(200, 200);
 }
 
@@ -259,8 +255,6 @@ void mission_goal1(bool pointed) //Get the ball in the first goal
   if (pointed) {
     drive_t(S, 40, 300); //drive forward and line up as well as swerve to make sure the goal is in the right direction
     square();
-    //drive_e(S, 40, 00); //After this line, the tip of the spatula must be right in front of the seam.
-    wait10Msec(500);
     swerve(-90);
   } else {
     drive_t(S, 40, 300); //drive forward and line up
@@ -319,9 +313,6 @@ void mission_goal2(bool pointed)
   drive_e(N, 50, 1300);
   drive_t(CW, 100, 1300);
 
-  PlayImmediateTone(200, 200);
-  //wait1Msec(2000);
-
   drive_t(E, 100, 300);
 
   if (pointed) {
@@ -348,7 +339,7 @@ void mission_goal2(bool pointed)
   servo[FLAP] = kFlapOpen;
 
   motor[POPPER] = 100;
-  wait1Msec(2000);
+  wait1Msec(3000);
   motor[POPPER] = 0;
   motor[FEEDER] = 0;
   drive_t(N, 100, 500); //.
@@ -360,15 +351,15 @@ task main()
   HTSPBsetupIO(HTSPB, 0x10);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanKick;
+  Plan_t cur_plan = kPlanRamp;
   int tubes = 2;
   int delay = 0;
 
   //StartTask(verify_smux);
-  //dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
+  dialog(&cur_alli, &cur_plan, &tubes, &delay); // Run Dialog for user input of parameters
   HTGYROstartCal(msensor_S4_2);
   initialize_servos();
-  //waitForStart();
+  waitForStart();
   ClearTimer(T4);
   //StartTask(updateBearing);
   wait1Msec(delay * 1000);
