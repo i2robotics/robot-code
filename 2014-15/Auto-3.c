@@ -74,6 +74,7 @@ typedef enum
 
 void initialize_servos()
 {
+	servoChangeRate[SPOUT] = 5;
 	servo[ROOF] = kRoofClosed;
 	servo[FLAP] = kFlapClosed;
 	servo[SPOUT] = kSpoutClosed;
@@ -107,7 +108,7 @@ task initialize_motors()
 	//when timer is greater than or equal to 7000 miliseconds stop the lift
 	motor[FORK] = 0;
 
-	while (time1[T2] < 7500) {}
+	while (time1[T2] < 8000) {}
 	motor[TUBE] = 0;
 	ClearTimer(T2);
 	lockout_medium = false;
@@ -268,7 +269,6 @@ void mission_goal1(bool pointed) //Get the ball in the first goal
 		drive_e(S, 40, 800); //drive forward and line up as well as swerve to make sure the goal is in the right direction
 		square();
 		drive_e(S, 40, 300);
-		wait10Msec(1000);
 		swerve(-90);
 		} else {
 		drive_e(S, 40, 500); //drive forward and line up
@@ -285,7 +285,7 @@ void mission_goal1(bool pointed) //Get the ball in the first goal
 	halt();
 	while (lockout_medium == true) {}
 	wait1Msec(500);
-	servo[SPOUT] = kSpoutOpen;
+	servo[SPOUT] = kSpoutOpenE;
 	wait1Msec(1200);
 	servo[ROOF] = kRoofOpen;
 	wait1Msec(500);
@@ -296,8 +296,6 @@ void mission_goal1(bool pointed) //Get the ball in the first goal
 	motor[POPPER] = 0;
 	wait1Msec(300);
 
-	servo[SPOUT] = 0;
-	wait1Msec(60);
 	servo[ROOF] = kRoofClosed;
 	wait1Msec(500);
 	servo[SPOUT] = kSpoutMiddle;
@@ -367,18 +365,15 @@ task main()
 	HTSPBsetupIO(HTSPB, 0x10);
 
 	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanKick;
+	Plan_t cur_plan = kPlanRamp;
 	int tubes = 2;
 	int point = 0;
 	int delay = 0;
 
-	//StartTask(verify_smux);
-	//dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
-	//HTGYROstartCal(msensor_S4_2);
+	dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
 	initialize_servos();
-	//waitForStart();
+	waitForStart();
 	ClearTimer(T4);
-	//StartTask(updateBearing);
 	wait1Msec(delay * 1000);
 	wait1Msec(500);
 

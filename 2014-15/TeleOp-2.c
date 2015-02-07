@@ -39,11 +39,12 @@
 #include "../drivers/hitechnic-superpro.h"
 #include "../headers/servoValues_1.h"
 
-
+int times_popped = 0;
 bool grab_state = false;
 bool grab_lock = false;
 bool lock_fork = false;
 bool popper_has_been_readied = false;
+bool spatula_down_var = false;
 float J1X1;
 float J1Y1;
 float J1X2;
@@ -54,9 +55,17 @@ short current_joystick;
 
 
 task spatulaDown() {
+	spatula_down_var = false;
 	lock_fork = true;
 	motor[FORK] = -100;
-	while ((SPATULA_DOWN & 0x08) != 8) {}
+	while (!spatula_down_var) {
+	while (!(SPATULA_DOWN & 0x08)) {}
+	if (SPATULA_DOWN & 0x08) {
+    	spatula_down_var = true;
+    } else {
+    	spatula_down_var = false;
+  	}
+	}
 	motor[FORK] = 0;
 	lock_fork = false;
 }
@@ -70,6 +79,7 @@ task closeRoof()
 
 task scoringGoals()
 {
+	servo[FLAP] = kFlapClosed;
   if (ServoValue[ROOF] != kRoofClosed) {
     servo[FLAP] = kFlapClosed;
     servo[ROOF] = kRoofClosed;
@@ -201,9 +211,12 @@ task main()
     if (POPPER_PRIMED == 0 && !popper_has_been_readied) {
     	ClearTimer(T1);
     	popper_has_been_readied = true;
+    	times_popped += 1;
   	} else if (POPPER_PRIMED != 0) {
   	  popper_has_been_readied = false;
   	}
+
+  	nxtDisplayTextLine(1, "SE:%i", times_popped);
 
     action_joy2 // run popper
     state bB && time1[T1] >= 50 down
@@ -211,6 +224,7 @@ task main()
     otherwise
       motor[POPPER] = 0;
     end
+
 
     action_joy2 // manually adjust flap
     state bA down
