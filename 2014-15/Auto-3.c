@@ -268,7 +268,7 @@ void mission_goal1(bool pointed) //Get the ball in the first goal
 	if (pointed) {
 		drive_e(S, 40, 800); //drive forward and line up as well as swerve to make sure the goal is in the right direction
 		square();
-		drive_e(S, 40, 300);
+		drive_e(S, 40, 150);  //Changed from 300
 		swerve(-90);
 		} else {
 		drive_e(S, 40, 500); //drive forward and line up
