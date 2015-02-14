@@ -125,26 +125,19 @@ task tube_to_top()
   motor[TUBE] = 0;
 }
 
-void swerve(int power, unsigned int time = 600
-
-)
+void swerve(int power, unsigned int time = 600)
 {
-motor[DRIVE_NE] =
-power;
-motor[DRIVE_SE] =
-power;
-motor[DRIVE_NW] = 0;
-motor[DRIVE_SW] = 0;
-wait1Msec(time);
+  motor[DRIVE_NE] = power;
+  motor[DRIVE_SE] = power;
+  motor[DRIVE_NW] = 0;
+  motor[DRIVE_SW] = 0;
+  wait1Msec(time);
 
-motor[DRIVE_NE] = 0;
-motor[DRIVE_SE] = 0;
-motor[DRIVE_NW] =
-power;
-motor[DRIVE_SW] =
-power;
-wait1Msec(time
-*2);
+  motor[DRIVE_NE] = 0;
+  motor[DRIVE_SE] = 0;
+  motor[DRIVE_NW] = power;
+  motor[DRIVE_SW] = power;
+  wait1Msec(time * 2);
 }
 
 void square()
@@ -180,7 +173,7 @@ int seek_ir_pos()
   while (first_IR > 10) {
     first_IR = IR_SEEK_VAL;
   }
-  drive_e(N, 40, 2000);
+  drive_e(S, 40, 2000);
   int second_IR = IR_SEEK_VAL;
   while (second_IR > 10) {
     second_IR = IR_SEEK_VAL;
@@ -195,29 +188,30 @@ int seek_ir_pos()
     monolith_position = 2;
   }
 #ifdef DEBUG_IR
-		writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
-		writeDebugStreamLine("result: %i", monolith_position);
-		switch (monolith_position) {
-		case 1:
-			PlayImmediateTone(900, 300);
-			break;
-		case 2:
-			PlayImmediateTone(650, 190);
-			wait1Msec(200);
-			PlayImmediateTone(650, 190);
-			wait1Msec(200);
-			break;
-		case 3:
-			PlayImmediateTone(400, 90);
-			wait1Msec(100);
-			PlayImmediateTone(400, 90);
-			wait1Msec(100);
-			PlayImmediateTone(400, 90);
-			wait1Msec(100);
-			break;
-		}
-		wait1Msec(2000);
+  writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
+  writeDebugStreamLine("result: %i", monolith_position);
+  switch (monolith_position) {
+  case 1:
+    PlayImmediateTone(900, 300);
+    break;
+  case 2:
+    PlayImmediateTone(650, 190);
+    wait1Msec(200);
+    PlayImmediateTone(650, 190);
+    wait1Msec(200);
+    break;
+  case 3:
+    PlayImmediateTone(400, 90);
+    wait1Msec(100);
+    PlayImmediateTone(400, 90);
+    wait1Msec(100);
+    PlayImmediateTone(400, 90);
+    wait1Msec(100);
+    break;
+  }
+  wait1Msec(2000);
 #endif
+  return monolith_position;
 }
 
 
@@ -227,86 +221,105 @@ void mission_monolith(int monolith_position)
   writeDebugStreamLine("%i", monolith_position);
 
   switch (monolith_position) {
-    case 1:
-      drive_e(S, 30, 2);
-      drive_e(N, 30, 2700);
-      drive_t(N, 30, 400);
-      drive_t(CW, 70, 1200);
-      //wait10Msec(100);
-      drive_e(N, 70, 3000);
-      drive_t(S, -2, 1200);
-      break;
-    case 2:
-      drive_e(N, 55, 840);
-      drive_t(FWD + 23, 55, 1200);
-      drive_e(CW, 100, 1000);
-      drive_e(N, 100, 2800);
-      drive_t(S, -2, 1200);
-      break;
-    case 3:
-      drive_e(W, 100, 2200);
-      drive_e(N, 55, 2600);
-      drive_t(ACW, 70, 250);
-      drive_e(N, 55, 900);
-      drive_t(CW, 40, 1400);
-      drive_e(N, 58, 2000);
-      //drive_t(S, -20, 1800);
-      break;
+  case 1:
+    drive_e(S, 30, 2);
+    drive_e(N, 30, 2700);
+    drive_t(N, 30, 400);
+    drive_t(CW, 70, 1200);
+    //wait10Msec(100);
+    drive_e(N, 70, 3000);
+    drive_t(S, -2, 1200);
+    break;
+  case 2:
+    drive_e(N, 55, 840);
+    drive_t(FWD + 23, 55, 1200);
+    drive_e(CW, 100, 1000);
+    drive_e(N, 100, 2800);
+    drive_t(S, -2, 1200);
+    break;
+  case 3:
+    drive_e(W, 100, 2200);
+    drive_e(N, 55, 2600);
+    drive_t(ACW, 70, 250);
+    drive_e(N, 55, 900);
+    drive_t(CW, 40, 1400);
+    drive_e(N, 58, 2000);
+    //drive_t(S, -20, 1800);
+    break;
   }
 }
 
 void mission30(int monolith_position)
 {
   switch (monolith_position) {
-    case 3:
-      drive_t(CCW, 70, 1000);
-      drive_t(S, 90, 3000);
-      drive_t(S, 25, 1500);
-      drive_e(N, 90, 300);
-      drive_t(CW, 90, 1500);
-      motor[FORK] = -100;
-      wait1Msec(4200);
-      motor[FORK] = 0;
-      ClearTimer(T1);
-      while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
-      servo[GRAB1] = kGrab1Closed;
-      servo[GRAB2] = kGrab2Closed;
-      wait1Msec(300);
-      halt();
+  case 3:
+    drive_t(CCW, 70, 1000);
+    drive_t(S, 90, 3000);
+    drive_t(S, 25, 1500);
+    drive_e(N, 90, 300);
+    drive_t(CW, 90, 1500);
+    motor[FORK] = -100;
+    wait1Msec(4200);
+    motor[FORK] = 0;
+    ClearTimer(T1);
+    while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
+    servo[GRAB1] = kGrab1Closed;
+    servo[GRAB2] = kGrab2Closed;
+    wait1Msec(300);
+    halt();
 
-      break;
+    break;
   }
 }
 
-void mission_High(int monolith_position) // Center 120 cm goal
+void pop_it(int t)
 {
-  switch (monolith_position) {
-    case 3:
-      drive_e(CW, 100, 4400);
-      servo[FLAP] = kFlapClosed;
-      servo[ROOF] = kRoofClosed;
-      wait1Msec(350);
-      servo[SPOUT] = kSpoutOpen;
-      wait1Msec(1000);
-      servo[ROOF] = kRoofHigh;
-      wait1Msec(250);
-      servo[SPOUT] = kSpoutMiddle;
-      servo[FLAP] = kFlapHigh;
+  motor[POPPER] = 100;
+  wait1Msec(500*t);
+  motor[FEEDER] = 50;
+  wait1Msec(500*t);
+  motor[POPPER] = 0;
+  motor[FEEDER] = 0;
+}
 
-      drive_e(S, 60, 2000);
-      drive_e(W, 100, 300);
+void mission_high(int mono_pos) // Center 120 cm goal
+{
+  servo[FLAP] = kFlapClosed;
+  servo[ROOF] = kRoofClosed;
+  wait1Msec(350);
+  servo[SPOUT] = kSpoutOpen;
+  wait1Msec(1000);
+  servo[ROOF] = kRoofHigh;
+  wait1Msec(250);
+  servo[SPOUT] = kSpoutMiddle;
+  servo[FLAP] = kFlapHigh;
 
-      motor[POPPER] = 100;
-      motor[FEEDER] = 50;
-      wait1Msec(5000);
-      motor[POPPER] = 0;
-      motor[FEEDER] = 0;
+  switch (mono_pos) {
+  case 1:
+    drive_e(CCW, 100, 1000);
+    drive_e(S, 50, 2700);
+    drive_e(CW, 100, 1500);
+    drive_e(S, 40, 350);
+    pop_it(6);
+    drive_e(N, 40, 350);
+    drive_e(CCW, 100, 1500);
+    drive_e(N, 50, 2700);
+    drive_e(CW, 100, 1000);
 
-      drive_e(E, 100, 300);
-      drive_e(N, 60, 2000);
-      drive_e(CCW, 100, 3800);
-      break;
+    break;
+  case 3:
+    drive_e(S, 60, 1600);
+    pop_it(5);
+    drive_e(N, 60, 1600);
+    break;
   }
+
+  servo[SPOUT] = kSpoutOpen;
+  servo[FLAP] = kFlapClosed;
+  wait1Msec(500);
+  servo[ROOF] = kRoofClosed;
+  wait1Msec(350);
+  servo[SPOUT] = kSpoutClosed;
 }
 
 void mission_ramp()
@@ -431,37 +444,37 @@ task main()
 
   int monolith_position;
 
-//  dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
+  //  dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
   initialize_servos();
-//  waitForStart();
+  //  waitForStart();
   ClearTimer(T4);
   wait1Msec(delay * 1000);
   wait1Msec(500);
 
   switch (cur_plan) {
-    case kPlanRamp: //================== Plan Ramp
-      StartTask(initialize_motors);
+  case kPlanRamp: //================== Plan Ramp
+    StartTask(initialize_motors);
 
-      mission_ramp();
+    mission_ramp();
 
-      if (tubes > 0)
-        mission_goal1(point == 1);
-      if (tubes > 1)
-        mission_goal2(point == 2);
+    if (tubes > 0)
+      mission_goal1(point == 1);
+    if (tubes > 1)
+      mission_goal2(point == 2);
 
-      break;
+    break;
 
-    case kPlanKick: //================== Plan Kick
-      monolith_position = seek_ir_pos();
-      mission_monolith(monolith_position);
-      drive_e(CW, 80, 5000);
-      motor[TUBE] = 0;
-      break;
+  case kPlanKick: //================== Plan Kick
+    monolith_position = seek_ir_pos();
+    mission_monolith(monolith_position);
+    drive_e(CW, 80, 5000);
+    motor[TUBE] = 0;
+    break;
 
-    case kPlanHigh:
-      monolith_position = seek_ir_pos();
-      mission_High(monolith_position);
-      break;
+  case kPlanHigh: //================== Plan High
+    monolith_position = seek_ir_pos();
+    mission_high(3);
+    break;
   }
   halt();
 

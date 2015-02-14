@@ -52,7 +52,7 @@ void dialog(Plan_t *ret_plan, int *ret_tubes, int *ret_point, int *ret_delay)
     nxtDisplayStringAt(55, 32, "%i", options.delay);
     nxtDisplayStringAt(5, 62 - sel_option * 10, ">");
 
-    switch (nNxtButtonPressed) {
+    switch ((char)nNxtButtonPressed) {
       case kNxtBtnRight:
         if (time10[T1] > 30) {
           switch (sel_option) {
