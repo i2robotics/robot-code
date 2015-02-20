@@ -53,22 +53,23 @@ float J2Y2;
 short current_joystick;
 
 
-
-task spatulaDown() {
-	spatula_down_var = false;
-	lock_fork = true;
-	motor[FORK] = -100;
-	while (!spatula_down_var) {
-	while (!(SPATULA_DOWN & 0x08)) {}
-	if (SPATULA_DOWN & 0x08) {
-    	spatula_down_var = true;
+task spatulaDown()
+{
+  spatula_down_var = false;
+  lock_fork = true;
+  motor[FORK] = -100;
+  while (!spatula_down_var) {
+    while (!(SPATULA_DOWN & 0x08)) {}
+    if (SPATULA_DOWN & 0x08) {
+      spatula_down_var = true;
     } else {
-    	spatula_down_var = false;
-  	}
-	}
-	motor[FORK] = 0;
-	lock_fork = false;
+      spatula_down_var = false;
+    }
+  }
+  motor[FORK] = 0;
+  lock_fork = false;
 }
+
 task closeRoof()
 {
   servo[FLAP] = kFlapClosed;
@@ -79,13 +80,13 @@ task closeRoof()
 
 task scoringGoals()
 {
-	servo[FLAP] = kFlapClosed;
+  servo[FLAP] = kFlapClosed;
   if (ServoValue[ROOF] != kRoofClosed) {
     servo[FLAP] = kFlapClosed;
     servo[ROOF] = kRoofClosed;
     wait1Msec(350);
   }
- servo[SPOUT] = kSpoutOpen;
+  servo[SPOUT] = kSpoutOpen;
   wait1Msec(1000);
   servo[ROOF] = kRoofOpen;
   wait1Msec(250);
@@ -108,7 +109,7 @@ task centerGoal()
 
 task main()
 {
-	ClearTimer(T1);
+  ClearTimer(T1);
   StartTask(scoringGoals);
   //nMotorEncoder[DRIVE_SE] = 0;
   // nMotorEncoder[DRIVE_SW] = 0;
@@ -135,28 +136,29 @@ task main()
 
     action_joy2
     state bSTART down
-    	servo[SPOUT] = ServoValue[SPOUT] - 2;
+      servo[SPOUT] = ServoValue[SPOUT] - 2;
     state bBACK down
-   	  servo[SPOUT] = ServoValue[SPOUT] + 2;
-		end
-    if (lock_fork == false) {
-    action_joy1 // Rolling Goal Forklift
-    state bRB down
-      motor[FORK] = 100;
-    state bRT down
-		if ((SPATULA_DOWN & 0x08) != 8) {
-    		motor[FORK] = -100;
-    	} else {
-
-    		motor[FORK] = 0;
-    	}
-    otherwise
-      motor[FORK] = 0;
+      servo[SPOUT] = ServoValue[SPOUT] + 2;
     end
-  	}
+
+    if (lock_fork == false) {
+      action_joy1 // Rolling Goal Forklift
+      state bRB down
+        motor[FORK] = 100;
+      state bRT down
+        if ((SPATULA_DOWN & 0x08) != 8) {
+          motor[FORK] = -100;
+        } else {
+          motor[FORK] = 0;
+        }
+      otherwise
+        motor[FORK] = 0;
+      end
+    }
+
     action_joy1
     state bX down
-    	StartTask(spatulaDown);
+      StartTask(spatulaDown);
     end
 
     if (LEFT_GRABBER_SWITCH != 0) {
@@ -206,14 +208,14 @@ task main()
     end
 
     if (POPPER_PRIMED == 0 && !popper_has_been_readied) {
-    	ClearTimer(T1);
-    	popper_has_been_readied = true;
-    	times_popped += 1;
-  	} else if (POPPER_PRIMED != 0) {
-  	  popper_has_been_readied = false;
-  	}
+      ClearTimer(T1);
+      popper_has_been_readied = true;
+      times_popped += 1;
+    } else if (POPPER_PRIMED != 0) {
+      popper_has_been_readied = false;
+    }
 
-  	nxtDisplayTextLine(1, "SE:%i", times_popped);
+    nxtDisplayTextLine(1, "SE:%i", times_popped);
 
     action_joy2 // run popper
     state bB && time1[T1] >= 50 down

@@ -48,20 +48,22 @@
 #define CHECK_TIMEOUT(timeout_start, duration) ((time1[T4] - timeout_start) < duration ? true : false)
 
 #ifdef GYRO_INCLUDED
+
 void go_to_bearing(int target)
 {
-	float k_p = 0.7;
-	while(abs(target - bearing) > 10) {
-		int error = (bearing - target);
-		//writeDebugStreamLine("err: %i  bear: %i <:HelpLn53", error, bearing);
-	  error = error * k_p;
-		if (abs(error) < 4) { break; }
-		//if (abs(error) < 25) { error = -25 * sgn(error); }
-		//writeDebugStreamLine("err: %i  bear: %i <:HelpLn53", error, bearing);
-		drive_t(CCW, error, 0, false);
-	}
-	halt();
+  float k_p = 0.7;
+  while (abs(target - bearing) > 10) {
+    int error = (bearing - target);
+    //writeDebugStreamLine("err: %i  bear: %i <:HelpLn53", error, bearing);
+    error = error * k_p;
+    if (abs(error) < 4) {break;}
+    //if (abs(error) < 25) { error = -25 * sgn(error); }
+    //writeDebugStreamLine("err: %i  bear: %i <:HelpLn53", error, bearing);
+    drive_t(CCW, error, 0, false);
+  }
+  halt();
 }
+
 #endif
 
 //for the superpro

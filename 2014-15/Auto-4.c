@@ -119,18 +119,18 @@ task initialize_motors()
 
 task tele_setup()
 {
-	setup_done = false;
-	motor[FORK] = -100;
-	motor[TUBE] = 100;
+  setup_done = false;
+  motor[FORK] = -100;
+  motor[TUBE] = 100;
   while (HTSPBreadIO(HTSPB, 0x01) != 1) {
-  if (SPATULA_DOWN & 0x08) {
-  	if (SPATULA_DOWN & 0x08){
-  		motor[FORK] = 0;
-  }
-	}
+    if (SPATULA_DOWN & 0x08) {
+      if (SPATULA_DOWN & 0x08) {
+        motor[FORK] = 0;
+      }
+    }
   }
   motor[TUBE] = 0;
-	setup_done = true;
+  setup_done = true;
 }
 
 task tube_to_top()
@@ -140,7 +140,7 @@ task tube_to_top()
   motor[TUBE] = 0;
 }
 
-void swerve(int power, unsigned int time = 600)
+void swerve(int power, unsigned int time)
 {
   motor[DRIVE_NE] = power;
   motor[DRIVE_SE] = power;
@@ -289,55 +289,57 @@ void mission30(int monolith_position)
 
 void pop_it(int times_without_feeder, int times_with_feeder)
 {
-	bool popper_has_been_readied = false;
+  bool popper_has_been_readied = false;
   motor[POPPER] = 100;
-  while (times_without_feeder >= 0){
-  	if (POPPER_PRIMED == 0 && !popper_has_been_readied) {
-  		popper_has_been_readied = true;
-  		times_without_feeder -= 1;
-  		motor[POPPER] = 0;
-  		wait1Msec(50);
-  		motor[POPPER] = 100;
-  	} else if (POPPER_PRIMED != 0) {
-  	  popper_has_been_readied = false;
-  	}
-  	if (times_without_feeder <= 0) {
-  		motor[FEEDER] = 100;
-  	}
-	}
+  while (times_without_feeder >= 0) {
+    if (POPPER_PRIMED == 0 && !popper_has_been_readied) {
+      popper_has_been_readied = true;
+      times_without_feeder -= 1;
+      motor[POPPER] = 0;
+      wait1Msec(50);
+      motor[POPPER] = 100;
+    } else if (POPPER_PRIMED != 0) {
+      popper_has_been_readied = false;
+    }
+    if (times_without_feeder <= 0) {
+      motor[FEEDER] = 100;
+    }
+  }
   popper_has_been_readied = false;
-  while (times_with_feeder >= 0){
-  	if (POPPER_PRIMED == 0 && !popper_has_been_readied) {
-  		popper_has_been_readied = true;
-  		times_with_feeder -= 1;
-  		motor[POPPER] = 0;
-  		wait1Msec(50);
-  		motor[POPPER] = 100;
-  	} else if (POPPER_PRIMED != 0) {
-  	  popper_has_been_readied = false;
-  	}
-	}
+  while (times_with_feeder >= 0) {
+    if (POPPER_PRIMED == 0 && !popper_has_been_readied) {
+      popper_has_been_readied = true;
+      times_with_feeder -= 1;
+      motor[POPPER] = 0;
+      wait1Msec(50);
+      motor[POPPER] = 100;
+    } else if (POPPER_PRIMED != 0) {
+      popper_has_been_readied = false;
+    }
+  }
   motor[POPPER] = 0;
   motor[FEEDER] = 0;
 }
+
 void mission_block(bool setup)
 {
-	drive_e(S, 100, 100);
-	drive_e(N, 30, 10);
-	drive_e(CCW, 100, 2000);
-	drive_e(CW, 30, 10);
-	drive_e(BWD - 45, 100, 6500);
-	drive_e(N, 30, 10);
-	drive_e(FWD - 45, 100, 4000);
-	drive_e(CCW, 100, 375);
-	drive_e(CW, 50, 10);
-	drive_e(BWD + 30, 100, 4500);
-	drive_e(FWD + 30, 100, 4500);
-	drive_e(N, 100, 1000);
-	drive_e(CCW, 100, 3500);
-	//	StartTask(tele_setup);
-	//	while (!setup_done) {}
+  drive_e(S, 100, 100);
+  drive_e(N, 30, 10);
+  drive_e(CCW, 100, 2000);
+  drive_e(CW, 30, 10);
+  drive_e(BWD - 45, 100, 6500);
+  drive_e(N, 30, 10);
+  drive_e(FWD - 45, 100, 4000);
+  drive_e(CCW, 100, 375);
+  drive_e(CW, 50, 10);
+  drive_e(BWD + 30, 100, 4500);
+  drive_e(FWD + 30, 100, 4500);
+  drive_e(N, 100, 1000);
+  drive_e(CCW, 100, 3500);
+  //	StartTask(tele_setup);
+  //	while (!setup_done) {}
 }
+
 void mission_high(int mono_pos) // Center 120 cm goal
 {
   servo[FLAP] = kFlapClosed;
@@ -352,15 +354,15 @@ void mission_high(int mono_pos) // Center 120 cm goal
   motor[TUBE] = 0;
   switch (mono_pos) {
   case 1:
-  	PlayImmediateTone(1200, 300);
-  	break;
+    PlayImmediateTone(1200, 300);
+    break;
   case 2:
     drive_e(CCW, 100, 1000);
     drive_e(S, 50, 2700);
     drive_e(CW, 100, 1500);
     drive_e(S, 40, 350);
     wait1Msec(350);
-  	servo[FLAP] = kFlapHigh - 40;
+    servo[FLAP] = kFlapHigh - 40;
     pop_it(3, 3);
     drive_e(N, 40, 350);
     drive_e(CCW, 100, 1500);
@@ -377,10 +379,10 @@ void mission_high(int mono_pos) // Center 120 cm goal
     break;
   }
   servo[FLAP] = kFlapClosed;
-	drive_e(E, 88, 1600);
-	drive_e(S, 60, 8000);
-	servo[FLAP] = kFlapOpen;
-	wait1Msec(350);
+  drive_e(E, 88, 1600);
+  drive_e(S, 60, 8000);
+  servo[FLAP] = kFlapOpen;
+  wait1Msec(350);
   servo[SPOUT] = kSpoutOpen;
   wait1Msec(500);
   servo[FLAP] = kFlapClosed;
@@ -535,15 +537,15 @@ task main()
     break;
 
   case kPlanHigh: //================== Plan High
-  	//motor[TUBE] = 100;
+    //motor[TUBE] = 100;
     monolith_position = seek_ir_pos();
     wait10Msec(1000);
     mission_high(monolith_position);
     break;
 
   case kPlanBlock: //================== Plan Defense
-  	mission_block(true);
-  	break;
+    mission_block(true);
+    break;
   }
 
   halt();
