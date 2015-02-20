@@ -55,6 +55,7 @@
 //==================  Variables ============================
 
 bool lockout_medium = false;
+bool setup_done = true;
 
 //==================  Config Definitions  ==================
 typedef enum
@@ -118,6 +119,7 @@ task initialize_motors()
 
 task tele_setup()
 {
+	setup_done = false;
 	motor[FORK] = -100;
 	motor[TUBE] = 100;
   while (HTSPBreadIO(HTSPB, 0x01) != 1) {
@@ -128,6 +130,7 @@ task tele_setup()
 	}
   }
   motor[TUBE] = 0;
+	setup_done = true;
 }
 
 task tube_to_top()
@@ -319,22 +322,21 @@ void pop_it(int times_without_feeder, int times_with_feeder)
 }
 void mission_block(bool setup)
 {
-	drive_e(S, 100, 2400);
-	drive_e(CW, 100, 1200);
-	drive_e(N, 100, 5900, true);
-	drive_e(CCW, 100, 1000);
-	drive_t(N, 50, 700);
-	drive_e(CW, 100, 1200);
-	drive_e(S, 100, 3000);
-	drive_e(CCW, 100, 500);
-	//StartTask(tele_setup);
-	if (setup) {
-	drive_e(S, 100, 3700);
-	drive_e(CCW, 100, 3000);
-	drive_e(S, 100, 4000);
-	} else {
-	while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
-	}
+	drive_e(S, 100, 100);
+	drive_e(N, 30, 10);
+	drive_e(CCW, 100, 2000);
+	drive_e(CW, 30, 10);
+	drive_e(BWD - 45, 100, 6500);
+	drive_e(N, 30, 10);
+	drive_e(FWD - 45, 100, 4000);
+	drive_e(CCW, 100, 375);
+	drive_e(CW, 50, 10);
+	drive_e(BWD + 30, 100, 4500);
+	drive_e(FWD + 30, 100, 4500);
+	drive_e(N, 100, 1000);
+	drive_e(CCW, 100, 3500);
+	//	StartTask(tele_setup);
+	//	while (!setup_done) {}
 }
 void mission_high(int mono_pos) // Center 120 cm goal
 {
@@ -502,7 +504,7 @@ task main()
   HTSPBsetupIO(HTSPB, 0x40);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanHigh;
+  Plan_t cur_plan = kPlanBlock;
   int tubes = 2;
   int point = 0;
   int delay = 0;
