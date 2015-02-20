@@ -410,7 +410,7 @@ void mission_goal1(bool pointed)
     drive_e(S, 40, 800); //drive forward and line up as well as swerve to make sure the goal is in the right direction
     square();
     drive_e(S, 40, 150);  //Changed from 300
-    swerve(-90);
+    swerve(-90, 500);
   } else {
     drive_e(S, 40, 500); //drive forward and line up
     square();
@@ -426,6 +426,7 @@ void mission_goal1(bool pointed)
   halt();
   while (lockout_medium == true) {}
   wait1Msec(500);
+  servoChangeRate[SPOUT] = 5;
   servo[SPOUT] = kSpoutOpenE;
   wait1Msec(1200);
   servo[ROOF] = kRoofOpen;
@@ -485,6 +486,7 @@ void mission_goal2(bool pointed)
   motor[FEEDER] = 80;
   servo[ROOF] = kRoofClosed;
   wait1Msec(500);
+  servoChangeRate[SPOUT] = 5;
   servo[SPOUT] = kSpoutOpen;
   wait1Msec(1200);
   servo[ROOF] = kRoofOpen;
