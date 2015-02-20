@@ -349,7 +349,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
   wait1Msec(250);
   servo[SPOUT] = kSpoutMiddle;
   while (MAX_REACHED != 1) {}
-  motor[TUBE} = 0;
+  motor[TUBE] = 0;
   switch (mono_pos) {
   case 1:
   	PlayImmediateTone(1200, 300);
@@ -417,7 +417,7 @@ void mission_goal1(bool pointed)
 
   drive_t(S, 20, 0); // grab and score in first goal
   ClearTimer(T1);
-  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
+  while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < (pointed ? 1200 : 1000)) {}
   servo[GRAB1] = kGrab1Closed;
   servo[GRAB2] = kGrab2Closed;
   wait1Msec(300);
@@ -430,9 +430,7 @@ void mission_goal1(bool pointed)
   wait1Msec(500);
   servo[FLAP] = kFlapOpen;
 
-  motor[POPPER] = 100;
-  wait1Msec(3000);
-  motor[POPPER] = 0;
+  pop_it(4, 0);
   wait1Msec(300);
 
   servo[ROOF] = kRoofClosed;
@@ -474,7 +472,6 @@ void mission_goal2(bool pointed)
   } else {
     square();
   }
-  motor[FEEDER] = 80;
   drive_t(S, 25, 0);//.
   ClearTimer(T1);
   while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 4000) {}
@@ -483,6 +480,7 @@ void mission_goal2(bool pointed)
   wait1Msec(300);
   halt();
 
+  motor[FEEDER] = 80;
   servo[ROOF] = kRoofClosed;
   wait1Msec(500);
   servo[SPOUT] = kSpoutOpen;
@@ -491,10 +489,7 @@ void mission_goal2(bool pointed)
   wait1Msec(500);
   servo[FLAP] = kFlapOpen;
 
-  motor[POPPER] = 100;
-  wait1Msec(3000);
-  motor[POPPER] = 0;
-  motor[FEEDER] = 0;
+  pop_it(0, 4);
   drive_t(N, 100, 500); //.
 }
 
@@ -504,9 +499,9 @@ task main()
   HTSPBsetupIO(HTSPB, 0x40);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanBlock;
+  Plan_t cur_plan = kPlanRamp;
   int tubes = 2;
-  int point = 0;
+  int point = 1;
   int delay = 0;
   bool setup = true;
 
