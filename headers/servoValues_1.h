@@ -8,7 +8,7 @@
 
 const unsigned byte kFlapClosed = 60;
 const unsigned byte kFlapOpen   = 125; // FLAP
-const unsigned byte kFlapHigh   = 255;
+const unsigned byte kFlapHigh   = 235;
 
 const unsigned byte kRoofClosed = 255;
 const unsigned byte kRoofOpen   = 185; // ROOF
@@ -17,7 +17,7 @@ const unsigned byte kRoofHigh   = 150;
 const unsigned byte kSpoutClosed = 227;
 const unsigned byte kSpoutOpen   = 12;  // SPOUT
 const unsigned byte kSpoutOpenE  = 0;
-const unsigned byte kSpoutMiddle = 88;
+const unsigned byte kSpoutMiddle = 95; //88
 
 const unsigned byte kGrab1Closed = 215;
 const unsigned byte kGrab1Open   = 75; // GRAB 1

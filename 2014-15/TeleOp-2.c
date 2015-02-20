@@ -146,11 +146,8 @@ task main()
     state bRT down
 		if ((SPATULA_DOWN & 0x08) != 8) {
     		motor[FORK] = -100;
-    		motor[LEFT_LIGHT] = 100;
-    		motor[RIGHT_LIGHT] = 0;
     	} else {
-    		motor[RIGHT_LIGHT] = 100;
-    		motor[LEFT_LIGHT] = 0;
+
     		motor[FORK] = 0;
     	}
     otherwise
@@ -243,7 +240,7 @@ task main()
     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
     HTSPBsetupIO(HTSPB, 0x40);
-//    if (LIFT_SWITCH != 1) {
+//    if (MAX_REACHED != 1) {
 //      nxtDisplayTextLine(1, "Magnet absent");
 //      //HTSPBwriteIO(HTSPB, 0x10);
 //    } else {
@@ -251,7 +248,7 @@ task main()
 //      //HTSPBwriteIO(HTSPB, 0x00);
 //    }
 
-    if (LIFT_SWITCH != 1 || J2Y2 < 0) {
+    if (MAX_REACHED != 1 || J2Y2 < 0) {
       motor[TUBE] = J2Y2;
     } else {
       motor[TUBE] = 0;
