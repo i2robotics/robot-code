@@ -106,10 +106,32 @@ task display()
 
 task main()
 {
-	square();
-
-
+	GRAB_OPEN;
+  bool setup_done = false;
+  bool fork_down = true;
+  if (SPATULA_DOWN == 0) {
+  	motor[FORK] = -100;
+		fork_down = false;
+	}
+	if (MAX_REACHED == 0) {
+  	motor[TUBE] = 100;
+	}
+  while (MAX_REACHED == 0) {
+    if (SPATULA_DOWN != 0 && !fork_down) {
+      if (SPATULA_DOWN != 0) {
+        motor[FORK] = 0;
+        fork_down = true;
+      }
+    }
+  }
+  motor[TUBE] = 0;
+  while (!fork_down) {
+      if (SPATULA_DOWN != 0) {
+        motor[FORK] = 0;
+        fork_down = true;
+      }
+    }
+  setup_done = true;
 	halt();
-	PlayImmediateTone(200,200);
 	wait1Msec(500);
 }
