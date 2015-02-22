@@ -179,7 +179,7 @@ void square()
 	drive_t(E, 88, 0);
 	ClearTimer(T1);
 	int to = 0;
-	while (time1[T1] < 6000) {
+	while (time1[T1] < 2000) {
 		if (SIDE_TOUCH_N == 1) {
 			motor[DRIVE_NE] = 0;
 			motor[DRIVE_NW] = 0;
@@ -322,29 +322,6 @@ void mission_monolith(int monolith_position)
 	}
 }
 
-void mission30(int monolith_position)
-{
-	switch (monolith_position) {
-	case 3:
-		drive_t(CCW, 70, 1000);
-		drive_t(S, 90, 3000);
-		drive_t(S, 25, 1500);
-		drive_e(N, 90, 300);
-		drive_t(CW, 90, 1500);
-		motor[FORK] = -100;
-		wait1Msec(4200);
-		motor[FORK] = 0;
-		ClearTimer(T1);
-		while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
-		servo[GRAB1] = kGrab1Closed;
-		servo[GRAB2] = kGrab2Closed;
-		wait1Msec(300);
-		halt();
-
-		break;
-	}
-}
-
 void mission_block()
 {
 	drive_e(S, 100, 100);
@@ -426,8 +403,8 @@ void mission_high(int mono_pos) // Center 120 cm goal
 	}
 	servo[FLAP] = kFlapClosed;
 	drive_e(E, 88, 1600);
-	drive_e(S, 60, 1000);
-	drive_e(BWD + 20, 60, 5000);
+	drive_e(S, 100, 1000);
+	drive_e(BWD + 20, 100, 5000);
 	servo[FLAP] = kFlapOpen;
 	wait1Msec(350);
 	servo[SPOUT] = kSpoutOpen;
@@ -443,13 +420,12 @@ void mission_high(int mono_pos) // Center 120 cm goal
 void mission_ramp()
 {
 	int start_bearing = bearing;
-	drive_t(S, 40, 600);
-	drive_t(N, 1, 500);
-	drive_t(S, 2, 500);
-	drive_t(N, 1, 300);
-	drive_e(S, 20, 2000);
+	//drive_t(S, 40, 600);
+	//drive_t(N, 1, 500);
+	//drive_t(S, 2, 500);
+	//drive_t(N, 1, 300);
+	drive_e(S, 20, 5500);
 
-	drive_t(S, 20, 300);
 	PlayImmediateTone(200, 200);
 }
 
@@ -526,7 +502,7 @@ void mission_goal2(bool pointed)
 	}
 	drive_t(S, 25, 0);//.
 	ClearTimer(T1);
-	while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < 1000) {}
+	while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < (pointed ? 1000 : 3000)) {}
 	GRAB_CLOSE;
 	wait1Msec(140);
 	halt();
@@ -562,23 +538,22 @@ task main()
 	HTSPBsetupIO(HTSPB, 0x40);
 
 	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanHigh;
-	int tubes = 2;
+	Plan_t cur_plan = kPlanRamp;
+	int tubes = 0;
 	int point = 0;
 	int delay = 0;
 
 	int monolith_position;
 
-	//  dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
+	// dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
 	initialize_servos();
-	//  waitForStart();
+	// waitForStart();
 	ClearTimer(T4);
 	wait1Msec(delay * 1000);
-	wait1Msec(500);
 
 	switch (cur_plan) {
 	case kPlanRamp: //================== Plan Ramp
-		StartTask(initialize_motors);
+		//StartTask(initialize_motors);
 
 		mission_ramp();
 
