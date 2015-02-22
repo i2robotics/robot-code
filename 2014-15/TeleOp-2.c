@@ -158,7 +158,7 @@ task main()
 
     action_joy1
     state bX down
-      StartTask(spatulaDown);
+      GRAB_OPEN;
     end
 
     if (LEFT_GRABBER_SWITCH != 0) {
