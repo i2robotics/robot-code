@@ -159,6 +159,15 @@ task tube_to_top()
 	motor[TUBE] = 0;
 }
 
+void shake()
+{
+	drive_e(E, 100, 40);
+	drive_e(W, 100, 40);
+	drive_e(E, 100, 40);
+	drive_e(W, 100, 40);
+	drive_e(E, 100, 20);
+}
+
 void swerve(int power, unsigned int time_1, unsigned int time_2)
 {
 	motor[DRIVE_NE] = power;
@@ -343,7 +352,6 @@ void mission_block()
 
 void mission_high(int mono_pos) // Center 120 cm goal
 {
-	StartTask(tube_to_top);
 	servo[FLAP] = kFlapClosed;
 	servo[ROOF] = kRoofClosed;
 	wait1Msec(350);
@@ -378,6 +386,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			wait1Msec(500);
 
 			pop_it(3, 5);
+			shake();
 			drive_e(N, 100, 500);
 			drive_e(E, 88, 400);
 		}	else {
@@ -388,6 +397,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			wait1Msec(350);
 			servo[FLAP] = kFlapHigh - 40;
 			pop_it(3, 5);
+			shake();
 			drive_e(N, 40, 350);
 			//drive_e(CCW, 100, 1500);
 			//drive_e(N, 50, 2700);
@@ -399,10 +409,12 @@ void mission_high(int mono_pos) // Center 120 cm goal
 		wait1Msec(350);
 		servo[FLAP] = kFlapHigh;
 		pop_it(3, 5);
+		shake();
 		drive_e(N, 60, 1000);
 	}
 	servo[FLAP] = kFlapClosed;
-	drive_e(E, 88, 1600);
+	drive_e(E, 88, 1200);
+
 	drive_e(S, 100, 1000);
 	drive_e(BWD + 20, 100, 5000);
 	servo[FLAP] = kFlapOpen;
@@ -413,8 +425,8 @@ void mission_high(int mono_pos) // Center 120 cm goal
 	servo[ROOF] = kRoofClosed;
 	wait1Msec(350);
 	servo[SPOUT] = kSpoutClosed;
-	StartTask(tele_setup);
-	while(!setup_done) {}
+	//StartTask(tele_setup);
+	//while(!setup_done) {}
 }
 
 void mission_ramp()
@@ -538,7 +550,7 @@ task main()
 	HTSPBsetupIO(HTSPB, 0x40);
 
 	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanRamp;
+	Plan_t cur_plan = kPlanHigh;
 	int tubes = 0;
 	int point = 0;
 	int delay = 0;
@@ -572,7 +584,7 @@ task main()
 		break;
 
 	case kPlanHigh: //================== Plan High
-		motor[TUBE] = 100;
+		StartTask(tube_to_top);
 		monolith_position = seek_ir_pos();
 		mission_high(monolith_position);
 		break;
