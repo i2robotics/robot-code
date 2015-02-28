@@ -35,7 +35,7 @@
 #endif
 
 //#define DEBUG_IR
-//#define DEBUG_NO_POP
+#define DEBUG_NO_POP
 
 #define IR_SEEK_VAL HTIRS2readACDir(msensor_S4_1)
 #define GYRO_VAL HTGYROreadRot(msensor_S4_2)
@@ -161,13 +161,12 @@ task tube_to_top()
 
 void shake()
 {
-	drive_e(E, 100, 40);
-	drive_e(W, 100, 40);
-	drive_e(E, 100, 40);
-	drive_e(W, 100, 40);
+	drive_e(E, 100, 100);
+	drive_e(W, 100, 200);
+	drive_e(E, 100, 100);
+	drive_e(W, 100, 200);
 	drive_e(E, 100, 20);
 }
-
 void swerve(int power, unsigned int time_1, unsigned int time_2)
 {
 	motor[DRIVE_NE] = power;
@@ -398,6 +397,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			servo[FLAP] = kFlapHigh - 40;
 			pop_it(3, 5);
 			shake();
+			drive_e(E, 88, 300);
 			drive_e(N, 40, 350);
 			//drive_e(CCW, 100, 1500);
 			//drive_e(N, 50, 2700);
@@ -405,26 +405,19 @@ void mission_high(int mono_pos) // Center 120 cm goal
 		}
 	} else {
 		while (MAX_REACHED == 0) {}
-		drive_e(S, 60, 1600);
+		drive_e(S, 60, 1900);
 		wait1Msec(350);
 		servo[FLAP] = kFlapHigh;
 		pop_it(3, 5);
 		shake();
+		servo[ROOF] = ServoValue[ROOF] + 40;
+		servo[SPOUT] = ServoValue[SPOUT] + 40;
 		drive_e(N, 60, 1000);
 	}
 	servo[FLAP] = kFlapClosed;
-	drive_e(E, 88, 1200);
-
+	drive_e(E, 88, 1800);
 	drive_e(S, 100, 1000);
-	drive_e(BWD + 20, 100, 5000);
-	servo[FLAP] = kFlapOpen;
-	wait1Msec(350);
-	servo[SPOUT] = kSpoutOpen;
-	wait1Msec(500);
-	servo[FLAP] = kFlapClosed;
-	servo[ROOF] = kRoofClosed;
-	wait1Msec(350);
-	servo[SPOUT] = kSpoutClosed;
+	drive_t(BWD + 20, 100, 1000);
 	//StartTask(tele_setup);
 	//while(!setup_done) {}
 }
@@ -432,12 +425,11 @@ void mission_high(int mono_pos) // Center 120 cm goal
 void mission_ramp()
 {
 	int start_bearing = bearing;
-	//drive_t(S, 40, 600);
-	//drive_t(N, 1, 500);
-	//drive_t(S, 2, 500);
-	//drive_t(N, 1, 300);
-	drive_e(S, 20, 5500);
-
+	drive_t(S, 40, 600);
+	drive_t(N, 1, 500);
+	drive_t(S, 2, 500);
+	drive_t(N, 1, 300);
+	drive_e(S, 20, 2100);
 	PlayImmediateTone(200, 200);
 }
 
@@ -461,6 +453,7 @@ while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < (poi
 	servo[GRAB2] = kGrab2Closed;
 	wait1Msec(300);
 	halt();
+
 	while (lockout_medium == true) {}
 	wait1Msec(500);
 	servoChangeRate[SPOUT] = 5;
@@ -491,7 +484,7 @@ while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < (poi
 
 void mission_goal2(bool pointed)
 {
-	StartTask(tube_to_top);
+	//StartTask(tube_to_top);
 	drive_e(W, 100, 300);
 	drive_t(CCW, 100, 1500);
 	ClearTimer(T2);
@@ -551,8 +544,8 @@ task main()
 
 	Alliance_t cur_alli = kAllianceRed;
 	Plan_t cur_plan = kPlanHigh;
-	int tubes = 0;
-	int point = 0;
+	int tubes = 2;
+	int point = 1;
 	int delay = 0;
 
 	int monolith_position;
@@ -567,12 +560,12 @@ task main()
 	case kPlanRamp: //================== Plan Ramp
 		//StartTask(initialize_motors);
 
-		mission_ramp();
+		//mission_ramp();
 
 		if (tubes > 0)
 			mission_goal1(point == 1);
 		if (tubes > 1)
-			mission_goal2(point == 2);
+			mission_goal2(1);//point == 2);
 
 		break;
 
