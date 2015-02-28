@@ -65,7 +65,7 @@ void dialog(Plan_t *ret_plan, int *ret_tubes, int *ret_point, int *ret_delay)
               options.tubes = options.tubes ? options.tubes - 1 : 2;
               break;
             case 2: // Point
-              options.point = options.point ? options.point - 1 : 2;
+              options.point = options.point ? options.point - 1 : 3;
               break;
             case 3: // Delay
               if (options.delay < 10) // Can't use a special trick here

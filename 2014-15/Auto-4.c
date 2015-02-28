@@ -100,8 +100,8 @@ task initialize_motors()
 	ClearTimer(T2);
 	time1[T2] = 0;
 	motor[TUBE] = 100;
-	while (!check_spatula) {
-		while (!(SPATULA_DOWN & 0x08)) {/*when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube*/
+	while (!check_spatula) { // This mess is here to mitigate against flickering values
+		while (!(SPATULA_DOWN & 0x08)) {//when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube
 		}
 		if (SPATULA_DOWN & 0x08) {
 			check_spatula = true;
@@ -482,7 +482,7 @@ while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 1
 	}
 }
 
-void mission_goal2(bool pointed)
+void mission_goal2(int pointed)
 {
 	//StartTask(tube_to_top);
 	drive_e(W, 100, 300);
@@ -499,15 +499,22 @@ void mission_goal2(bool pointed)
 
 	drive_t(E, 100, 300);
 
-	if (pointed) {
-		square();
-		swerve(-90, 600, 1000);
-		} else {
-		square();
+	square();
+	if (pointed == 1) {
+		swerve(-90, 600, 1000);// old/standard swerve
+	} else if (pointed == 2) {
+		drive_e(W, 100, 300);// new/alt swerve for pointy-pointy
 	}
-	drive_t(S, 25, 0);//.
+
+	drive_t(S, 25, 0);
 	ClearTimer(T1);
 	while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 1000 : 3000)) {}
+	if (pointed == 2) {
+		drive_e(CW, 60, 200);
+		drive_t(S, 20, 0);
+	  ClearTimer(T1);
+	  while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 500) {}
+	}
 	GRAB_CLOSE;
 	wait1Msec(140);
 	halt();
@@ -543,9 +550,9 @@ task main()
 	HTSPBsetupIO(HTSPB, 0x40);
 
 	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanHigh;
+	Plan_t cur_plan = kPlanRamp;
 	int tubes = 2;
-	int point = 1;
+	int point = 2;
 	int delay = 0;
 
 	int monolith_position;
@@ -558,14 +565,14 @@ task main()
 
 	switch (cur_plan) {
 	case kPlanRamp: //================== Plan Ramp
-		//StartTask(initialize_motors);
+		StartTask(initialize_motors);
 
-		//mission_ramp();
+		mission_ramp();
 
 		if (tubes > 0)
-			mission_goal1(point == 1);
-		if (tubes > 1)
-			mission_goal2(1);//point == 2);
+			mission_goal1(point == 1 || point == 3);
+		if (tubes < 1)
+			mission_goal2(point ? point - 1 : 0);
 
 		break;
 
