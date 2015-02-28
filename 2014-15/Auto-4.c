@@ -35,7 +35,7 @@
 #endif
 
 //#define DEBUG_IR
-#define DEBUG_NO_POP
+//#define DEBUG_NO_POP
 
 #define IR_SEEK_VAL HTIRS2readACDir(msensor_S4_1)
 #define GYRO_VAL HTGYROreadRot(msensor_S4_2)
@@ -101,9 +101,9 @@ task initialize_motors()
 	time1[T2] = 0;
 	motor[TUBE] = 100;
 	while (!check_spatula) { // This mess is here to mitigate against flickering values
-		while (!(SPATULA_DOWN & 0x08)) {//when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube
+		while (!SPATULA_DOWN) {//when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube
 		}
-		if (SPATULA_DOWN & 0x08) {
+		if (SPATULA_DOWN) {
 			check_spatula = true;
 			} else {
 			check_spatula = false;
@@ -429,7 +429,9 @@ void mission_ramp()
 	drive_t(N, 1, 500);
 	drive_t(S, 2, 500);
 	drive_t(N, 1, 300);
-	drive_e(S, 20, 2100);
+	drive_e(S, 20, 2000);
+
+	drive_t(S, 20, 400);
 	PlayImmediateTone(200, 200);
 }
 
@@ -448,7 +450,11 @@ void mission_goal1(bool pointed)
 
 	drive_t(S, 20, 0); // grab and score in first goal
 	ClearTimer(T1);
-while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 1200 : 1000)) {}
+	if (pointed) {// <Untested>
+		while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 900) {}
+	} else {
+		while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {}// revert to this if it isn't working
+	} // </untested>
 	servo[GRAB1] = kGrab1Closed;
 	servo[GRAB2] = kGrab2Closed;
 	wait1Msec(300);
@@ -459,11 +465,12 @@ while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 1
 	servoChangeRate[SPOUT] = 5;
 	servo[SPOUT] = kSpoutOpenE;
 	wait1Msec(1200);
-	servo[ROOF] = kRoofOpen;
+	servo[ROOF] = kRoofOpen + 10;
 	wait1Msec(500);
 	servo[FLAP] = kFlapOpen;
+	wait1Msec(500);
 
-	pop_it(4, 0);
+	pop_it(2, 0);
 	wait1Msec(300);
 
 	servo[ROOF] = kRoofClosed;
@@ -484,7 +491,7 @@ while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 1
 
 void mission_goal2(int pointed)
 {
-	//StartTask(tube_to_top);
+	StartTask(tube_to_top);
 	drive_e(W, 100, 300);
 	drive_t(CCW, 100, 1500);
 	ClearTimer(T2);
@@ -508,7 +515,7 @@ void mission_goal2(int pointed)
 
 	drive_t(S, 25, 0);
 	ClearTimer(T1);
-	while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 1000 : 3000)) {}
+	while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 1500 : 2500)) {}
 	if (pointed == 2) {
 		drive_e(CW, 60, 200);
 		drive_t(S, 20, 0);
@@ -571,7 +578,7 @@ task main()
 
 		if (tubes > 0)
 			mission_goal1(point == 1 || point == 3);
-		if (tubes < 1)
+		if (tubes > 1)
 			mission_goal2(point ? point - 1 : 0);
 
 		break;
