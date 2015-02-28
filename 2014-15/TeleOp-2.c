@@ -40,8 +40,10 @@
 #include "../headers/servoValues_1.h"
 
 int times_popped = 0;
-bool grab_state = false;
-bool grab_lock = false;
+bool grab_state_right = false;
+bool grab_lock_right = false;
+bool grab_state_left = false;
+bool grab_lock_left = false;
 bool lock_fork = false;
 bool popper_has_been_readied = false;
 bool spatula_down_var = false;
@@ -161,40 +163,54 @@ task main()
       GRAB_OPEN;
     end
 
-    if (LEFT_GRABBER_SWITCH) {
+    if (grab_state_left) {
       motor[LEFT_LIGHT] = 100;
     } else {
       motor[LEFT_LIGHT] = 0;
     }
 
-    if (RIGHT_GRABBER_SWITCH) {
+    if (grab_state_right) {
       motor[RIGHT_LIGHT] = 100;
     } else {
       motor[RIGHT_LIGHT] = 0;
     }
 
 
-    if (LEFT_GRABBER_SWITCH && RIGHT_GRABBER_SWITCH) { // If limit switches are active
-      if (!grab_lock) { // Unless auto-grabbing has already happened
-        grab_lock = true; // Prevent auto-grabbing from occurring repeatedly
-        grab_state = true; // Engage grabbers
+    if (RIGHT_GRABBER_SWITCH) { // If limit switches are active
+      if (!grab_lock_right) { // Unless auto-grabbing has already happened
+        grab_lock_right = true; // Prevent auto-grabbing from occurring repeatedly
+        grab_state_right = true; // Engage grabbers
       }
     } else { // If both limit switches have been released
-      grab_lock = false; // Allow auto-grabbing to occur in the future
+      grab_lock_right = false; // Allow auto-grabbing to occur in the future
+    }
+
+    if (LEFT_GRABBER_SWITCH) { // If limit switches are active
+      if (!grab_lock_left) { // Unless auto-grabbing has already happened
+        grab_lock_left = true; // Prevent auto-grabbing from occurring repeatedly
+        grab_state_left = true; // Engage grabbers
+      }
+    } else { // If both limit switches have been released
+      grab_lock_left = false; // Allow auto-grabbing to occur in the future
     }
 
     action_joy1 // (Manual) grabbing of rolling goals
     state bA down // Close
-      grab_state = true;
+      grab_state_right = true;
+      grab_state_left = true;
     state bB down // Open
-      grab_state = false;
+      grab_state_right = false;
+      grab_state_left = false;
     end
 
-    if (grab_state == true) { //activate servos
+    if (grab_state_left == true) { //activate servos
       servo[GRAB1] = 215;
-      servo[GRAB2] = 60;
-    } else if (grab_state == false) {
+    } else if (grab_state_left == false) {
       servo[GRAB1] = 55;
+    }
+    if (grab_state_right == true) { //activate servos
+      servo[GRAB2] = 60;
+    } else if (grab_state_right == false) {
       servo[GRAB2] = 215;
     }
 
