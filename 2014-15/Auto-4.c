@@ -206,7 +206,7 @@ void square()
 		}
 	}
 	wait1Msec(400);
-	drive_e(W, 100, 900); // !!!600 is actual desired value!!!
+	drive_e(W, 100, 600); // was 750 worked
 }
 
 int seek_ir_pos()
@@ -543,9 +543,9 @@ task main()
 	HTSPBsetupIO(HTSPB, 0x40);
 
 	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanRamp;
-	int tubes = 1;
-	int point = 0;
+	Plan_t cur_plan = kPlanHigh;
+	int tubes = 2;
+	int point = 1;
 	int delay = 0;
 
 	int monolith_position;
@@ -565,7 +565,7 @@ task main()
 		if (tubes > 0)
 			mission_goal1(point == 1);
 		if (tubes > 1)
-			mission_goal2(point == 2);
+			mission_goal2(1);//point == 2);
 
 		break;
 
