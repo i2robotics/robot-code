@@ -70,9 +70,9 @@ void go_to_bearing(int target)
 #endif
 
 //for the superpro
-#define MAX_REACHED HTSPBreadIO(HTSPB, 0x01)
-#define RIGHT_GRABBER_SWITCH HTSPBreadIO(HTSPB, 0x02)
-#define LEFT_GRABBER_SWITCH HTSPBreadIO(HTSPB, 0x04)
-#define SPATULA_DOWN HTSPBreadIO(HTSPB, 0x08)
-#define POPPER_PRIMED HTSPBreadIO(HTSPB, 0x10)
-#define SIXTY_REACHED HTSPBreadIO(HTSPB, 0x20)
+#define MAX_REACHED HTSPBreadIO(HTSPB, 0x01) != 0
+#define RIGHT_GRABBER_SWITCH HTSPBreadIO(HTSPB, 0x02) != 0
+#define LEFT_GRABBER_SWITCH HTSPBreadIO(HTSPB, 0x04) != 0
+#define SPATULA_DOWN HTSPBreadIO(HTSPB, 0x08) != 0
+#define POPPER_PRIMED HTSPBreadIO(HTSPB, 0x10) != 0
+#define SIXTY_REACHED HTSPBreadIO(HTSPB, 0x20) != 0

@@ -59,9 +59,9 @@ task spatulaDown()
   lock_fork = true;
   motor[FORK] = -100;
   while (!spatula_down_var) {
-    while (!(SPATULA_DOWN & 0x08)) {}
-    if (SPATULA_DOWN & 0x08) {
-      spatula_down_var = true;
+    while (!SPATULA_DOWN) {}
+    if (SPATULA_DOWN) {
+      SPATULA_DOWN_var = true;
     } else {
       spatula_down_var = false;
     }
@@ -146,7 +146,7 @@ task main()
       state bRB down
         motor[FORK] = 100;
       state bRT down
-        if ((SPATULA_DOWN & 0x08) != 8) {
+        if (!SPATULA_DOWN) {
           motor[FORK] = -100;
         } else {
           motor[FORK] = 0;
@@ -161,20 +161,20 @@ task main()
       GRAB_OPEN;
     end
 
-    if (LEFT_GRABBER_SWITCH != 0) {
+    if (LEFT_GRABBER_SWITCH) {
       motor[LEFT_LIGHT] = 100;
     } else {
       motor[LEFT_LIGHT] = 0;
     }
 
-    if (RIGHT_GRABBER_SWITCH != 0) {
+    if (RIGHT_GRABBER_SWITCH) {
       motor[RIGHT_LIGHT] = 100;
     } else {
       motor[RIGHT_LIGHT] = 0;
     }
 
 
-    if (LEFT_GRABBER_SWITCH != 0 && RIGHT_GRABBER_SWITCH != 0) { // If limit switches are active
+    if (LEFT_GRABBER_SWITCH && RIGHT_GRABBER_SWITCH) { // If limit switches are active
       if (!grab_lock) { // Unless auto-grabbing has already happened
         grab_lock = true; // Prevent auto-grabbing from occurring repeatedly
         grab_state = true; // Engage grabbers
@@ -207,11 +207,11 @@ task main()
       StartTask(centerGoal);
     end
 
-    if (POPPER_PRIMED == 0 && !popper_has_been_readied) {
+    if (!POPPER_PRIMED && !popper_has_been_readied) {
       ClearTimer(T1);
       popper_has_been_readied = true;
       times_popped += 1;
-    } else if (POPPER_PRIMED != 0) {
+    } else if (POPPER_PRIMED) {
       popper_has_been_readied = false;
     }
 
@@ -242,7 +242,7 @@ task main()
     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
     HTSPBsetupIO(HTSPB, 0x40);
-//    if (MAX_REACHED != 1) {
+//    if (!MAX_REACHED) {
 //      nxtDisplayTextLine(1, "Magnet absent");
 //      //HTSPBwriteIO(HTSPB, 0x10);
 //    } else {
@@ -250,7 +250,7 @@ task main()
 //      //HTSPBwriteIO(HTSPB, 0x00);
 //    }
 
-    if (MAX_REACHED != 1 || J2Y2 < 0) {
+    if (!MAX_REACHED || J2Y2 < 0) {
       motor[TUBE] = J2Y2;
     } else {
       motor[TUBE] = 0;

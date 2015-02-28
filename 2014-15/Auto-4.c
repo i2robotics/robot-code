@@ -112,7 +112,7 @@ task initialize_motors()
 	//when timer is greater than or equal to 7000 miliseconds stop the lift
 	motor[FORK] = 0;
 
-	while (time1[T2] < 9000 && SIXTY_REACHED == 0) {}
+	while (time1[T2] < 9000 && !SIXTY_REACHED) {}
 	motor[TUBE] = 0;
 	ClearTimer(T2);
 	lockout_medium = false;
@@ -123,16 +123,16 @@ task tele_setup()
 	GRAB_OPEN;
 	bool setup_done = false;
 	bool fork_down = true;
-	if (SPATULA_DOWN == 0) {
+	if (!SPATULA_DOWN) {
 		motor[FORK] = -100;
 		fork_down = false;
 	}
-	if (MAX_REACHED == 0) {
+	if (!MAX_REACHED) {
 		motor[TUBE] = 100;
 	}
-	while (MAX_REACHED == 0) {
-		if (SPATULA_DOWN != 0 && !fork_down) {
-			if (SPATULA_DOWN != 0) {
+	while (!MAX_REACHED) {
+		if (SPATULA_DOWN && !fork_down) {
+			if (SPATULA_DOWN) {
 				motor[FORK] = 0;
 				fork_down = true;
 			}
@@ -140,7 +140,7 @@ task tele_setup()
 	}
 	motor[TUBE] = 0;
 	while (!fork_down) {
-		if (SPATULA_DOWN != 0) {
+		if (SPATULA_DOWN) {
 			motor[FORK] = 0;
 			fork_down = true;
 		}
@@ -152,7 +152,7 @@ task tele_setup()
 
 task tube_to_top()
 {
-	if (MAX_REACHED == 0) {
+	if (!MAX_REACHED) {
 		motor[TUBE] = 100;
 	}
 	while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
@@ -263,13 +263,13 @@ void pop_it(int times_without_feeder, int times_with_feeder)
 	bool popper_has_been_readied = false;
 	motor[POPPER] = 100;
 	while (times_without_feeder >= 0) {
-		if (POPPER_PRIMED == 0 && !popper_has_been_readied) {
+		if (!POPPER_PRIMED && !popper_has_been_readied) {
 			popper_has_been_readied = true;
 			times_without_feeder -= 1;
 			motor[POPPER] = 0;
 			wait1Msec(50);
 			motor[POPPER] = 100;
-			} else if (POPPER_PRIMED != 0) {
+			} else if (POPPER_PRIMED) {
 			popper_has_been_readied = false;
 		}
 		if (times_without_feeder <= 0) {
@@ -278,13 +278,13 @@ void pop_it(int times_without_feeder, int times_with_feeder)
 	}
 	popper_has_been_readied = false;
 	while (times_with_feeder >= 0) {
-		if (POPPER_PRIMED == 0 && !popper_has_been_readied) {
+		if (!POPPER_PRIMED && !popper_has_been_readied) {
 			popper_has_been_readied = true;
 			times_with_feeder -= 1;
 			motor[POPPER] = 0;
 			wait1Msec(50);
 			motor[POPPER] = 100;
-			} else if (POPPER_PRIMED != 0) {
+			} else if (POPPER_PRIMED) {
 			popper_has_been_readied = false;
 		}
 	}
@@ -377,7 +377,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			}
 		if (mono_pos2 == 1) {
 			drive_e(S, 50, 2800);
-			while (MAX_REACHED == 0) {}
+			while (!MAX_REACHED) {}
 			drive_e(CW, 100, 600);
 			drive_e(S, 50, 1300);
 			drive_e(CW, 100, 1500);
@@ -390,7 +390,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			drive_e(E, 88, 400);
 		}	else {
 			drive_e(S, 50, 1500);
-			while (MAX_REACHED == 0) {}
+			while (!MAX_REACHED) {}
 			drive_e(CW, 100, 1700);
 			drive_e(S, 40, 350);
 			wait1Msec(350);
@@ -404,7 +404,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			//drive_e(CW, 100, 1000);
 		}
 	} else {
-		while (MAX_REACHED == 0) {}
+		while (!MAX_REACHED) {}
 		drive_e(S, 60, 1900);
 		wait1Msec(350);
 		servo[FLAP] = kFlapHigh;
@@ -448,7 +448,7 @@ void mission_goal1(bool pointed)
 
 	drive_t(S, 20, 0); // grab and score in first goal
 	ClearTimer(T1);
-while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < (pointed ? 1200 : 1000)) {}
+while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 1200 : 1000)) {}
 	servo[GRAB1] = kGrab1Closed;
 	servo[GRAB2] = kGrab2Closed;
 	wait1Msec(300);
@@ -507,7 +507,7 @@ void mission_goal2(bool pointed)
 	}
 	drive_t(S, 25, 0);//.
 	ClearTimer(T1);
-	while (LEFT_GRABBER_SWITCH == 0 && RIGHT_GRABBER_SWITCH == 0 && time1[T1] < (pointed ? 1000 : 3000)) {}
+	while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 1000 : 3000)) {}
 	GRAB_CLOSE;
 	wait1Msec(140);
 	halt();
