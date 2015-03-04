@@ -207,7 +207,7 @@ void square()
 		}
 	}
 	wait1Msec(400);
-	drive_e(W, 100, 600); // was 750 worked
+	drive_e(W, 100, 530); // was 600 until 4 mar
 }
 
 int seek_ir_pos()
@@ -446,15 +446,16 @@ void mission_goal1(bool pointed)
 	if (pointed) {
 		drive_e(S, 40, 800); //drive forward and line up as well as swerve to make sure the goal is in the right direction
 		square();
-		drive_e(S, 40, 150);  //Changed from 300
+		drive_e(S, 40, 175);  //Changed from 300
 		while(lockout_medium) {} //wait for 60 cm height and spatula to be all the way down.
-		swerve(-90, 500, 1000);
-		} else {
+		swerve(-90, 500, 700);
+	} else {
 		drive_e(S, 40, 500); //drive forward and line up
 		square();
 		while(lockout_medium) {} //wait for 60 cm height and spatula to be all the way down.
 		drive_e(S, 40, 750);
 	}
+	nMotorEncoder[DRIVE_SW] = 0;
 	drive_t(S, 20, 0); // grab and score in first goal
 	ClearTimer(T1);
 	if (pointed) {// <Untested>
@@ -465,8 +466,9 @@ void mission_goal1(bool pointed)
 	servo[GRAB1] = kGrab1Closed;
 	servo[GRAB2] = kGrab2Closed;
 	wait1Msec(300);
-	halt();
 
+	halt();
+	int encoder_after_swerve = nMotorEncoder[DRIVE_SW];
 
 	wait1Msec(500);
 	servo[SPOUT] = kSpoutOpenE;
@@ -476,7 +478,7 @@ void mission_goal1(bool pointed)
 	servo[FLAP] = kFlapHigh;
 	wait1Msec(500);
 
-	pop_it(2, 0);
+	pop_it(3, 0);
 	wait1Msec(300);
 
 	servo[ROOF] = kRoofClosed;
@@ -488,17 +490,19 @@ void mission_goal1(bool pointed)
 	motor[FORK] = 0;
 
 	if (pointed) {
-		motor[DRIVE_NW] = 90;
-		motor[DRIVE_SW] = 90;
-		wait1Msec(600);
-		halt();
+		drive_e(N, 20, encoder_after_swerve);
+
+		//motor[DRIVE_NW] = 90;
+		//motor[DRIVE_SW] = 90;
+		//wait1Msec(600);
+		//halt();
 	}
 }
 
 void mission_goal2(int pointed)
 {
 	StartTask(tube_to_top);
-	drive_e(W, 100, 300);
+	drive_e(W, 100, 500);
 	drive_t(CCW, 100, 1500);
 	ClearTimer(T2);
 	motor[FORK] = -100;
@@ -514,21 +518,26 @@ void mission_goal2(int pointed)
 
 	square();
 	if (pointed == 1) {
-		//  Slow down!  Slippery road.  swerve(-90, 600, 1000);// old/standard swerve
 		swerve(-50, 600, 1000);// old/standard swerve but slower now
 	} else if (pointed == 2) {
-		drive_e(W, 100, 300);// new/alt swerve for pointy-pointy
+		drive_e(S, 40, 1200);
+		swerve(-50, 600, 1000);
+		//drive_e(W, 100, 300);// new/alt swerve for pointy-pointy
+	} else { //flat
+		drive_e(S, 40, 1600);
+		drive_e(E, 100, 200);
 	}
 
 	drive_t(S, 25, 0);
 	ClearTimer(T1);
-	while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 1500 : 2500)) {}
-	if (pointed == 2) {
-		drive_e(CW, 60, 200);
-		drive_t(S, 20, 0);
-	  ClearTimer(T1);
-	  while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 500) {}
-	}
+	while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 800 : 1500)) {}
+	//if (pointed == 2) {
+	//	drive_e(CW, 60, 200);
+	//	wait1Msec(1000);
+	//	drive_t(S, 20, 0);
+	//  ClearTimer(T1);
+	//  while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 500) {}
+	//}
 	GRAB_CLOSE;
 	wait1Msec(140);
 	halt();
@@ -566,7 +575,7 @@ task main()
 	Alliance_t cur_alli = kAllianceRed;
 	Plan_t cur_plan = kPlanRamp;
 	int tubes = 2;
-	int point = 0;
+	int point = 1;
 	int delay = 0;
 
 	int monolith_position;

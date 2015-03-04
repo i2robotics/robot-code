@@ -47,91 +47,17 @@
 #include "../headers/helpers_1.h"
 #include "../headers/servoValues_1.h"
 
-
-task displayIR ()
-{
-	while (true)
-	{
-			nxtDisplayBigTextLine(3, "%i    %i", SIDE_TOUCH_N, SIDE_TOUCH_S);
-			wait1Msec(300);
-				//PlayImmediateTone(ULTRA_VAL*100 + 100,300);
-	}
-}
-
-void square()
-{
-  drive_t(E, 88, 0);
-  ClearTimer(T1);
-  time1[T1] = 0;
-  while (true) {
-    if (SIDE_TOUCH_N == 1) {
-      motor[DRIVE_NE] = 0;
-      motor[DRIVE_NW] = 0;
-    }
-    if (SIDE_TOUCH_S == 1) {
-      motor[DRIVE_SE] = 0;
-      motor[DRIVE_SW] = 0;
-    }
-    if (SIDE_TOUCH_N == 1 && SIDE_TOUCH_S == 1) {
-      halt();
-      PlayImmediateTone(1500, 200);
-      break;
-    }
-  }
-  wait1Msec(400);
-  drive_e(W, 100, 600); // was 750 worked
-}
-
-void swerve(int power, unsigned int time = 600)
-{
-    motor[DRIVE_NE] = power;
-    motor[DRIVE_SE] = power;
-    motor[DRIVE_NW] = 0;
-    motor[DRIVE_SW] = 0;
-    wait1Msec(time);
-
-    motor[DRIVE_NE] = 0;
-    motor[DRIVE_SE] = 0;
-    motor[DRIVE_NW] = power;
-    motor[DRIVE_SW] = power;
-    wait1Msec(time*2);
-}
-
-task display()
-{
-	while (true){
-		nxtDisplayBigTextLine(4, "%i", time1[T1]);
-	}
-}
-
 task main()
 {
-	GRAB_OPEN;
-  bool setup_done = false;
-  bool fork_down = true;
-  if (SPATULA_DOWN == 0) {
-  	motor[FORK] = -100;
-		fork_down = false;
-	}
-	if (MAX_REACHED == 0) {
-  	motor[TUBE] = 100;
-	}
-  while (MAX_REACHED == 0) {
-    if (SPATULA_DOWN != 0 && !fork_down) {
-      if (SPATULA_DOWN != 0) {
-        motor[FORK] = 0;
-        fork_down = true;
-      }
-    }
-  }
-  motor[TUBE] = 0;
-  while (!fork_down) {
-      if (SPATULA_DOWN != 0) {
-        motor[FORK] = 0;
-        fork_down = true;
-      }
-    }
-  setup_done = true;
+	int enc = 0;
+	drive_t(S, 25, 0);
+	wait1Msec(200);
+	nMotorEncoder[DRIVE_SW] = 0;
+	wait1Msec(1000);
+	enc = nMotorEncoder[DRIVE_SW];
+	writeDebugStreamLine("%i", enc);
+
+
 	halt();
 	wait1Msec(500);
 }
