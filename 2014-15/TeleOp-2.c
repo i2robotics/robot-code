@@ -203,15 +203,15 @@ task main()
       grab_state_left = false;
     end
 
-    if (grab_state_left == true) { //activate servos
-      servo[GRAB1] = 215;
-    } else if (grab_state_left == false) {
-      servo[GRAB1] = 55;
+    if (grab_state_left) { //activate reft grabber
+      servo[GRAB1] = kGrab1Closed;
+    } else {
+      servo[GRAB1] = kGrab1Open;
     }
-    if (grab_state_right == true) { //activate servos
-      servo[GRAB2] = 60;
-    } else if (grab_state_right == false) {
-      servo[GRAB2] = 215;
+    if (grab_state_right) { //activate right grabber
+      servo[GRAB2] = kGrab2Closed;
+    } else {
+      servo[GRAB2] = kGrab2Open;
     }
 
     action_joy2 //adjusting ball dispenser
