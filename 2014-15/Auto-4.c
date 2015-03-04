@@ -48,6 +48,7 @@
 #include "../drivers/hitechnic-irseeker-v2.h"
 #include "../drivers/lego-touch.h"
 #include "../drivers/hitechnic-superpro.h"
+#include "../drivers/lego-ultrasound.h"
 
 #include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
@@ -93,7 +94,7 @@ task initialize_motors()
 {
 	bool first_time_repeat = true;
 	bool check_spatula = false;
-	bool lockout_medium = true;
+	lockout_medium = true;
 	wait1Msec(800);
 	motor[FORK] = -100;
 	//start timer
@@ -352,14 +353,18 @@ void mission_block()
 void mission_high(int mono_pos) // Center 120 cm goal
 {
 	servo[FLAP] = kFlapClosed;
-	servo[ROOF] = kRoofClosed;
-	wait1Msec(350);
-	servo[SPOUT] = kSpoutOpen;
-	wait1Msec(1000);
-	servo[ROOF] = kRoofHigh;
-	servo[FLAP] = kFlapHigh;
-	wait1Msec(250);
-	servo[SPOUT] = kSpoutMiddle;
+  servo[ROOF] = kRoofClosed;
+  wait1Msec(350);
+  servo[SPOUT] = kSpoutClosed;
+	//servo[FLAP] = kFlapClosed;
+	//servo[ROOF] = kRoofClosed;
+	//wait1Msec(350);
+	//servo[SPOUT] = kSpoutOpen;
+	//wait1Msec(1000);
+	//servo[ROOF] = kRoofHigh;
+	//servo[FLAP] = kFlapHigh;
+	//wait1Msec(250);
+	//servo[SPOUT] = kSpoutMiddle;
 	if (mono_pos == 3) {
 		mono_pos = 2;
 	}
@@ -367,6 +372,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 		int mono_pos2;
 		drive_e(CCW, 100, 1000);
 		drive_e(S, 50, 1000); //2700
+		servo[SPOUT] = kSpoutClosed;
 		halt();
 			PlayImmediateTone(1200, 200);
 			wait1Msec(200);
@@ -379,12 +385,12 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			drive_e(S, 50, 2800);
 			while (!MAX_REACHED) {}
 			drive_e(CW, 100, 600);
-			drive_e(S, 50, 1300);
+			drive_e(S, 50, 1200);
 			drive_e(CW, 100, 1500);
 			drive_e(W, 88, 200);
 			wait1Msec(500);
 
-			pop_it(3, 5);
+
 			shake();
 			drive_e(N, 100, 500);
 			drive_e(E, 88, 400);
@@ -392,7 +398,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			drive_e(S, 50, 1500);
 			while (!MAX_REACHED) {}
 			drive_e(CW, 100, 1700);
-			drive_e(S, 40, 350);
+			drive_e(S, 40, 250);
 			wait1Msec(350);
 			servo[FLAP] = kFlapHigh - 40;
 			pop_it(3, 5);
@@ -407,12 +413,12 @@ void mission_high(int mono_pos) // Center 120 cm goal
 		while (!MAX_REACHED) {}
 		drive_e(S, 60, 1900);
 		wait1Msec(350);
-		servo[FLAP] = kFlapHigh;
-		pop_it(3, 5);
+		servoChangeRate[SPOUT] = 0;
+		servo[SPOUT] = 100;
+
 		shake();
-		servo[ROOF] = ServoValue[ROOF] + 40;
-		servo[SPOUT] = ServoValue[SPOUT] + 40;
 		drive_e(N, 60, 1000);
+			servoChangeRate[SPOUT] = 10;
 	}
 	servo[FLAP] = kFlapClosed;
 	drive_e(E, 88, 1800);
@@ -441,13 +447,14 @@ void mission_goal1(bool pointed)
 		drive_e(S, 40, 800); //drive forward and line up as well as swerve to make sure the goal is in the right direction
 		square();
 		drive_e(S, 40, 150);  //Changed from 300
+		while(lockout_medium) {} //wait for 60 cm height and spatula to be all the way down.
 		swerve(-90, 500, 1000);
 		} else {
 		drive_e(S, 40, 500); //drive forward and line up
 		square();
+		while(lockout_medium) {} //wait for 60 cm height and spatula to be all the way down.
 		drive_e(S, 40, 750);
 	}
-
 	drive_t(S, 20, 0); // grab and score in first goal
 	ClearTimer(T1);
 	if (pointed) {// <Untested>
@@ -460,14 +467,13 @@ void mission_goal1(bool pointed)
 	wait1Msec(300);
 	halt();
 
-	while (lockout_medium == true) {}
+
 	wait1Msec(500);
-	servoChangeRate[SPOUT] = 5;
 	servo[SPOUT] = kSpoutOpenE;
 	wait1Msec(1200);
-	servo[ROOF] = kRoofOpen + 10;
+	servo[ROOF] = kRoofOpen;
 	wait1Msec(500);
-	servo[FLAP] = kFlapOpen;
+	servo[FLAP] = kFlapHigh;
 	wait1Msec(500);
 
 	pop_it(2, 0);
@@ -508,7 +514,8 @@ void mission_goal2(int pointed)
 
 	square();
 	if (pointed == 1) {
-		swerve(-90, 600, 1000);// old/standard swerve
+		//  Slow down!  Slippery road.  swerve(-90, 600, 1000);// old/standard swerve
+		swerve(-50, 600, 1000);// old/standard swerve but slower now
 	} else if (pointed == 2) {
 		drive_e(W, 100, 300);// new/alt swerve for pointy-pointy
 	}
@@ -559,19 +566,19 @@ task main()
 	Alliance_t cur_alli = kAllianceRed;
 	Plan_t cur_plan = kPlanRamp;
 	int tubes = 2;
-	int point = 2;
+	int point = 0;
 	int delay = 0;
 
 	int monolith_position;
 
-	// dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
-	initialize_servos();
+  //dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
 	// waitForStart();
 	ClearTimer(T4);
 	wait1Msec(delay * 1000);
 
 	switch (cur_plan) {
 	case kPlanRamp: //================== Plan Ramp
+		initialize_servos();
 		StartTask(initialize_motors);
 
 		mission_ramp();
@@ -584,6 +591,7 @@ task main()
 		break;
 
 	case kPlanKick: //================== Plan Kick
+		initialize_servos();
 		monolith_position = seek_ir_pos();
 		mission_monolith(monolith_position);
 		drive_e(CW, 80, 5000);
@@ -592,11 +600,13 @@ task main()
 
 	case kPlanHigh: //================== Plan High
 		StartTask(tube_to_top);
+
 		monolith_position = seek_ir_pos();
 		mission_high(monolith_position);
 		break;
 
 	case kPlanBlock: //================== Plan Defense
+		initialize_servos();
 		mission_block();
 		break;
 	}
