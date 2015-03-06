@@ -97,12 +97,15 @@ task initialize_motors()
 	bool first_time_repeat = true;
 	bool check_spatula = false;
 	lockout_medium = true;
+
+	motor[TUBE] = 100;
+
 	wait1Msec(800);
 	motor[FORK] = -100;
 	//start timer
 	ClearTimer(T2);
 	time1[T2] = 0;
-	motor[TUBE] = 100;
+
 	while (!check_spatula) { // This mess is here to mitigate against flickering values
 		while (!SPATULA_DOWN) {//when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube
 		}
@@ -260,13 +263,15 @@ int seek_ir_pos()
 	return monolith_position;
 }
 
-
 void pop_it(int times_without_feeder, int times_with_feeder)
 {
 #ifndef DEBUG_NO_POP
+	if (times_with_feeder) {times_with_feeder++}
+	if (times_without_feeder) {times_without_feeder++}
+
 	bool popper_has_been_readied = false;
 	motor[POPPER] = 100;
-	while (times_without_feeder >= 0) {
+	while (times_without_feeder > 0) {
 		if (!POPPER_PRIMED && !popper_has_been_readied) {
 			popper_has_been_readied = true;
 			times_without_feeder -= 1;
@@ -276,12 +281,9 @@ void pop_it(int times_without_feeder, int times_with_feeder)
 			} else if (POPPER_PRIMED) {
 			popper_has_been_readied = false;
 		}
-		if (times_without_feeder <= 0) {
-			motor[FEEDER] = 100;
-		}
 	}
 	popper_has_been_readied = false;
-	while (times_with_feeder >= 0) {
+	while (times_with_feeder > 0) {
 		if (!POPPER_PRIMED && !popper_has_been_readied) {
 			popper_has_been_readied = true;
 			times_with_feeder -= 1;
@@ -469,7 +471,7 @@ void mission_goal1(bool pointed)
 		drive_e(S, 40, 175);  //Changed from 300
 		while(lockout_medium) {} //wait for 60 cm height and spatula to be all the way down.
 		swerve(-90, 500, 700);
-		} else {
+	} else {
 		drive_e(S, 40, 500); //drive forward and line up
 		square();
 		while(lockout_medium) {} //wait for 60 cm height and spatula to be all the way down.
@@ -509,14 +511,9 @@ void mission_goal1(bool pointed)
 	wait1Msec(500);
 	motor[FORK] = 0;
 
-	if (pointed) {
-		drive_e(N, 20, encoder_after_swerve);
-
-		//motor[DRIVE_NW] = 90;
-		//motor[DRIVE_SW] = 90;
-		//wait1Msec(600);
-		//halt();
-	}
+	//if (pointed) {
+		drive_e(N, 50, encoder_after_swerve);
+	//}
 }
 
 void mission_goal2(int pointed)
@@ -538,6 +535,7 @@ void mission_goal2(int pointed)
 
 	square();
 	if (pointed == 1) {
+		drive_e(S, 40, 1500);
 		swerve(-50, 600, 1000);// old/standard swerve but slower now
 		} else if (pointed == 2) {
 		drive_e(S, 40, 1200);
@@ -593,15 +591,15 @@ task main()
 	HTSPBsetupIO(HTSPB, 0x40);
 
 	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanHigh;
+	Plan_t cur_plan = kPlanRamp;
 	int tubes = 2;
-	int point = 1;
+	int point = 2;
 	int delay = 0;
 
 	int monolith_position;
 
-	//dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
-	// waitForStart();
+	dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
+	waitForStart();
 	ClearTimer(T4);
 	wait1Msec(delay * 1000);
 

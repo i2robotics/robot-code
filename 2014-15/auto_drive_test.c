@@ -47,15 +47,46 @@
 #include "../headers/helpers_1.h"
 #include "../headers/servoValues_1.h"
 
+void pop_it(int times_without_feeder, int times_with_feeder)
+{
+#ifndef DEBUG_NO_POP
+	bool popper_has_been_readied = false;
+	motor[POPPER] = 100;
+	while (times_without_feeder > 0) {
+		if (!POPPER_PRIMED && !popper_has_been_readied) {
+			popper_has_been_readied = true;
+			times_without_feeder -= 1;
+			motor[POPPER] = 0;
+			wait1Msec(50);
+			motor[POPPER] = 100;
+			} else if (POPPER_PRIMED) {
+			popper_has_been_readied = false;
+		}
+	}
+	popper_has_been_readied = false;
+	while (times_with_feeder > 0) {
+		if (!POPPER_PRIMED && !popper_has_been_readied) {
+			popper_has_been_readied = true;
+			times_with_feeder -= 1;
+			motor[POPPER] = 0;
+			wait1Msec(50);
+			motor[POPPER] = 100;
+			} else if (POPPER_PRIMED) {
+			popper_has_been_readied = false;
+		}
+	}
+#else
+	PlayImmediateTone(900,20);
+	wait1Msec(1000);
+#endif
+	motor[POPPER] = 0;
+	motor[FEEDER] = 0;
+}
+
 task main()
 {
-	int enc = 0;
-	drive_t(S, 25, 0);
-	wait1Msec(200);
-	nMotorEncoder[DRIVE_SW] = 0;
-	wait1Msec(1000);
-	enc = nMotorEncoder[DRIVE_SW];
-	writeDebugStreamLine("%i", enc);
+
+  pop_it(3, 0);
 
 
 	halt();
