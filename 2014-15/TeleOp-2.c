@@ -57,6 +57,9 @@ short current_joystick;
 
 task spatulaDown()
 {
+	if (!SPATULA_DOWN) {
+	motor[FORK] = -100;
+	}
   spatula_down_var = false;
   lock_fork = true;
   motor[FORK] = -100;
@@ -68,6 +71,8 @@ task spatulaDown()
       spatula_down_var = false;
     }
   }
+  motor[FORK] = 100;
+  while (SPATULA_DOWN) {}
   motor[FORK] = 0;
   lock_fork = false;
 }
@@ -160,7 +165,7 @@ task main()
 
     action_joy1
     state bX down
-      GRAB_OPEN;
+      	StartTask(spatulaDown);
     end
 
     if (grab_state_left) {

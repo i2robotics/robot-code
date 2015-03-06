@@ -230,7 +230,8 @@ void drive(int d, byte s, unsigned int t, bool useGyro, bool useEnc)
     float k_p = 0.08;
     float error;
     while (abs(nMotorEncoder[DRIVE_SW]) < abs(t)) {
-      error = k_p * (s / 100.0) * (bearing - targetBearing);
+    	error = 0;
+      //error = k_p * (s / 100.0) * (bearing - targetBearing);
       motor[DRIVE_NE] = ne - error;
       motor[DRIVE_SE] = se - error;
       motor[DRIVE_NW] = nw + error;
@@ -246,7 +247,8 @@ void drive(int d, byte s, unsigned int t, bool useGyro, bool useEnc)
     float k_p = 0.08;
     float error;
     while (time1[T2] < t) {
-      error = k_p * (s / 100.0) * (bearing - targetBearing);
+    	error = 0;
+//      error = k_p * (s / 100.0) * (bearing - targetBearing);
       motor[DRIVE_NE] = ne - error;
       motor[DRIVE_SE] = se - error;
       motor[DRIVE_NW] = nw + error;

@@ -37,8 +37,10 @@
 //#define DEBUG_IR
 //#define DEBUG_NO_POP
 
+
+
 #define IR_SEEK_VAL HTIRS2readACDir(msensor_S4_1)
-#define GYRO_VAL HTGYROreadRot(msensor_S4_2)
+#define ULTRA_VAL USreadDist(msensor_S4_2)
 #define SIDE_TOUCH_S TSreadState(msensor_S4_4)
 #define SIDE_TOUCH_N TSreadState(msensor_S4_3)
 
@@ -50,7 +52,7 @@
 #include "../drivers/hitechnic-superpro.h"
 #include "../drivers/lego-ultrasound.h"
 
-#include "../headers/gyro_1.h"
+//#include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
 #include "../headers/helpers_1.h"
 #include "../headers/servoValues_1.h"
@@ -217,6 +219,7 @@ int seek_ir_pos()
 		first_IR = IR_SEEK_VAL;
 	}
 	drive_e(S, 40, 2000);
+	servo[SPOUT] = kSpoutClosed;
 	int second_IR = IR_SEEK_VAL;
 	while (second_IR > 10) {
 		second_IR = IR_SEEK_VAL;
@@ -353,9 +356,9 @@ void mission_block()
 void mission_high(int mono_pos) // Center 120 cm goal
 {
 	servo[FLAP] = kFlapClosed;
-  servo[ROOF] = kRoofClosed;
-  wait1Msec(350);
-  servo[SPOUT] = kSpoutClosed;
+	servo[ROOF] = kRoofClosed;
+	wait1Msec(350);
+	servo[SPOUT] = kSpoutClosed;
 	//servo[FLAP] = kFlapClosed;
 	//servo[ROOF] = kRoofClosed;
 	//wait1Msec(350);
@@ -373,64 +376,81 @@ void mission_high(int mono_pos) // Center 120 cm goal
 		drive_e(CCW, 100, 1000);
 		drive_e(S, 50, 1000); //2700
 		servo[SPOUT] = kSpoutClosed;
-		halt();
-			PlayImmediateTone(1200, 200);
-			wait1Msec(200);
-			if (IR_SEEK_VAL <= 3) {
-				mono_pos2 = 1;
-				} else {
-				mono_pos2 = 2;
-			}
+		PlayImmediateTone(1200, 200);
+		wait1Msec(200);
+		if (IR_SEEK_VAL <= 3) {
+			mono_pos2 = 1;
+			} else {
+			mono_pos2 = 2;
+		}
 		if (mono_pos2 == 1) {
 			drive_e(S, 50, 2800);
 			while (!MAX_REACHED) {}
 			drive_e(CW, 100, 600);
 			drive_e(S, 50, 1200);
-			drive_e(CW, 100, 1500);
+			drive_t(CW, 100, 0);
+			while (ULTRA_VAL > 75) {}
+			drive_e(CCW, 100, 50);
+			halt();
 			drive_e(W, 88, 200);
-			wait1Msec(500);
+			drive_t(S, 60, 0);
+			while (ULTRA_VAL > 29) {}
+			halt();
+			servoChangeRate[SPOUT] = 15;
+			servo[SPOUT] = 100;
+			wait1Msec(750);
+			servoChangeRate[SPOUT] = 10;
 
 
-			shake();
 			drive_e(N, 100, 500);
 			drive_e(E, 88, 400);
-		}	else {
+			drive_t(CCW, 60, 0);
+			while (IR_SEEK_VAL < 5) {}
+			halt();
+			while (true) {}
+			}	else {
 			drive_e(S, 50, 1500);
-			while (!MAX_REACHED) {}
 			drive_e(CW, 100, 1700);
-			drive_e(S, 40, 250);
-			wait1Msec(350);
-			servo[FLAP] = kFlapHigh - 40;
-			pop_it(3, 5);
-			shake();
-			drive_e(E, 88, 300);
+			while (!MAX_REACHED) {}
+			servo[SPOUT] = kSpoutClosed;
+			drive_t(S, 60, 0);
+			while (ULTRA_VAL > 29) {}
+			halt();
+			//while (true) {}
+			servoChangeRate[SPOUT] = 15;
+			servo[SPOUT] = 100;
+			wait1Msec(500);
+			servoChangeRate[SPOUT] = 10;
 			drive_e(N, 40, 350);
 			//drive_e(CCW, 100, 1500);
 			//drive_e(N, 50, 2700);
 			//drive_e(CW, 100, 1000);
 		}
-	} else {
+		} else {
+		servo[SPOUT] = kSpoutClosed;
 		while (!MAX_REACHED) {}
-		drive_e(S, 60, 1900);
-		wait1Msec(350);
-		servoChangeRate[SPOUT] = 0;
+		servo[SPOUT] = kSpoutClosed;
+		drive_t(S, 60, 0);
+		while (ULTRA_VAL > 29) {}
+		halt();
+		//while (true) {}
+		servoChangeRate[SPOUT] = 15;
 		servo[SPOUT] = 100;
-
-		shake();
+		wait1Msec(500);
+		servoChangeRate[SPOUT] = 10;
 		drive_e(N, 60, 1000);
-			servoChangeRate[SPOUT] = 10;
 	}
-	servo[FLAP] = kFlapClosed;
 	drive_e(E, 88, 1800);
 	drive_e(S, 100, 1000);
-	drive_t(BWD + 20, 100, 1000);
+	drive_t(BWD + 20, 100, 1500);
+	drive_t(CW, 100, 1000);
 	//StartTask(tele_setup);
 	//while(!setup_done) {}
 }
 
 void mission_ramp()
 {
-	int start_bearing = bearing;
+	//	int start_bearing = bearing;
 	drive_t(S, 40, 600);
 	drive_t(N, 1, 500);
 	drive_t(S, 2, 500);
@@ -449,7 +469,7 @@ void mission_goal1(bool pointed)
 		drive_e(S, 40, 175);  //Changed from 300
 		while(lockout_medium) {} //wait for 60 cm height and spatula to be all the way down.
 		swerve(-90, 500, 700);
-	} else {
+		} else {
 		drive_e(S, 40, 500); //drive forward and line up
 		square();
 		while(lockout_medium) {} //wait for 60 cm height and spatula to be all the way down.
@@ -460,7 +480,7 @@ void mission_goal1(bool pointed)
 	ClearTimer(T1);
 	if (pointed) {// <Untested>
 		while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 900) {}
-	} else {
+		} else {
 		while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {}// revert to this if it isn't working
 	} // </untested>
 	servo[GRAB1] = kGrab1Closed;
@@ -519,18 +539,18 @@ void mission_goal2(int pointed)
 	square();
 	if (pointed == 1) {
 		swerve(-50, 600, 1000);// old/standard swerve but slower now
-	} else if (pointed == 2) {
+		} else if (pointed == 2) {
 		drive_e(S, 40, 1200);
 		swerve(-50, 600, 1000);
 		//drive_e(W, 100, 300);// new/alt swerve for pointy-pointy
-	} else { //flat
+		} else { //flat
 		drive_e(S, 40, 1600);
 		drive_e(E, 100, 200);
 	}
 
 	drive_t(S, 25, 0);
 	ClearTimer(T1);
-	while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 800 : 1500)) {}
+while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 800 : 1500)) {}
 	//if (pointed == 2) {
 	//	drive_e(CW, 60, 200);
 	//	wait1Msec(1000);
@@ -573,14 +593,14 @@ task main()
 	HTSPBsetupIO(HTSPB, 0x40);
 
 	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanRamp;
+	Plan_t cur_plan = kPlanHigh;
 	int tubes = 2;
 	int point = 1;
 	int delay = 0;
 
 	int monolith_position;
 
-  //dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
+	//dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
 	// waitForStart();
 	ClearTimer(T4);
 	wait1Msec(delay * 1000);
@@ -595,7 +615,7 @@ task main()
 		if (tubes > 0)
 			mission_goal1(point == 1 || point == 3);
 		if (tubes > 1)
-			mission_goal2(point ? point - 1 : 0);
+		mission_goal2(point ? point - 1 : 0);
 
 		break;
 
