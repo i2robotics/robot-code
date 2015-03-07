@@ -69,7 +69,9 @@ task spatulaDown()
       SPATULA_DOWN_var = true;
     } else {
       spatula_down_var = false;
-    }
+    motor[FORK] = 100;
+  while (SPATULA_DOWN) {}
+  motor[FORK] = 0;}
   }
   motor[FORK] = 100;
   while (SPATULA_DOWN) {}

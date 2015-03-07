@@ -47,32 +47,23 @@
 #include "../headers/helpers_1.h"
 #include "../headers/servoValues_1.h"
 
-void pop_it(int times_without_feeder, int times_with_feeder)
+void pop_it(int times, bool feeder)
 {
 #ifndef DEBUG_NO_POP
-	bool popper_has_been_readied = false;
+	bool is_cocked = false;
+	if (feeder)
+		motor[FEEDER] = 100;
+
 	motor[POPPER] = 100;
-	while (times_without_feeder > 0) {
-		if (!POPPER_PRIMED && !popper_has_been_readied) {
-			popper_has_been_readied = true;
-			times_without_feeder -= 1;
+	while (times >= 0) {
+		if (POPPER_PRIMED && !is_cocked) {
+			is_cocked = true;
+			times--;
 			motor[POPPER] = 0;
 			wait1Msec(50);
 			motor[POPPER] = 100;
-			} else if (POPPER_PRIMED) {
-			popper_has_been_readied = false;
-		}
-	}
-	popper_has_been_readied = false;
-	while (times_with_feeder > 0) {
-		if (!POPPER_PRIMED && !popper_has_been_readied) {
-			popper_has_been_readied = true;
-			times_with_feeder -= 1;
-			motor[POPPER] = 0;
-			wait1Msec(50);
-			motor[POPPER] = 100;
-			} else if (POPPER_PRIMED) {
-			popper_has_been_readied = false;
+		} else if (!POPPER_PRIMED) {
+			is_cocked = false;
 		}
 	}
 #else
@@ -86,7 +77,7 @@ void pop_it(int times_without_feeder, int times_with_feeder)
 task main()
 {
 
-  pop_it(3, 0);
+  pop_it(3, 1);
 
 
 	halt();

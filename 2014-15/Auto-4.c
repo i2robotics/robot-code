@@ -60,6 +60,7 @@
 
 bool lockout_medium = false;
 bool setup_done = true;
+bool lockout_fork = false;
 
 //==================  Config Definitions  ==================
 typedef enum
@@ -97,7 +98,7 @@ task initialize_motors()
 	bool first_time_repeat = true;
 	bool check_spatula = false;
 	lockout_medium = true;
-
+	lockout_fork = true;
 	motor[TUBE] = 100;
 
 	wait1Msec(800);
@@ -108,7 +109,10 @@ task initialize_motors()
 
 	while (!check_spatula) { // This mess is here to mitigate against flickering values
 		while (!SPATULA_DOWN) {//when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube
-		}
+		  if (SIXTY_REACHED) {
+		  	motor[TUBE] = 0;
+		  }
+	  }
 		if (SPATULA_DOWN) {
 			check_spatula = true;
 			} else {
@@ -117,9 +121,19 @@ task initialize_motors()
 	}
 	//when timer is greater than or equal to 7000 miliseconds stop the lift
 	motor[FORK] = 0;
-
+	motor[FORK] = 100;
+  while (SPATULA_DOWN) {
+  	if (SIXTY_REACHED) {
+			motor[TUBE] = 0;
+		}
+	}
+  motor[FORK] = 0;
+  lockout_fork = false;
 	while (time1[T2] < 9000 && !SIXTY_REACHED) {}
 	motor[TUBE] = 0;
+	servo[SPOUT] = 0; //TEMPORARY HACK
+	wait1Msec(350);
+	servo[ROOF] = kRoofOpen;
 	ClearTimer(T2);
 	lockout_medium = false;
 }
@@ -263,35 +277,23 @@ int seek_ir_pos()
 	return monolith_position;
 }
 
-void pop_it(int times_without_feeder, int times_with_feeder)
+void pop_it(int times, bool feeder)
 {
 #ifndef DEBUG_NO_POP
-	if (times_with_feeder) {times_with_feeder++}
-	if (times_without_feeder) {times_without_feeder++}
+	bool is_cocked = false;
+	if (feeder)
+		motor[FEEDER] = 100;
 
-	bool popper_has_been_readied = false;
 	motor[POPPER] = 100;
-	while (times_without_feeder > 0) {
-		if (!POPPER_PRIMED && !popper_has_been_readied) {
-			popper_has_been_readied = true;
-			times_without_feeder -= 1;
+	while (times >= 0) {
+		if (POPPER_PRIMED && !is_cocked) {
+			is_cocked = true;
+			times--;
 			motor[POPPER] = 0;
 			wait1Msec(50);
 			motor[POPPER] = 100;
-			} else if (POPPER_PRIMED) {
-			popper_has_been_readied = false;
-		}
-	}
-	popper_has_been_readied = false;
-	while (times_with_feeder > 0) {
-		if (!POPPER_PRIMED && !popper_has_been_readied) {
-			popper_has_been_readied = true;
-			times_with_feeder -= 1;
-			motor[POPPER] = 0;
-			wait1Msec(50);
-			motor[POPPER] = 100;
-			} else if (POPPER_PRIMED) {
-			popper_has_been_readied = false;
+		} else if (!POPPER_PRIMED) {
+			is_cocked = false;
 		}
 	}
 #else
@@ -468,13 +470,13 @@ void mission_goal1(bool pointed)
 	if (pointed) {
 		drive_e(S, 40, 800); //drive forward and line up as well as swerve to make sure the goal is in the right direction
 		square();
-		drive_e(S, 40, 175);  //Changed from 300
-		while(lockout_medium) {} //wait for 60 cm height and spatula to be all the way down.
+		drive_e(S, 40, 150);  //Changed from 300
+		while(lockout_fork) {} //wait for 60 cm height and spatula to be all the way down.
 		swerve(-90, 500, 700);
 	} else {
 		drive_e(S, 40, 500); //drive forward and line up
 		square();
-		while(lockout_medium) {} //wait for 60 cm height and spatula to be all the way down.
+		while(lockout_fork) {} //wait for 60 cm height and spatula to be all the way down.
 		drive_e(S, 40, 750);
 	}
 	nMotorEncoder[DRIVE_SW] = 0;
@@ -492,15 +494,9 @@ void mission_goal1(bool pointed)
 	halt();
 	int encoder_after_swerve = nMotorEncoder[DRIVE_SW];
 
-	wait1Msec(500);
-	servo[SPOUT] = kSpoutOpenE;
-	wait1Msec(1200);
-	servo[ROOF] = kRoofOpen;
-	wait1Msec(500);
-	servo[FLAP] = kFlapHigh;
-	wait1Msec(500);
+	while (lockout_medium) {}
 
-	pop_it(3, 0);
+	pop_it(2, false);
 	wait1Msec(300);
 
 	servo[ROOF] = kRoofClosed;
@@ -530,15 +526,17 @@ void mission_goal2(int pointed)
 	drive_e(S, 50, 1200);
 	drive_e(N, 50, 1300);
 	drive_t(CW, 100, 1300);
-
+  motor[FORK] = 100;
+  while (SPATULA_DOWN) {}
+  motor[FORK] = 0;
 	drive_t(E, 100, 300);
 
 	square();
 	if (pointed == 1) {
-		drive_e(S, 40, 1500);
+		drive_e(S, 40, 1500);// 1500 too short
 		swerve(-50, 600, 1000);// old/standard swerve but slower now
 		} else if (pointed == 2) {
-		drive_e(S, 40, 1200);
+		drive_e(S, 40, 1000);
 		swerve(-50, 600, 1000);
 		//drive_e(W, 100, 300);// new/alt swerve for pointy-pointy
 		} else { //flat
@@ -546,9 +544,9 @@ void mission_goal2(int pointed)
 		drive_e(E, 100, 200);
 	}
 
-	drive_t(S, 25, 0);
+	drive_t(S, 20, 0);
 	ClearTimer(T1);
-while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 800 : 1500)) {}
+while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? (pointed==2 ? 800: 1200) : 1500)) {}
 	//if (pointed == 2) {
 	//	drive_e(CW, 60, 200);
 	//	wait1Msec(1000);
@@ -567,14 +565,14 @@ while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? 8
 	motor[FEEDER] = 80;
 	servo[ROOF] = kRoofClosed;
 	wait1Msec(500);
-	servoChangeRate[SPOUT] = 5;
+	servoChangeRate[SPOUT] = 15;
 	servo[SPOUT] = kSpoutOpen;
 	wait1Msec(1200);
 	servo[ROOF] = kRoofOpen;
 	wait1Msec(500);
 	servo[FLAP] = kFlapOpen;
-
-	pop_it(0, 4);
+	servoChangeRate[Spout] = 10;
+	pop_it(4, true);
 
 	if (pointed) {
 		motor[DRIVE_NW] = 90;
@@ -593,13 +591,13 @@ task main()
 	Alliance_t cur_alli = kAllianceRed;
 	Plan_t cur_plan = kPlanRamp;
 	int tubes = 2;
-	int point = 2;
+	int point = 3;
 	int delay = 0;
 
 	int monolith_position;
 
-	dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
-	waitForStart();
+	//dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
+	//waitForStart();
 	ClearTimer(T4);
 	wait1Msec(delay * 1000);
 
