@@ -392,6 +392,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			while (!MAX_REACHED) {}
 			drive_e(CW, 100, 600);
 			drive_e(S, 50, 1200);
+			drive_e(CW, 100, 900);
 			drive_t(CW, 100, 0);
 			while (ULTRA_VAL > 75) {}
 			drive_e(CCW, 100, 50);
@@ -402,16 +403,18 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			halt();
 			servoChangeRate[SPOUT] = 15;
 			servo[SPOUT] = 100;
-			wait1Msec(750);
+			wait1Msec(1000);
 			servoChangeRate[SPOUT] = 10;
 
 
 			drive_e(N, 100, 500);
 			drive_e(E, 88, 400);
 			drive_t(CCW, 60, 0);
-			while (IR_SEEK_VAL < 5) {}
+			while (IR_SEEK_VAL > 5) {}
 			halt();
-			while (true) {}
+			drive_e(CCW, 60, 300);
+			halt();
+			drive_e(CW, 60, 100);
 			}	else {
 			drive_e(S, 50, 1500);
 			drive_e(CW, 100, 1700);
@@ -420,6 +423,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			drive_t(S, 60, 0);
 			while (ULTRA_VAL > 29) {}
 			halt();
+			drive_e(E, 88, 100);
 			//while (true) {}
 			servoChangeRate[SPOUT] = 15;
 			servo[SPOUT] = 100;
@@ -448,8 +452,26 @@ void mission_high(int mono_pos) // Center 120 cm goal
 	drive_e(S, 100, 1000);
 	drive_t(BWD + 20, 100, 1500);
 	drive_t(CW, 100, 1000);
-	//StartTask(tele_setup);
-	//while(!setup_done) {}
+	GRAB_OPEN;
+	bool spatula_down_var = false;
+if (!SPATULA_DOWN) {
+	motor[FORK] = -100;
+	}
+  spatula_down_var = false;
+  motor[FORK] = -100;
+  while (!spatula_down_var) {
+    while (!SPATULA_DOWN) {}
+    if (SPATULA_DOWN) {
+      SPATULA_DOWN_var = true;
+    } else {
+      spatula_down_var = false;
+    motor[FORK] = 100;
+  while (SPATULA_DOWN) {}
+  motor[FORK] = 0;}
+  }
+  motor[FORK] = 100;
+  while (SPATULA_DOWN) {}
+  motor[FORK] = 0;
 }
 
 void mission_ramp()
@@ -589,7 +611,7 @@ task main()
 	HTSPBsetupIO(HTSPB, 0x40);
 
 	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanRamp;
+	Plan_t cur_plan = kPlanHigh;
 	int tubes = 2;
 	int point = 3;
 	int delay = 0;
@@ -597,7 +619,7 @@ task main()
 	int monolith_position;
 
 	//dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
-	//waitForStart();
+	waitForStart();
 	ClearTimer(T4);
 	wait1Msec(delay * 1000);
 
