@@ -12,7 +12,7 @@ const unsigned byte kFlapHigh   = 205;
 
 const unsigned byte kRoofClosed = 255;
 const unsigned byte kRoofOpen   = 185; // ROOF
-const unsigned byte kRoofHigh   = 145;
+const unsigned byte kRoofHigh   = 162;
 
 const unsigned byte kSpoutClosed = 227;
 const unsigned byte kSpoutOpen   = 12;  // SPOUT

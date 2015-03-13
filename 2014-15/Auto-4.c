@@ -149,6 +149,7 @@ task initialize_motors()
 	servo[SPOUT] = 0; //TEMPORARY HACK
 	wait1Msec(350);
 	servo[ROOF] = kRoofOpen;
+	wait1Msec(300);
 	ClearTimer(T2);
 	lockout_medium = false;
 }
@@ -411,15 +412,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 	servo[ROOF] = kRoofClosed;
 	wait1Msec(350);
 	servo[SPOUT] = kSpoutClosed;
-	//servo[FLAP] = kFlapClosed;
-	//servo[ROOF] = kRoofClosed;
-	//wait1Msec(350);
-	//servo[SPOUT] = kSpoutOpen;
-	//wait1Msec(1000);
-	//servo[ROOF] = kRoofHigh;
-	//servo[FLAP] = kFlapHigh;
-	//wait1Msec(250);
-	//servo[SPOUT] = kSpoutMiddle;
+
 	if (mono_pos == 3) {
 		mono_pos = 2;
 	}
@@ -581,7 +574,8 @@ void mission_goal2(int pointed)
 	square();
 	if (pointed == 1) {
 		drive_e(S, 40, 1500);// 1500 too short
-		swerve(-50, 600, 1000);// old/standard swerve but slower now
+		wait10Msec(500);
+		swerve(-50, 600, 700);// old/standard swerve but slower now
 		} else if (pointed == 2) {
 		drive_e(S, 40, 1000);
 		swerve(-50, 600, 1000);
@@ -643,8 +637,8 @@ task main()
 
 	int monolith_position;
 
-	dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
-	waitForStart();
+	//dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
+	//waitForStart();
 	ClearTimer(T4);
 	wait1Msec(delay * 1000);
 
