@@ -77,7 +77,7 @@ typedef enum
 	kPlanBlock
 } Plan_t;
 #define DEF_PLAN_STRINGS const string Plan_s[] = {"Kick", "Ramp", "High", "Block"};
-
+#define timeout 5500
 
 #include "../headers/dialog_2.h"
 
@@ -101,6 +101,8 @@ task initialize_motors()
 	lockout_fork = true;
 	motor[TUBE] = 100;
 
+
+
 	wait1Msec(800);
 	motor[FORK] = -100;
 	//start timer
@@ -108,7 +110,15 @@ task initialize_motors()
 	time1[T2] = 0;
 
 	while (!check_spatula) { // This mess is here to mitigate against flickering values
+		if (time1[T2] > timeout) {
+		  		motor[FORK] = 0;
+		  		break;
+		  	}
 		while (!SPATULA_DOWN) {//when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube
+			if (time1[T2] > timeout) {
+		  		motor[FORK] = 0;
+		  		break;
+		  	}
 		  if (SIXTY_REACHED) {
 		  	motor[TUBE] = 0;
 		  }
@@ -119,10 +129,15 @@ task initialize_motors()
 			check_spatula = false;
 		}
 	}
+
 	//when timer is greater than or equal to 7000 miliseconds stop the lift
 	motor[FORK] = 0;
 	motor[FORK] = 100;
   while (SPATULA_DOWN) {
+  	if (time1[T2] > timeout) {
+		  		motor[FORK] = 0;
+		  		break;
+		}
   	if (SIXTY_REACHED) {
 			motor[TUBE] = 0;
 		}
@@ -136,6 +151,39 @@ task initialize_motors()
 	servo[ROOF] = kRoofOpen;
 	ClearTimer(T2);
 	lockout_medium = false;
+}
+
+void put_fork_down()
+{
+GRAB_OPEN;
+	bool spatula_down_var = false;
+if (!SPATULA_DOWN) {
+	motor[FORK] = -100;
+	}
+  spatula_down_var = false;
+  motor[FORK] = -100;
+  while (!spatula_down_var) {
+  		if (time1[T2] > timeout) {
+		  		motor[FORK] = 0;
+		  		break;
+		  	}
+    while (!SPATULA_DOWN) {
+    		if (time1[T2] > timeout) {
+		  		motor[FORK] = 0;
+		  		break;
+		  	}
+		  	}
+    if (SPATULA_DOWN) {
+      spatula_down_var = true;
+    } else {
+      spatula_down_var = false;
+    motor[FORK] = 100;
+  while (SPATULA_DOWN) {}
+  motor[FORK] = 0;}
+  }
+  motor[FORK] = 100;
+  while (SPATULA_DOWN) {}
+  motor[FORK] = 0;
 }
 
 task tele_setup()
@@ -399,35 +447,30 @@ void mission_high(int mono_pos) // Center 120 cm goal
 			halt();
 			drive_e(W, 88, 200);
 			drive_t(S, 60, 0);
-			while (ULTRA_VAL > 29) {}
+			while (ULTRA_VAL > 32) {}
 			halt();
 			servoChangeRate[SPOUT] = 15;
-			servo[SPOUT] = 100;
-			wait1Msec(1000);
+			servo[SPOUT] = kSpoutMiddle;
+			wait1Msec(2000);
 			servoChangeRate[SPOUT] = 10;
 
 
-			drive_e(N, 100, 500);
-			drive_e(E, 88, 400);
-			drive_t(CCW, 60, 0);
-			while (IR_SEEK_VAL > 5) {}
-			halt();
-			drive_e(CCW, 60, 300);
-			halt();
-			drive_e(CW, 60, 100);
+			drive_e(N, 60, 500);
+			drive_e(W, 88, 400);
+
 			}	else {
-			drive_e(S, 50, 1500);
-			drive_e(CW, 100, 1700);
+			drive_e(S, 50, 1300);
+			drive_e(CW, 100, 1800);
 			while (!MAX_REACHED) {}
 			servo[SPOUT] = kSpoutClosed;
 			drive_t(S, 60, 0);
-			while (ULTRA_VAL > 29) {}
+			while (ULTRA_VAL > 32) {}
 			halt();
 			drive_e(E, 88, 100);
 			//while (true) {}
 			servoChangeRate[SPOUT] = 15;
 			servo[SPOUT] = 100;
-			wait1Msec(500);
+			wait1Msec(1500);
 			servoChangeRate[SPOUT] = 10;
 			drive_e(N, 40, 350);
 			//drive_e(CCW, 100, 1500);
@@ -444,34 +487,16 @@ void mission_high(int mono_pos) // Center 120 cm goal
 		//while (true) {}
 		servoChangeRate[SPOUT] = 15;
 		servo[SPOUT] = 100;
-		wait1Msec(500);
+		wait1Msec(1500);
 		servoChangeRate[SPOUT] = 10;
 		drive_e(N, 60, 1000);
+		drive_e(E, 88, 200);
 	}
 	drive_e(E, 88, 1800);
-	drive_e(S, 100, 1000);
+	drive_e(S, 100, 1500);
 	drive_t(BWD + 20, 100, 1500);
 	drive_t(CW, 100, 1000);
-	GRAB_OPEN;
-	bool spatula_down_var = false;
-if (!SPATULA_DOWN) {
-	motor[FORK] = -100;
-	}
-  spatula_down_var = false;
-  motor[FORK] = -100;
-  while (!spatula_down_var) {
-    while (!SPATULA_DOWN) {}
-    if (SPATULA_DOWN) {
-      SPATULA_DOWN_var = true;
-    } else {
-      spatula_down_var = false;
-    motor[FORK] = 100;
-  while (SPATULA_DOWN) {}
-  motor[FORK] = 0;}
-  }
-  motor[FORK] = 100;
-  while (SPATULA_DOWN) {}
-  motor[FORK] = 0;
+	//put_fork_down();
 }
 
 void mission_ramp()
@@ -593,7 +618,7 @@ while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? (
 	servo[ROOF] = kRoofOpen;
 	wait1Msec(500);
 	servo[FLAP] = kFlapOpen;
-	servoChangeRate[Spout] = 10;
+	servoChangeRate[SPOUT] = 10;
 	pop_it(4, true);
 
 	if (pointed) {
@@ -611,14 +636,14 @@ task main()
 	HTSPBsetupIO(HTSPB, 0x40);
 
 	Alliance_t cur_alli = kAllianceRed;
-	Plan_t cur_plan = kPlanHigh;
+	Plan_t cur_plan = kPlanRamp;
 	int tubes = 2;
-	int point = 3;
+	int point = 2;
 	int delay = 0;
 
 	int monolith_position;
 
-	//dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
+	dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
 	waitForStart();
 	ClearTimer(T4);
 	wait1Msec(delay * 1000);

@@ -18,7 +18,7 @@ const unsigned byte kSpoutClosed = 227;
 const unsigned byte kSpoutOpen   = 12;  // SPOUT
 const unsigned byte kSpoutMiddle = 90; //88
 
-const unsigned byte kGrab1Closed = 215;
-const unsigned byte kGrab1Open   = 75; // GRAB 1
+const unsigned byte kGrab1Closed = 168;
+const unsigned byte kGrab1Open   = 24; // GRAB 1
 const unsigned byte kGrab2Closed = 60; // GRAB 2
 const unsigned byte kGrab2Open   = 215;
