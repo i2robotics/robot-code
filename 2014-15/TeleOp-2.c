@@ -224,6 +224,12 @@ task main()
       servo[GRAB2] = kGrab2Open;
     }
 
+    if (!grab_state_left && !grab_state_right) { //if both switches are disengaged
+      servo[SPOUT] = kSpoutMiddle;
+    } else {
+      servo[SPOUT] = kSpoutOpen;
+    }
+
     action_joy2 //adjusting ball dispenser
     state bRT down // close
       StartTask(closeRoof);
