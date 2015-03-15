@@ -67,18 +67,19 @@ task spatulaDown()
   motor[FORK] = -100;
   while (!spatula_down_var) {
     while (!SPATULA_DOWN) {}
-    if (SPATULA_DOWN) {
-      SPATULA_DOWN_var = true;
+    if (SPATULA_DOWN || SPATULA_UP) {
+      spatula_down_var = true;
     } else {
       spatula_down_var = false;
       motor[FORK] = 100;
       while (SPATULA_DOWN) {}
       motor[FORK] = 0;
     }
-  }
+  } if (!SPATULA_UP) {
   motor[FORK] = 100;
   while (SPATULA_DOWN) {}
   motor[FORK] = 0;
+	}
   lock_fork = false;
 }
 
@@ -153,10 +154,21 @@ task main()
       servo[SPOUT] = ServoValue[SPOUT] + 2;
     end
 
+    action_joy1
+    state bY down
+    	StopTask(spatulaDown);
+    	motor[FORK] = 0;
+    	lock_fork = false;
+    end
+
     if (lock_fork == false) {
       action_joy1 // Rolling Goal Forklift
       state bRB down
+      if (!SPATULA_UP) {
         motor[FORK] = 100;
+      } else {
+      	motor[FORK] = 0;
+      }
       state bRT down
         if (!SPATULA_DOWN) {
           motor[FORK] = -100;
@@ -225,7 +237,7 @@ task main()
     }
 
     if (!grab_state_left && !grab_state_right) { //if both switches are disengaged
-      servo[SPOUT] = kSpoutMiddle;
+      servo[SPOUT] = kSpoutSlight;
     } else {
       servo[SPOUT] = kSpoutOpen;
     }
@@ -273,7 +285,7 @@ task main()
 
     //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
-    HTSPBsetupIO(HTSPB, 0x40);
+    HTSPBsetupIO(HTSPB, 0x100);
 //    if (!MAX_REACHED) {
 //      nxtDisplayTextLine(1, "Magnet absent");
 //      //HTSPBwriteIO(HTSPB, 0x10);

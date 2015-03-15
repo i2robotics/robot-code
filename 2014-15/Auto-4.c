@@ -109,12 +109,12 @@ task initialize_motors()
   time1[T2] = 0;
 
   while (!check_spatula) { // This mess is here to mitigate against flickering values
-    if (time1[T2] > timeout) {
+    if (time1[T2] > timeout || SPATULA_UP) {
       motor[FORK] = 0;
       break;
     }
     while (!SPATULA_DOWN) {//when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube
-      if (time1[T2] > timeout) {
+      if (time1[T2] > timeout || SPATULA_UP) {
         motor[FORK] = 0;
         break;
       }
@@ -133,7 +133,7 @@ task initialize_motors()
   motor[FORK] = 0;
   motor[FORK] = 100;
   while (SPATULA_DOWN) {
-    if (time1[T2] > timeout) {
+    if (time1[T2] > timeout || SPATULA_UP) {
       motor[FORK] = 0;
       break;
     }

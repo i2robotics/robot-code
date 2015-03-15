@@ -76,3 +76,4 @@ void go_to_bearing(int target)
 #define SPATULA_DOWN HTSPBreadIO(HTSPB, 0x08) != 0
 #define POPPER_PRIMED HTSPBreadIO(HTSPB, 0x10) != 0
 #define SIXTY_REACHED HTSPBreadIO(HTSPB, 0x20) != 0
+#define SPATULA_UP HTSPBreadIO(HTSPB, 0x40) != 0

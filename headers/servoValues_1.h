@@ -17,6 +17,7 @@ const unsigned byte kRoofHigh   = 162;
 const unsigned byte kSpoutClosed = 227;
 const unsigned byte kSpoutOpen   = 12;  // SPOUT
 const unsigned byte kSpoutMiddle = 90; //88
+const unsigned byte kSpoutSlight = 25;
 
 const unsigned byte kGrab1Closed = 168;
 const unsigned byte kGrab1Open   = 24; // GRAB 1
