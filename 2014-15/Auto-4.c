@@ -250,6 +250,25 @@ void swerve(int power, unsigned int time_1, unsigned int time_2)
   motor[DRIVE_NW] = power;
   motor[DRIVE_SW] = power;
   wait1Msec(time_2);
+  halt();
+}
+
+void swerve_e(int power, int enc_1, int enc_2)
+{
+  nMotorEncoder[DRIVE_NE] = 0;
+  motor[DRIVE_NE] = power;
+  motor[DRIVE_SE] = power;
+  motor[DRIVE_NW] = 0;
+  motor[DRIVE_SW] = 0;
+  while (abs(nMotorEncoder[DRIVE_NE]) < enc_1) {}
+
+  nMotorEncoder[DRIVE_SW] = 0;
+  motor[DRIVE_NE] = 0;
+  motor[DRIVE_SE] = 0;
+  motor[DRIVE_NW] = power;
+  motor[DRIVE_SW] = power;
+  while (abs(nMotorEncoder[DRIVE_SW]) < enc_2) {}
+  halt();
 }
 
 void square()
@@ -511,7 +530,6 @@ void mission_goal1(bool pointed)
   if (pointed) {
     drive_e(S, 40, 800); //drive forward and line up as well as swerve to make sure the goal is in the right direction
     square();
-    drive_e(S, 40, 150);  //Changed from 300
     while (lockout_fork) {} //wait for 60 cm height and spatula to be all the way down.
     swerve(-90, 500, 700);
   } else {
@@ -574,21 +592,20 @@ void mission_goal2(int pointed)
 
   square();
   if (pointed == 1) {
-    drive_e(S, 40, 1500);// 1500 too short
-    wait10Msec(500);
-    swerve(-50, 600, 700);// old/standard swerve but slower now
+    drive_e(S, 40, 2100);// 1500 too short
+    swerve_e(-50, 600, 900);// old/standard swerve but slower now
   } else if (pointed == 2) {
-    drive_e(S, 40, 1000);
-    swerve(-50, 600, 1000);
+    drive_e(S, 40, 1500);
+    swerve_e(-50, 600, 1000);
     //drive_e(W, 100, 300);// new/alt swerve for pointy-pointy
   } else { //flat
     drive_e(S, 40, 1600);
     drive_e(E, 100, 200);
   }
 
-  drive_t(S, 20, 0);
+  drive_t(S, 15, 0);
   ClearTimer(T1);
-  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? (pointed == 2 ? 800 : 1200) : 1500)) {}
+  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 1500) {}
   //if (pointed == 2) {
   //	drive_e(CW, 60, 200);
   //	wait1Msec(1000);
@@ -633,7 +650,7 @@ task main()
   Alliance_t cur_alli = kAllianceRed;
   Plan_t cur_plan = kPlanRamp;
   int tubes = 2;
-  int point = 2;
+  int point = 3;
   int delay = 0;
 
   int monolith_position;
