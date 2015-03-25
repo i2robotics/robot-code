@@ -38,7 +38,6 @@
 //#define DEBUG_NO_POP
 
 
-
 #define IR_SEEK_VAL HTIRS2readACDir(msensor_S4_1)
 #define ULTRA_VAL USreadDist(msensor_S4_2)
 #define SIDE_TOUCH_S TSreadState(msensor_S4_4)
@@ -52,10 +51,11 @@
 #include "../drivers/hitechnic-superpro.h"
 #include "../drivers/lego-ultrasound.h"
 
-//#include "../headers/gyro_1.h"
 #include "../headers/nav_5.h"
 #include "../headers/helpers_1.h"
 #include "../headers/servoValues_1.h"
+#include "../header/concurrency_1.h"
+
 //==================  Variables ============================
 
 bool lockout_medium = false;
@@ -541,11 +541,11 @@ void mission_goal1(bool pointed)
   nMotorEncoder[DRIVE_SW] = 0;
   drive_t(S, 20, 0); // grab and score in first goal
   ClearTimer(T1);
-  if (pointed) {// <Untested>
+  if (pointed) {
     while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 900) {}
   } else {
-    while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {}// revert to this if it isn't working
-  } // </untested>
+    while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {}
+  }
   servo[GRAB1] = kGrab1Closed;
   servo[GRAB2] = kGrab2Closed;
   wait1Msec(300);
@@ -657,7 +657,7 @@ task main()
 
   //dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
   //waitForStart();
-  ClearTimer(T4);
+  ClearTimer(T4); //global `run timer' used by new concurrency code
   wait1Msec(delay * 1000);
 
   switch (cur_plan) {

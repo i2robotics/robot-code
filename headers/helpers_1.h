@@ -44,9 +44,6 @@
 #define otherwise }else{
 #define end }
 
-#define NEW_TIMEOUT time1[T4]
-#define CHECK_TIMEOUT(timeout_start, duration) ((time1[T4] - timeout_start) < duration ? true : false)
-
 #define GRAB_OPEN servo[GRAB1] = kGrab1Open; servo[GRAB2] = kGrab2Open
 #define GRAB_CLOSE servo[GRAB1] = kGrab1Closed; servo[GRAB2] = kGrab2Closed
 
@@ -71,6 +68,7 @@ void go_to_bearing(int target)
 
 //for the superpro
 #define MAX_REACHED HTSPBreadIO(HTSPB, 0x01) != 0
+#define NINETY_REACHED HTSPBreadIO(HTSPB, 0x01) != 0
 #define RIGHT_GRABBER_SWITCH HTSPBreadIO(HTSPB, 0x02) != 0
 #define LEFT_GRABBER_SWITCH HTSPBreadIO(HTSPB, 0x04) != 0
 #define SPATULA_DOWN HTSPBreadIO(HTSPB, 0x08) != 0
