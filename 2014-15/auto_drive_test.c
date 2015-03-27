@@ -22,7 +22,7 @@
 #pragma config(Servo,  srvo_S2_C3_6,    FLAP,                 tServoStandard)
 #pragma config(Servo,  srvo_S2_C4_1,    GRAB1,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C4_2,    GRAB2,                tServoStandard)
-#pragma config(Servo,  srvo_S2_C4_3,    servo9,               tServoNone)
+#pragma config(Servo,  srvo_S2_C4_3,    GRAB3,                tServoNone)
 #pragma config(Servo,  srvo_S2_C4_4,    servo10,              tServoNone)
 #pragma config(Servo,  srvo_S2_C4_5,    servo11,              tServoNone)
 #pragma config(Servo,  srvo_S2_C4_6,    servo12,              tServoNone)
@@ -110,25 +110,15 @@ void swerve_e(int power, int enc_1, int enc_2)
 
 task main()
 {
-	int pointed = 1;
-  GRAB_OPEN;
-	square();
-    swerve_e(-50, 600, 800);// old/standard swerve but slower now
-
-  drive_t(S, 15, 0);
-  ClearTimer(T1);
-  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < (pointed ? (pointed == 2 ? 800 : 1200) : 1500)) {}
-
-
+  servo[GRAB3] = kGrab3Open;
+  wait1Msec(350);
   GRAB_CLOSE;
-  wait1Msec(140);
-  halt();
-  drive_t(N, 20, 500);
-  GRAB_OPEN;
-  drive_t(S, 20, 300);
-  GRAB_CLOSE;
+  drive_e(W, 88, 300);
+	drive_e(CCW, 60, 5500);
+	drive_e(N, 60, 4500);
 
+  servo[GRAB3] = kGrab3Closed;
+  wait1Msec(350);
+  drive_e(S, 40, 600);
 
-	halt();
-	wait1Msec(500);
 }
