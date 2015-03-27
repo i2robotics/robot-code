@@ -1,7 +1,5 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
 #pragma config(Hubs,  S2, HTMotor,  HTMotor,  HTServo,  HTServo)
-#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
-#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSPB,          sensorI2CCustom9V)
 #pragma config(Sensor, S4,     HTSMUX,         sensorI2CCustom)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
@@ -22,7 +20,7 @@
 #pragma config(Servo,  srvo_S2_C3_6,    FLAP,                 tServoStandard)
 #pragma config(Servo,  srvo_S2_C4_1,    GRAB1,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C4_2,    GRAB2,                tServoStandard)
-#pragma config(Servo,  srvo_S2_C4_3,    servo9,               tServoNone)
+#pragma config(Servo,  srvo_S2_C4_3,    GRAB3,                tServoNone)
 #pragma config(Servo,  srvo_S2_C4_4,    servo10,              tServoNone)
 #pragma config(Servo,  srvo_S2_C4_5,    servo11,              tServoNone)
 #pragma config(Servo,  srvo_S2_C4_6,    servo12,              tServoNone)
@@ -74,9 +72,10 @@ typedef enum
   kPlanKick,
   kPlanRamp,
   kPlanHigh,
-  kPlanBlock
+  kPlanBlock,
+  kPlanPark
 } Plan_t;
-#define DEF_PLAN_STRINGS const string Plan_s[] = {"Kick", "Ramp", "High", "Block"};
+#define DEF_PLAN_STRINGS const string Plan_s[] = {"Kick", "Ramp", "High", "Block", "Park"};
 #define timeout 5500
 
 #include "../headers/dialog_2.h"
@@ -91,6 +90,7 @@ void initialize_servos()
   servo[SPOUT] = kSpoutClosed;
   servo[GRAB1] = kGrab1Open;
   servo[GRAB2] = kGrab2Open;
+  servo[GRAB3] = kGrab3Open;
 }
 
 task initialize_motors()
@@ -155,6 +155,7 @@ task initialize_motors()
 
 void put_fork_down()
 {
+  ClearTimer(T2);
   GRAB_OPEN;
   bool spatula_down_var = false;
   if (!SPATULA_DOWN) {
@@ -453,14 +454,14 @@ void mission_high(int mono_pos) // Center 120 cm goal
       while (!MAX_REACHED) {}
       drive_e(CW, 100, 600);
       drive_e(S, 50, 1200);
-      drive_e(CW, 100, 900);
+      drive_e(CW, 60, 900);
       drive_t(CW, 100, 0);
       while (ULTRA_VAL > 75) {}
       drive_e(CCW, 100, 50);
       halt();
       drive_e(W, 88, 200);
       drive_t(S, 60, 0);
-      while (ULTRA_VAL > 32) {}
+      while (ULTRA_VAL > 29) {}
       halt();
       servoChangeRate[SPOUT] = 15;
       servo[SPOUT] = kSpoutMiddle;
@@ -469,6 +470,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
 
 
       drive_e(N, 60, 500);
+      drive_e(CCW, 60, 50);
       drive_e(W, 88, 400);
 
     } else {
@@ -509,7 +511,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
   drive_e(S, 100, 1500);
   drive_t(BWD + 20, 100, 1500);
   drive_t(CW, 100, 1000);
-  //put_fork_down();
+  put_fork_down();
 }
 
 void mission_ramp()
@@ -648,9 +650,9 @@ task main()
   HTSPBsetupIO(HTSPB, 0x40);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanRamp;
+  Plan_t cur_plan = kPlanPark;
   int tubes = 2;
-  int point = 3;
+  int point = 0;
   int delay = 0;
 
   int monolith_position;
@@ -693,6 +695,17 @@ task main()
       initialize_servos();
       mission_block();
       break;
+    case kPlanPark: //=================== Plan Parking Zone
+      initialize_servos();
+      StartTask(initialize_motors);
+      mission_ramp();
+      mission_goal1(point == 1 || point == 3);
+      if (tubes > 0) {
+
+      } else if (tubes > 1) {
+        //drive_e(CCW, 60, 3000);
+
+      }
   }
 
   halt();
