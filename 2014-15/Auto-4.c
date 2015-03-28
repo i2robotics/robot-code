@@ -143,7 +143,7 @@ task initialize_motors()
   }
   motor[FORK] = 0;
   lockout_fork = false;
-  while (time1[T2] < 9000 && !SIXTY_REACHED) {}
+  while (time1[T2] < 9000 && !SIXTY_REACHED) {abortTimeSlice();}
   motor[TUBE] = 0;
   servo[SPOUT] = 0; //TEMPORARY HACK
   wait1Msec(350);
@@ -179,12 +179,12 @@ void put_fork_down()
     } else {
       spatula_down_var = false;
       motor[FORK] = 100;
-      while (SPATULA_DOWN) {}
+      while (SPATULA_DOWN) {abortTimeSlice();}
       motor[FORK] = 0;
     }
   }
   motor[FORK] = 100;
-  while (SPATULA_DOWN) {}
+  while (SPATULA_DOWN) {abortTimeSlice();}
   motor[FORK] = 0;
 }
 
@@ -225,7 +225,7 @@ task tube_to_top()
   if (!MAX_REACHED) {
     motor[TUBE] = 100;
   }
-  while (HTSPBreadIO(HTSPB, 0x01) != 1) {}
+  while (HTSPBreadIO(HTSPB, 0x01) != 1) {abortTimeSlice();}
   motor[TUBE] = 0;
 }
 
@@ -261,14 +261,14 @@ void swerve_e(int power, int enc_1, int enc_2)
   motor[DRIVE_SE] = power;
   motor[DRIVE_NW] = 0;
   motor[DRIVE_SW] = 0;
-  while (abs(nMotorEncoder[DRIVE_NE]) < enc_1) {}
+  while (abs(nMotorEncoder[DRIVE_NE]) < enc_1) {abortTimeSlice();}
 
   nMotorEncoder[DRIVE_SW] = 0;
   motor[DRIVE_NE] = 0;
   motor[DRIVE_SE] = 0;
   motor[DRIVE_NW] = power;
   motor[DRIVE_SW] = power;
-  while (abs(nMotorEncoder[DRIVE_SW]) < enc_2) {}
+  while (abs(nMotorEncoder[DRIVE_SW]) < enc_2) {abortTimeSlice();}
   halt();
 }
 
@@ -424,7 +424,7 @@ void mission_block()
   drive_e(N, 100, 1000);
   drive_e(CCW, 100, 3500);
   StartTask(tele_setup);
-  while (!setup_done) {}
+  while (!setup_done) {abortTimeSlice();}
 }
 
 void mission_high(int mono_pos) // Center 120 cm goal
@@ -451,17 +451,17 @@ void mission_high(int mono_pos) // Center 120 cm goal
     }
     if (mono_pos2 == 1) {
       drive_e(S, 50, 2800);
-      while (!MAX_REACHED) {}
+      while (!MAX_REACHED) {abortTimeSlice();}
       drive_e(CW, 100, 600);
       drive_e(S, 50, 1200);
       drive_e(CW, 60, 900);
       drive_t(CW, 100, 0);
-      while (ULTRA_VAL > 75) {}
+      while (ULTRA_VAL > 75) {abortTimeSlice();}
       drive_e(CCW, 100, 50);
       halt();
       drive_e(W, 88, 200);
       drive_t(S, 60, 0);
-      while (ULTRA_VAL > 29) {}
+      while (ULTRA_VAL > 29) {abortTimeSlice();}
       halt();
       servoChangeRate[SPOUT] = 15;
       servo[SPOUT] = kSpoutMiddle;
@@ -476,13 +476,13 @@ void mission_high(int mono_pos) // Center 120 cm goal
     } else {
       drive_e(S, 50, 1300);
       drive_e(CW, 100, 1800);
-      while (!MAX_REACHED) {}
+      while (!MAX_REACHED) {abortTimeSlice();}
       servo[SPOUT] = kSpoutClosed;
       drive_t(S, 60, 0);
-      while (ULTRA_VAL > 32) {}
+      while (ULTRA_VAL > 32) {abortTimeSlice();}
       halt();
       drive_e(E, 88, 100);
-      //while (true) {}
+      //while (true) {abortTimeSlice();}
       servoChangeRate[SPOUT] = 15;
       servo[SPOUT] = 100;
       wait1Msec(1500);
@@ -494,12 +494,12 @@ void mission_high(int mono_pos) // Center 120 cm goal
     }
   } else {
     servo[SPOUT] = kSpoutClosed;
-    while (!MAX_REACHED) {}
+    while (!MAX_REACHED) {abortTimeSlice();}
     servo[SPOUT] = kSpoutClosed;
     drive_t(S, 60, 0);
-    while (ULTRA_VAL > 29) {}
+    while (ULTRA_VAL > 29) {abortTimeSlice();}
     halt();
-    //while (true) {}
+    //while (true) {abortTimeSlice();}
     servoChangeRate[SPOUT] = 15;
     servo[SPOUT] = 100;
     wait1Msec(1500);
@@ -516,7 +516,9 @@ void mission_high(int mono_pos) // Center 120 cm goal
 
 void mission_ramp()
 {
-  //	int start_bearing = bearing;
+  want_state.tube = SIXTY;
+  want_state.fork = DOWN;
+
   drive_t(S, 40, 600);
   drive_t(N, 1, 500);
   drive_t(S, 2, 500);
@@ -529,24 +531,26 @@ void mission_ramp()
 
 void mission_goal1(bool pointed)
 {
+  want_state.tube = SIXTY;
+  want_state.fork = DOWN;
   if (pointed) {
     drive_e(S, 40, 800); //drive forward and line up as well as swerve to make sure the goal is in the right direction
     square();
-    while (lockout_fork) {} //wait for 60 cm height and spatula to be all the way down.
+    while (is_state.fork == MOVING) {Sleep(300);} //wait for 60 cm height and spatula to be all the way down.
     swerve(-90, 500, 700);
   } else {
     drive_e(S, 40, 500); //drive forward and line up
     square();
-    while (lockout_fork) {} //wait for 60 cm height and spatula to be all the way down.
+    while (is_state.fork == MOVING) {Sleep(300);} //wait for 60 cm height and spatula to be all the way down.
     drive_e(S, 40, 750);
   }
   nMotorEncoder[DRIVE_SW] = 0;
   drive_t(S, 20, 0); // grab and score in first goal
   ClearTimer(T1);
   if (pointed) {
-    while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 900) {}
+    while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 900) {abortTimeSlice();}
   } else {
-    while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {}
+    while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {abortTimeSlice();}
   }
   servo[GRAB1] = kGrab1Closed;
   servo[GRAB2] = kGrab2Closed;
@@ -555,7 +559,7 @@ void mission_goal1(bool pointed)
   halt();
   int encoder_after_swerve = nMotorEncoder[DRIVE_SW];
 
-  while (lockout_medium) {}
+  while (is_state.tube == MOVING) {Sleep(300);}
 
   pop_it(2, false);
   wait1Msec(300);
@@ -575,21 +579,14 @@ void mission_goal1(bool pointed)
 
 void mission_goal2(int pointed)
 {
-  StartTask(tube_to_top);
+  want_state.tube = NINETY;
   drive_e(W, 100, 500);
   drive_t(CCW, 100, 1500);
-  ClearTimer(T2);
-  motor[FORK] = -100;
-  while ((SPATULA_DOWN & 0x08) != 8 && time1[T2] < 600) {}
-  motor[FORK] = 0;
-  servo[GRAB1] = kGrab1Open;
-  servo[GRAB2] = kGrab2Open;
+  want_state.fork = DOWN;
+  GRAB_OPEN;
   drive_e(S, 50, 1200);
   drive_e(N, 50, 1300);
   drive_t(CW, 100, 1300);
-  motor[FORK] = 100;
-  while (SPATULA_DOWN) {}
-  motor[FORK] = 0;
   drive_t(E, 100, 300);
 
   square();
@@ -607,13 +604,13 @@ void mission_goal2(int pointed)
 
   drive_t(S, 15, 0);
   ClearTimer(T1);
-  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 1500) {}
+  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 1500) {abortTimeSlice();}
   //if (pointed == 2) {
   //	drive_e(CW, 60, 200);
   //	wait1Msec(1000);
   //	drive_t(S, 20, 0);
   //  ClearTimer(T1);
-  //  while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 500) {}
+  //  while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 500) {abortTimeSlice();}
   //}
   GRAB_CLOSE;
   wait1Msec(140);
@@ -650,7 +647,7 @@ task main()
   HTSPBsetupIO(HTSPB, 0x40);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanPark;
+  Plan_t cur_plan = kPlanRamp;
   int tubes = 2;
   int point = 0;
   int delay = 0;
@@ -661,11 +658,11 @@ task main()
   //waitForStart();
   ClearTimer(T4); //global `run timer' used by new concurrency code
   wait1Msec(delay * 1000);
+  StartTask(background_loop);
 
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
       initialize_servos();
-      StartTask(initialize_motors);
 
       mission_ramp();
 
