@@ -33,7 +33,7 @@
 #endif
 
 //#define DEBUG_IR
-//#define DEBUG_NO_POP
+#define DEBUG_NO_POP
 
 
 
@@ -650,7 +650,7 @@ task main()
   HTSPBsetupIO(HTSPB, 0x40);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanPark;
+  Plan_t cur_plan = kPlanRamp;
   int tubes = 2;
   int point = 0;
   int delay = 0;
