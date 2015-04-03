@@ -24,5 +24,5 @@ const unsigned byte kGrab1Open   = 0; // GRAB 1
 const unsigned byte kGrab2Closed = 60; // GRAB 2
 const unsigned byte kGrab2Open   = 215;
 
-const unsigned byte kGrab3Closed = 210;
-const unsigned byte kGrab3Open = 40;
+const unsigned byte kGrab3Closed = 202;
+const unsigned byte kGrab3Open = 30;

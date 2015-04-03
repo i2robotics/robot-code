@@ -33,7 +33,7 @@
 #endif
 
 //#define DEBUG_IR
-//#define DEBUG_NO_POP
+#define DEBUG_NO_POP
 
 
 #define IR_SEEK_VAL HTIRS2readACDir(msensor_S4_1)

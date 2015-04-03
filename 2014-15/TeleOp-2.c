@@ -158,12 +158,12 @@ task main()
       servo[SPOUT] = ServoValue[SPOUT] + 2;
     end
 
-    action_joy1
+    action_joy2
     state bY down
-      if (grabbed_alt_pressed == false && grabbed_alt == false) {
+      if (grabbed_alt_pressed == false && grabbed_alt == 0) {
           grabbed_alt = 1;
           grabbed_alt_pressed = true;
-        } else if (grabbed_alt_pressed == false && grabbed_alt == true) {
+        } else if (grabbed_alt_pressed == false && (grabbed_alt == 1 || grabbed_alt == 2)) {
           grabbed_alt = 0;
           grabbed_alt_pressed = true;
         }
@@ -299,8 +299,6 @@ task main()
     action_joy2 // manually adjust flap
     state bA down
       grabbed_alt = 2;
-    state bY down
-      servo[FLAP] = ServoValue[FLAP] + 2;
     end
 
     action_joy2 // manually adjust roof

@@ -110,15 +110,17 @@ void swerve_e(int power, int enc_1, int enc_2)
 
 task main()
 {
-  servo[GRAB3] = kGrab3Open;
-  wait1Msec(350);
-  GRAB_CLOSE;
-  drive_e(W, 88, 300);
-	drive_e(CCW, 60, 5500);
-	drive_e(N, 60, 4500);
+  while(true) {
+ // servo[GRAB3] = kGrab3Open;
+ // wait1Msec(350);
+ // GRAB_CLOSE;
+ // drive_e(W, 88, 300);
+	//drive_e(CCW, 60, 5500);
+	//drive_e(N, 60, 4500);
 
   servo[GRAB3] = kGrab3Closed;
-  wait1Msec(350);
-  drive_e(S, 40, 600);
+}
+  //wait1Msec(350);
+  //drive_e(S, 40, 600);
 
 }
