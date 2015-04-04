@@ -32,12 +32,12 @@
 
 #endif
 
-//#define DEBUG_IR
+#define DEBUG_ULTRA
 #define DEBUG_NO_POP
 
 
-#define IR_SEEK_VAL HTIRS2readACDir(msensor_S4_1)
-#define ULTRA_VAL USreadDist(msensor_S4_2)
+#define ULTRA_LEFT_VAL USreadDist(msensor_S4_1)
+#define ULTRA_RIGHT_VAL USreadDist(msensor_S4_2)
 #define SIDE_TOUCH_S TSreadState(msensor_S4_4)
 #define SIDE_TOUCH_N TSreadState(msensor_S4_3)
 
@@ -125,15 +125,6 @@ task tele_setup()
   wait1Msec(500);
 }
 
-void shake()
-{
-  drive_e(E, 100, 100);
-  drive_e(W, 100, 200);
-  drive_e(E, 100, 100);
-  drive_e(W, 100, 200);
-  drive_e(E, 100, 20);
-}
-
 void swerve(int power, unsigned int time_1, unsigned int time_2)
 {
   motor[DRIVE_NE] = power;
@@ -167,6 +158,24 @@ void swerve_e(int power, int enc_1, int enc_2)
   while (abs(nMotorEncoder[DRIVE_SW]) < enc_2) {abortTimeslice();}
   halt();
 }
+void ultra_line_up(int distance) {
+  drive_t(S, 35, 0);
+  bool left = false;
+  bool right = false;
+  while (left == false || right == false) {
+  if (ULTRA_LEFT_VAL <= distance) {
+    motor[DRIVE_NW] = 0;
+    motor[DRIVE_SW] = 0;
+    left = true;
+  }
+  if (ULTRA_RIGHT_VAL <= distance) {
+    motor[DRIVE_NE] = 0;
+    motor[DRIVE_SE] = 0;
+    right = true;
+  }
+}
+}
+
 
 void square()
 {
@@ -195,29 +204,20 @@ void square()
   drive_e(W, 80, 480); // was 530 until 3 Apr; was 600 until 4 mar
 }
 
-int seek_ir_pos()
+int seek_ultra_pos()
 {
-  int first_IR = IR_SEEK_VAL;
-  while (first_IR > 10) {
-    first_IR = IR_SEEK_VAL;
-  }
-  drive_e(S, 40, 2000);
-  servo[SPOUT] = kSpoutClosed;
-  int second_IR = IR_SEEK_VAL;
-  while (second_IR > 10) {
-    second_IR = IR_SEEK_VAL;
-  }
-
+  int first_ULTRA = ULTRA_RIGHT_VAL;
+  int second_ULTRA = ULTRA_LEFT_VAL;
   int monolith_position;
-  if (first_IR <= 3) {
-    monolith_position = 1;
-  } else if (second_IR == 5) {
+  if (first_ULTRA <= 90) {
     monolith_position = 3;
-  } else {
+  } else if (second_ULTRA == 255) {
     monolith_position = 2;
+  } else {
+    monolith_position = 1;
   }
-#ifdef DEBUG_IR
-	writeDebugStreamLine("first: %i, second: %i", first_IR, second_IR);
+#ifdef DEBUG_ULTRA
+	writeDebugStreamLine("first: %i, second: %i", first_ULTRA, second_ULTRA);
 	writeDebugStreamLine("result: %i", monolith_position);
 	switch (monolith_position) {
 	case 1:
@@ -329,85 +329,26 @@ void mission_high(int mono_pos) // Center 120 cm goal
   servo[ROOF] = kRoofClosed;
   wait1Msec(350);
   servo[SPOUT] = kSpoutClosed;
-
-  if (mono_pos == 3) {
-    mono_pos = 2;
-  }
-  if (mono_pos == 1) {
-    int mono_pos2;
-    drive_e(CCW, 100, 1000);
-    drive_e(S, 50, 1000); //2700
-    servo[SPOUT] = kSpoutClosed;
-    PlayImmediateTone(1200, 200);
-    wait1Msec(200);
-    if (IR_SEEK_VAL <= 3) {
-      mono_pos2 = 1;
-    } else {
-      mono_pos2 = 2;
-    }
-    if (mono_pos2 == 1) {
-      drive_e(S, 50, 2800);
-      while (!MAX_REACHED) {abortTimeslice();}
-      drive_e(CW, 100, 600);
-      drive_e(S, 50, 1200);
-      drive_e(CW, 60, 900);
-      drive_t(CW, 100, 0);
-      while (ULTRA_VAL > 75) {abortTimeslice();}
-      drive_e(CCW, 100, 50);
-      halt();
-      drive_e(W, 88, 200);
-      drive_t(S, 60, 0);
-      while (ULTRA_VAL > 29) {abortTimeslice();}
-      halt();
-      servoChangeRate[SPOUT] = 15;
-      servo[SPOUT] = kSpoutMiddle;
-      wait1Msec(2000);
-      servoChangeRate[SPOUT] = 10;
-
-
-      drive_e(N, 60, 500);
-      drive_e(CCW, 60, 50);
+  switch (mono_pos) {
+    case 1:
+    case 2:
+      drive_e(W, 88, 1800);
+      ultra_line_up(45);
       drive_e(W, 88, 400);
-
-    } else {
-      drive_e(S, 50, 1300);
-      drive_e(CW, 100, 1800);
-      while (!MAX_REACHED) {abortTimeslice();}
-      servo[SPOUT] = kSpoutClosed;
-      drive_t(S, 60, 0);
-      while (ULTRA_VAL > 32) {abortTimeslice();}
+      wait10Msec(500);
+      drive_t(CW, 30, 0);
+      while(ULTRA_LEFT_VAL >=30){}
       halt();
-      drive_e(E, 88, 100);
-      //while (true) {abortTimeslice();}
-      servoChangeRate[SPOUT] = 15;
-      servo[SPOUT] = 100;
-      wait1Msec(1500);
+      wait10Msec(500);
+    case 3:
+      ultra_line_up(35);
+      servoChangeRate[SPOUT] = 0;
+      servo[SPOUT] = kSpoutMiddle;
       servoChangeRate[SPOUT] = 10;
-      drive_e(N, 40, 350);
-      //drive_e(CCW, 100, 1500);
-      //drive_e(N, 50, 2700);
-      //drive_e(CW, 100, 1000);
-    }
-  } else {
-    servo[SPOUT] = kSpoutClosed;
-    while (!MAX_REACHED) {abortTimeslice();}
-    servo[SPOUT] = kSpoutClosed;
-    drive_t(S, 60, 0);
-    while (ULTRA_VAL > 29) {abortTimeslice();}
-    halt();
-    //while (true) {abortTimeslice();}
-    servoChangeRate[SPOUT] = 15;
-    servo[SPOUT] = 100;
-    wait1Msec(1500);
-    servoChangeRate[SPOUT] = 10;
-    drive_e(N, 60, 1000);
-    drive_e(E, 88, 200);
   }
   drive_e(E, 88, 1800);
-  drive_e(S, 100, 1500);
-  drive_t(BWD + 20, 100, 1500);
-  drive_t(CW, 100, 1000);
-  want_state.fork = DOWN;
+  drive_e(S, 100, 5000);
+  //want_state.fork = DOWN;
 }
 
 void mission_ramp()
@@ -572,8 +513,8 @@ task main()
 
   Alliance_t cur_alli = kAllianceRed;
   Plan_t cur_plan = kPlanPark;
-  int tubes = 2;
-  int point = 0;
+  int tubes = 1;
+  int point = 1;
   int delay = 0;
 
   int monolith_position;
@@ -598,17 +539,17 @@ task main()
       break;
 
     case kPlanKick: //================== Plan Kick
-      initialize_servos();
+      /*initialize_servos();
       monolith_position = seek_ir_pos();
       mission_monolith(monolith_position);
       drive_e(CW, 80, 5000);
-      motor[TUBE] = 0;
+      motor[TUBE] = 0;*/
       break;
 
     case kPlanHigh: //================== Plan High
       want_state.tube = NINETY;
-
-      monolith_position = seek_ir_pos();
+      drive_e(S, 60 , 800);
+      monolith_position = seek_ultra_pos();
       mission_high(monolith_position);
       break;
 
@@ -621,7 +562,7 @@ task main()
       initialize_servos();
       mission_ramp();
       mission_goal1(point % 2);
-      mission_park();
+      //mission_park();
   }
 
   halt();

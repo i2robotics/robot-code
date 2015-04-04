@@ -40,7 +40,7 @@ task main()
     servo[ROOF] = kRoofClosed;
     wait1Msec(350);
   }
-  servo[SPOUT] = kSpoutOpen;
+  servo[SPOUT] = 0;
   wait1Msec(1000);
   servo[ROOF] = kRoofOpen;
   wait1Msec(250);
