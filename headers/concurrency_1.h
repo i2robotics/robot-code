@@ -6,7 +6,7 @@
  *
  *------------------------------------------------*/
 
-const unsigned int timeout_ninety = 10;
+const unsigned int timeout_ninety = 4500;
 const unsigned int timeout_sixty = 9000;
 const unsigned int timeout_up = 10;
 const unsigned int timeout_down = 5500;
@@ -37,14 +37,14 @@ unsigned int fork_start_time = 0; // Private
 void stop_tube()
 { // Private. Only to be used within this file
   motor[TUBE] = 0;
-  want_state.tube = STOPPED;
+  //want_state.tube = STOPPED; //problem with this:
   tube_start_time = 0;
 }
 
 void stop_fork()
 { // Private. Only to be used within this file
   motor[FORK] = 0;
-  want_state.fork = STOPPED;
+  want_state.fork = STOPPED; //problem without this: if it times out, it'll keep going because It'll reset the timer, and then start the thing going again
   fork_start_time = 0;
 }
 
@@ -98,7 +98,7 @@ task background_loop()
     switch (want_state.fork) {
       case STOPPED:
         stop_fork();
-        is_state = STOPPED;
+        is_state.fork = STOPPED;
         break;
       case UP:
         if (SPATULA_UP || check_tout(timeout_up, fork_start_time)) {
