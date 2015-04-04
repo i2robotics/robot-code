@@ -20,7 +20,7 @@
 #pragma config(Servo,  srvo_S2_C3_6,    FLAP,                 tServoStandard)
 #pragma config(Servo,  srvo_S2_C4_1,    GRAB1,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C4_2,    GRAB2,                tServoStandard)
-#pragma config(Servo,  srvo_S2_C4_3,    GRAB3,                tServoNone)
+#pragma config(Servo,  srvo_S2_C4_3,    GRAB3 ,                tServoNone)
 #pragma config(Servo,  srvo_S2_C4_4,    servo10,              tServoNone)
 #pragma config(Servo,  srvo_S2_C4_5,    servo11,              tServoNone)
 #pragma config(Servo,  srvo_S2_C4_6,    servo12,              tServoNone)
@@ -56,9 +56,9 @@
 
 //==================  Variables ============================
 
-bool lockout_medium = false;
 bool setup_done = true;
-bool lockout_fork = false;
+
+bool plan_is_park = false;
 
 //==================  Config Definitions  ==================
 typedef enum
@@ -93,101 +93,6 @@ void initialize_servos()
   servo[GRAB3] = kGrab3Open;
 }
 
-task initialize_motors()
-{
-  bool first_time_repeat = true;
-  bool check_spatula = false;
-  lockout_medium = true;
-  lockout_fork = true;
-  motor[TUBE] = 100;
-
-
-  wait1Msec(800);
-  motor[FORK] = -100;
-  //start timer
-  ClearTimer(T2);
-  time1[T2] = 0;
-
-  while (!check_spatula) { // This mess is here to mitigate against flickering values
-    if (time1[T2] > timeout || SPATULA_UP) {
-      motor[FORK] = 0;
-      break;
-    }
-    while (!SPATULA_DOWN) {//when timer is greater than or equal to the time to get down the ramp clear the timer and start lifting the tube
-      if (time1[T2] > timeout || SPATULA_UP) {
-        motor[FORK] = 0;
-        break;
-      }
-      if (SIXTY_REACHED) {
-        motor[TUBE] = 0;
-      }
-    }
-    if (SPATULA_DOWN) {
-      check_spatula = true;
-    } else {
-      check_spatula = false;
-    }
-  }
-
-  //when timer is greater than or equal to 7000 miliseconds stop the lift
-  motor[FORK] = 0;
-  motor[FORK] = 100;
-  while (SPATULA_DOWN) {
-    if (time1[T2] > timeout || SPATULA_UP) {
-      motor[FORK] = 0;
-      break;
-    }
-    if (SIXTY_REACHED) {
-      motor[TUBE] = 0;
-    }
-  }
-  motor[FORK] = 0;
-  lockout_fork = false;
-  while (time1[T2] < 9000 && !SIXTY_REACHED) {abortTimeSlice();}
-  motor[TUBE] = 0;
-  servo[SPOUT] = 0; //TEMPORARY HACK
-  wait1Msec(350);
-  servo[ROOF] = kRoofOpen;
-  wait1Msec(300);
-  ClearTimer(T2);
-  lockout_medium = false;
-}
-
-void put_fork_down()
-{
-  ClearTimer(T2);
-  GRAB_OPEN;
-  bool spatula_down_var = false;
-  if (!SPATULA_DOWN) {
-    motor[FORK] = -100;
-  }
-  spatula_down_var = false;
-  motor[FORK] = -100;
-  while (!spatula_down_var) {
-    if (time1[T2] > timeout) {
-      motor[FORK] = 0;
-      break;
-    }
-    while (!SPATULA_DOWN) {
-      if (time1[T2] > timeout) {
-        motor[FORK] = 0;
-        break;
-      }
-    }
-    if (SPATULA_DOWN) {
-      spatula_down_var = true;
-    } else {
-      spatula_down_var = false;
-      motor[FORK] = 100;
-      while (SPATULA_DOWN) {abortTimeSlice();}
-      motor[FORK] = 0;
-    }
-  }
-  motor[FORK] = 100;
-  while (SPATULA_DOWN) {abortTimeSlice();}
-  motor[FORK] = 0;
-}
-
 task tele_setup()
 {
   GRAB_OPEN;
@@ -218,15 +123,6 @@ task tele_setup()
   setup_done = true;
   halt();
   wait1Msec(500);
-}
-
-task tube_to_top()
-{
-  if (!MAX_REACHED) {
-    motor[TUBE] = 100;
-  }
-  while (HTSPBreadIO(HTSPB, 0x01) != 1) {abortTimeSlice();}
-  motor[TUBE] = 0;
 }
 
 void shake()
@@ -261,20 +157,20 @@ void swerve_e(int power, int enc_1, int enc_2)
   motor[DRIVE_SE] = power;
   motor[DRIVE_NW] = 0;
   motor[DRIVE_SW] = 0;
-  while (abs(nMotorEncoder[DRIVE_NE]) < enc_1) {abortTimeSlice();}
+  while (abs(nMotorEncoder[DRIVE_NE]) < enc_1) {abortTimeslice();}
 
   nMotorEncoder[DRIVE_SW] = 0;
   motor[DRIVE_NE] = 0;
   motor[DRIVE_SE] = 0;
   motor[DRIVE_NW] = power;
   motor[DRIVE_SW] = power;
-  while (abs(nMotorEncoder[DRIVE_SW]) < enc_2) {abortTimeSlice();}
+  while (abs(nMotorEncoder[DRIVE_SW]) < enc_2) {abortTimeslice();}
   halt();
 }
 
 void square()
 {
-  drive_t(E, 88, 0);
+  drive_t(E, 50, 0);
   ClearTimer(T1);
   int to = 0;
   while (time1[T1] < 2000) {
@@ -296,7 +192,7 @@ void square()
     }
   }
   wait1Msec(400);
-  drive_e(W, 100, 530); // was 600 until 4 mar
+  drive_e(W, 80, 480); // was 530 until 3 Apr; was 600 until 4 mar
 }
 
 int seek_ir_pos()
@@ -424,7 +320,7 @@ void mission_block()
   drive_e(N, 100, 1000);
   drive_e(CCW, 100, 3500);
   StartTask(tele_setup);
-  while (!setup_done) {abortTimeSlice();}
+  while (!setup_done) {abortTimeslice();}
 }
 
 void mission_high(int mono_pos) // Center 120 cm goal
@@ -451,17 +347,17 @@ void mission_high(int mono_pos) // Center 120 cm goal
     }
     if (mono_pos2 == 1) {
       drive_e(S, 50, 2800);
-      while (!MAX_REACHED) {abortTimeSlice();}
+      while (!MAX_REACHED) {abortTimeslice();}
       drive_e(CW, 100, 600);
       drive_e(S, 50, 1200);
       drive_e(CW, 60, 900);
       drive_t(CW, 100, 0);
-      while (ULTRA_VAL > 75) {abortTimeSlice();}
+      while (ULTRA_VAL > 75) {abortTimeslice();}
       drive_e(CCW, 100, 50);
       halt();
       drive_e(W, 88, 200);
       drive_t(S, 60, 0);
-      while (ULTRA_VAL > 29) {abortTimeSlice();}
+      while (ULTRA_VAL > 29) {abortTimeslice();}
       halt();
       servoChangeRate[SPOUT] = 15;
       servo[SPOUT] = kSpoutMiddle;
@@ -476,13 +372,13 @@ void mission_high(int mono_pos) // Center 120 cm goal
     } else {
       drive_e(S, 50, 1300);
       drive_e(CW, 100, 1800);
-      while (!MAX_REACHED) {abortTimeSlice();}
+      while (!MAX_REACHED) {abortTimeslice();}
       servo[SPOUT] = kSpoutClosed;
       drive_t(S, 60, 0);
-      while (ULTRA_VAL > 32) {abortTimeSlice();}
+      while (ULTRA_VAL > 32) {abortTimeslice();}
       halt();
       drive_e(E, 88, 100);
-      //while (true) {abortTimeSlice();}
+      //while (true) {abortTimeslice();}
       servoChangeRate[SPOUT] = 15;
       servo[SPOUT] = 100;
       wait1Msec(1500);
@@ -494,12 +390,12 @@ void mission_high(int mono_pos) // Center 120 cm goal
     }
   } else {
     servo[SPOUT] = kSpoutClosed;
-    while (!MAX_REACHED) {abortTimeSlice();}
+    while (!MAX_REACHED) {abortTimeslice();}
     servo[SPOUT] = kSpoutClosed;
     drive_t(S, 60, 0);
-    while (ULTRA_VAL > 29) {abortTimeSlice();}
+    while (ULTRA_VAL > 29) {abortTimeslice();}
     halt();
-    //while (true) {abortTimeSlice();}
+    //while (true) {abortTimeslice();}
     servoChangeRate[SPOUT] = 15;
     servo[SPOUT] = 100;
     wait1Msec(1500);
@@ -511,7 +407,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
   drive_e(S, 100, 1500);
   drive_t(BWD + 20, 100, 1500);
   drive_t(CW, 100, 1000);
-  put_fork_down();
+  want_state.fork = DOWN;
 }
 
 void mission_ramp()
@@ -548,9 +444,9 @@ void mission_goal1(bool pointed)
   drive_t(S, 20, 0); // grab and score in first goal
   ClearTimer(T1);
   if (pointed) {
-    while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 900) {abortTimeSlice();}
+    while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 900) {abortTimeslice();}
   } else {
-    while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {abortTimeSlice();}
+    while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {abortTimeslice();}
   }
   servo[GRAB1] = kGrab1Closed;
   servo[GRAB2] = kGrab2Closed;
@@ -572,22 +468,21 @@ void mission_goal1(bool pointed)
   wait1Msec(500);
   motor[FORK] = 0;
 
-  //if (pointed) {
-  drive_e(N, 50, encoder_after_swerve);
-  //}
+  if (plan_is_park)
+    drive_e(N, 50, encoder_after_swerve);
 }
 
 void mission_goal2(int pointed)
 {
   want_state.tube = NINETY;
   drive_e(W, 100, 500);
-  drive_t(CCW, 100, 1500);
+  drive_t(CCW, 80, 1500);
   want_state.fork = DOWN;
   GRAB_OPEN;
   drive_e(S, 50, 1200);
   drive_e(N, 50, 1300);
-  drive_t(CW, 100, 1300);
-  drive_t(E, 100, 300);
+  drive_t(CW, 80, 1300);
+  drive_e(E, 100, 300);
 
   square();
   if (pointed == 1) {
@@ -604,13 +499,13 @@ void mission_goal2(int pointed)
 
   drive_t(S, 15, 0);
   ClearTimer(T1);
-  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 1500) {abortTimeSlice();}
+  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 1500) {abortTimeslice();}
   //if (pointed == 2) {
   //	drive_e(CW, 60, 200);
   //	wait1Msec(1000);
   //	drive_t(S, 20, 0);
   //  ClearTimer(T1);
-  //  while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 500) {abortTimeSlice();}
+  //  while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 500) {abortTimeslice();}
   //}
   GRAB_CLOSE;
   wait1Msec(140);
@@ -638,7 +533,36 @@ void mission_goal2(int pointed)
     wait1Msec(600);
     halt();
   }
+
   drive_t(N, 100, 500);
+}
+
+void mission_park()
+{
+  want_state.tube = NINETY;
+  drive_e(W, 100, 700); //was 600
+  drive_e(CCW, 80, 3800);
+  drive_e(N, 80, 2000);
+  drive_e(E, 70, 300);
+  drive_e(N, 40, 800);
+  servo[GRAB3] = kGrab3Closed;
+  Sleep(100);
+  drive_e(N, 20, 200);
+  drive_e(S, 20, 200);
+  Sleep(200);
+  drive_e(CCW, 20, 200);
+  Sleep(200);
+  drive_e(CW, 20, 200);
+  Sleep(200);
+  drive_e(S, 100, 800);
+  drive_e(E, 70, 300);
+  drive_e(E, 100, 2800);
+  drive_e(S, 100, 8000);
+  GRAB_OPEN;
+  drive_e(N, 100, 600);
+  drive_e(CW, 80, 5500);
+  servo[GRAB3] = kGrab3Open;
+
 }
 
 //==================  Main Task  ==================
@@ -647,7 +571,7 @@ task main()
   HTSPBsetupIO(HTSPB, 0x40);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanRamp;
+  Plan_t cur_plan = kPlanPark;
   int tubes = 2;
   int point = 0;
   int delay = 0;
@@ -667,7 +591,7 @@ task main()
       mission_ramp();
 
       if (tubes > 0)
-        mission_goal1(point == 1 || point == 3);
+        mission_goal1(point % 2);
       if (tubes > 1)
         mission_goal2(point ? point - 1 : 0);
 
@@ -682,7 +606,7 @@ task main()
       break;
 
     case kPlanHigh: //================== Plan High
-      StartTask(tube_to_top);
+      want_state.tube = NINETY;
 
       monolith_position = seek_ir_pos();
       mission_high(monolith_position);
@@ -693,16 +617,11 @@ task main()
       mission_block();
       break;
     case kPlanPark: //=================== Plan Parking Zone
+      plan_is_park = true;
       initialize_servos();
-      StartTask(initialize_motors);
       mission_ramp();
-      mission_goal1(point == 1 || point == 3);
-      if (tubes > 0) {
-
-      } else if (tubes > 1) {
-        //drive_e(CCW, 60, 3000);
-
-      }
+      mission_goal1(point % 2);
+      mission_park();
   }
 
   halt();

@@ -36,7 +36,6 @@ unsigned int fork_start_time = 0; // Private
 
 void stop_tube()
 { // Private. Only to be used within this file
-  writeDebugStreamLine("TUbe has been stopped");
   motor[TUBE] = 0;
   want_state.tube = STOPPED;
   tube_start_time = 0;
@@ -47,6 +46,15 @@ void stop_fork()
   motor[FORK] = 0;
   want_state.fork = STOPPED;
   fork_start_time = 0;
+}
+
+bool check_tout(unsigned int limit_time, unsigned int check_time) {
+  if (time1[T4] - check_time > limit_time) {
+    writeDebugStreamLine("Timed Out! :%i", limit_time);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 task background_loop()
@@ -68,7 +76,7 @@ task background_loop()
         if (NINETY_REACHED) {
           stop_tube();
           is_state.tube = NINETY;
-        } else if (SIXTY_REACHED || time1[T4] - tube_start_time > timeout_sixty) {
+        } else if (SIXTY_REACHED || check_tout(timeout_sixty, tube_start_time)) {
           stop_tube();
           is_state.tube = SIXTY;
         } else {
@@ -77,7 +85,7 @@ task background_loop()
         }
         break;
       case NINETY:
-        if (NINETY_REACHED || time1[T4] - tube_start_time > timeout_ninety) {
+        if (NINETY_REACHED || check_tout(timeout_ninety, tube_start_time)) {
           stop_tube();
           is_state.tube = NINETY;
         } else {
@@ -93,7 +101,7 @@ task background_loop()
         is_state = STOPPED;
         break;
       case UP:
-        if (SPATULA_UP || time1[T4] - fork_start_time > timeout_up) {
+        if (SPATULA_UP || check_tout(timeout_up, fork_start_time)) {
           stop_fork();
           is_state.fork = UP;
         } else {
@@ -105,7 +113,7 @@ task background_loop()
         if (SPATULA_UP) {
           stop_fork();
           is_state.fork = UP;
-        } else if (SPATULA_DOWN || time1[T4]-fork_start_time > timeout_down) {
+        } else if (SPATULA_DOWN || check_tout(timeout_down, fork_start_time)) {
           stop_fork();
           is_state.fork = DOWN;
         } else {
