@@ -239,6 +239,7 @@ void drive(int d, byte s, unsigned int t, bool useGyro, bool useEnc)
 #ifdef DEBUG_GYRO
       writeDebugStreamLine("err: %f, bear: %f, targ:%f <:NavLn254", error, bearing, targetBearing);
 #endif
+
       wait1Msec(2);
     }
     halt();

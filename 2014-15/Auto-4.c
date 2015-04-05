@@ -32,8 +32,8 @@
 
 #endif
 
-#define DEBUG_ULTRA
-#define DEBUG_NO_POP
+//#define DEBUG_ULTRA
+//#define DEBUG_NO_POP
 
 
 #define ULTRA_LEFT_VAL USreadDist(msensor_S4_1)
@@ -159,10 +159,28 @@ void swerve_e(int power, int enc_1, int enc_2)
   halt();
 }
 void ultra_line_up(int distance) {
+  if (distance < 0) {
+    distance = distance * -1;
+       drive_t(N, 35, 0);
+  bool left = false;
+  bool right = false;
+  while (!left || !right) {
+  if (ULTRA_LEFT_VAL >= distance) {
+    motor[DRIVE_NW] = 0;
+    motor[DRIVE_SW] = 0;
+    left = true;
+  }
+  if (ULTRA_RIGHT_VAL >= distance) {
+    motor[DRIVE_NE] = 0;
+    motor[DRIVE_SE] = 0;
+    right = true;
+  }
+}
+  } else {
   drive_t(S, 35, 0);
   bool left = false;
   bool right = false;
-  while (left == false || right == false) {
+  while (!left || !right) {
   if (ULTRA_LEFT_VAL <= distance) {
     motor[DRIVE_NW] = 0;
     motor[DRIVE_SW] = 0;
@@ -173,6 +191,7 @@ void ultra_line_up(int distance) {
     motor[DRIVE_SE] = 0;
     right = true;
   }
+}
 }
 }
 
@@ -209,9 +228,9 @@ int seek_ultra_pos()
   int first_ULTRA = ULTRA_RIGHT_VAL;
   int second_ULTRA = ULTRA_LEFT_VAL;
   int monolith_position;
-  if (first_ULTRA <= 90) {
+  if (first_ULTRA <= 110 || second_ULTRA <= 110) {
     monolith_position = 3;
-  } else if (second_ULTRA == 255) {
+  } else if (second_ULTRA == 255 && first_ULTRA == 255) {
     monolith_position = 2;
   } else {
     monolith_position = 1;
@@ -331,6 +350,23 @@ void mission_high(int mono_pos) // Center 120 cm goal
   servo[SPOUT] = kSpoutClosed;
   switch (mono_pos) {
     case 1:
+      drive_e(CW, 60, 2000);
+      drive_e(E, 88, 300);
+      drive_e(N, 60, 3500);
+      square();
+      drive_t(W, 88, 0);
+      ClearTimer(T2);
+      while(time1[T2] <= 5000 && (ULTRA_RIGHT_VAL >= 100 || ULTRA_LEFT_VAL >= 255)){}
+      halt();
+      wait1Msec(500);
+      drive_e(CCW, 60, 225);
+      drive_t(S, 30, 0);
+      while (ULTRA_LEFT_VAL > 25 && ULTRA_RIGHT_VAL > 25){}
+      halt();
+      servo[SPOUT] = kSpoutMiddle;
+      wait1Msec(1500);
+      while(true){}
+      break;
     case 2:
       drive_e(W, 88, 1800);
       ultra_line_up(45);
@@ -340,11 +376,13 @@ void mission_high(int mono_pos) // Center 120 cm goal
       while(ULTRA_LEFT_VAL >=30){}
       halt();
       wait10Msec(500);
+      break;
     case 3:
-      ultra_line_up(35);
-      servoChangeRate[SPOUT] = 0;
+      ultra_line_up(40);
+      drive_e(CCW, 60, 200);
       servo[SPOUT] = kSpoutMiddle;
-      servoChangeRate[SPOUT] = 10;
+      wait1Msec(1500);
+      break;
   }
   drive_e(E, 88, 1800);
   drive_e(S, 100, 5000);
@@ -360,7 +398,7 @@ void mission_ramp()
   drive_t(N, 1, 500);
   drive_t(S, 2, 500);
   drive_t(N, 1, 300);
-  drive_e(S, 20, 2000);
+  drive_e(S, 20, 1500);
 
   drive_t(S, 20, 400);
   PlayImmediateTone(200, 200);
@@ -374,7 +412,7 @@ void mission_goal1(bool pointed)
     drive_e(S, 40, 800); //drive forward and line up as well as swerve to make sure the goal is in the right direction
     square();
     while (is_state.fork == MOVING) {Sleep(300);} //wait for 60 cm height and spatula to be all the way down.
-    swerve(-90, 500, 700);
+    swerve(-50, 500, 700);
   } else {
     drive_e(S, 40, 500); //drive forward and line up
     square();
@@ -382,21 +420,32 @@ void mission_goal1(bool pointed)
     drive_e(S, 40, 750);
   }
   nMotorEncoder[DRIVE_SW] = 0;
-  drive_t(S, 20, 0); // grab and score in first goal
+  drive_t(S, 15, 0); // grab and score in first goal
   ClearTimer(T1);
   if (pointed) {
     while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 900) {abortTimeslice();}
   } else {
     while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {abortTimeslice();}
   }
-  servo[GRAB1] = kGrab1Closed;
-  servo[GRAB2] = kGrab2Closed;
+  GRAB_CLOSE;
   wait1Msec(300);
 
   halt();
   int encoder_after_swerve = nMotorEncoder[DRIVE_SW];
 
   while (is_state.tube == MOVING) {Sleep(300);}
+
+  servo[FLAP] = kFlapClosed;
+  if (ServoValue[ROOF] != kRoofClosed) {
+    servo[FLAP] = kFlapClosed;
+    servo[ROOF] = kRoofClosed;
+    wait1Msec(350);
+  }
+  servo[SPOUT] = kSpoutOpen;
+  wait1Msec(1000);
+  servo[ROOF] = kRoofOpen;
+  wait1Msec(250);
+  servo[FLAP] = kFlapOpen;
 
   pop_it(2, false);
   wait1Msec(300);
@@ -409,8 +458,11 @@ void mission_goal1(bool pointed)
   wait1Msec(500);
   motor[FORK] = 0;
 
-  if (plan_is_park)
+  if (!plan_is_park) {
     drive_e(N, 50, encoder_after_swerve);
+  } else if (pointed) {
+    drive_e(N, 50, 200);
+  }
 }
 
 void mission_goal2(int pointed)
@@ -481,29 +533,36 @@ void mission_goal2(int pointed)
 void mission_park()
 {
   want_state.tube = NINETY;
-  drive_e(W, 100, 700); //was 600
+  square();
+  drive_e(W, 100, 220);
   drive_e(CCW, 80, 3800);
-  drive_e(N, 80, 2000);
-  drive_e(E, 70, 300);
-  drive_e(N, 40, 800);
+  drive_e(E, 70, 280);
+  drive_e(N, 40, 1000);
+  drive_t(W, 90, 2000);
+  drive_e(E, 60, 200);
+  drive_e(N, 40, 400);
   servo[GRAB3] = kGrab3Closed;
   Sleep(100);
   drive_e(N, 20, 200);
   drive_e(S, 20, 200);
   Sleep(200);
-  drive_e(CCW, 20, 200);
+  drive_e(CW, 20, 400);
   Sleep(200);
-  drive_e(CW, 20, 200);
+  drive_e(CCW, 20, 400);
   Sleep(200);
-  drive_e(S, 100, 800);
+  drive_e(S, 80, 800);
   drive_e(E, 70, 300);
-  drive_e(E, 100, 2800);
-  drive_e(S, 100, 8000);
+  Sleep(300);
+  drive_e(CW, 30, 280);
+  drive_e(E, 80, 2000); // was 2800
+  drive_e(S, 80, 8700);
   GRAB_OPEN;
-  drive_e(N, 100, 600);
-  drive_e(CW, 80, 5500);
+  Sleep(200);
+  drive_e(N, 80, 600);
+  drive_e(E, 80, 400);
+  drive_e(CW, 30, 5500);
   servo[GRAB3] = kGrab3Open;
-
+  drive_e(N, 30, 500);
 }
 
 //==================  Main Task  ==================
@@ -512,9 +571,9 @@ task main()
   HTSPBsetupIO(HTSPB, 0x40);
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanPark;
-  int tubes = 1;
-  int point = 1;
+  Plan_t cur_plan = kPlanHigh;
+  int tubes = 2;
+  int point = 3;
   int delay = 0;
 
   int monolith_position;
@@ -547,7 +606,7 @@ task main()
       break;
 
     case kPlanHigh: //================== Plan High
-      want_state.tube = NINETY;
+      //want_state.tube = NINETY;
       drive_e(S, 60 , 800);
       monolith_position = seek_ultra_pos();
       mission_high(monolith_position);
@@ -562,7 +621,7 @@ task main()
       initialize_servos();
       mission_ramp();
       mission_goal1(point % 2);
-      //mission_park();
+      mission_park();
   }
 
   halt();
