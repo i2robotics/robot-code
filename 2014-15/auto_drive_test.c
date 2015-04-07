@@ -61,6 +61,34 @@ void swerve(int power, unsigned int time_1, unsigned int time_2)
   motor[DRIVE_SW] = power;
   wait1Msec(time_2);
 }
+void swerve_e(int power, int enc_1, int enc_2)
+{
+  nMotorEncoder[DRIVE_NE] = 0;
+  motor[DRIVE_NE] = power;
+  motor[DRIVE_SE] = power;
+  motor[DRIVE_NW] = 0;
+  motor[DRIVE_SW] = 0;
+  while (abs(nMotorEncoder[DRIVE_NE]) < enc_1) {abortTimeslice();}
+
+  nMotorEncoder[DRIVE_SW] = 0;
+  motor[DRIVE_NE] = 0;
+  motor[DRIVE_SE] = 0;
+  motor[DRIVE_NW] = power;
+  motor[DRIVE_SW] = power;
+  while (abs(nMotorEncoder[DRIVE_SW]) < enc_2) {abortTimeslice();}
+  halt();
+}
+void ultra_line_up(int distance) {
+  if (distance < 0) {
+    distance = distance * -1;
+
+  } else {
+
+  }
+
+
+}
+
 
 void square()
 {
@@ -111,16 +139,7 @@ void swerve_e(int power, int enc_1, int enc_2)
 task main()
 {
   while(true) {
- // servo[GRAB3] = kGrab3Open;
- // wait1Msec(350);
- // GRAB_CLOSE;
- // drive_e(W, 88, 300);
-	//drive_e(CCW, 60, 5500);
-	//drive_e(N, 60, 4500);
-
-  servo[GRAB3] = kGrab3Closed;
+ servo[GRAB1] = kGrab1Closed;
+ servo[GRAB3] = kGrab3Open;
 }
-  //wait1Msec(350);
-  //drive_e(S, 40, 600);
-
 }
