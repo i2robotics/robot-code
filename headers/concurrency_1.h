@@ -6,10 +6,10 @@
  *
  *------------------------------------------------*/
 
-const unsigned int timeout_ninety = 4500;
+const unsigned int timeout_ninety = 5000;
 const unsigned int timeout_sixty = 9000;
 const unsigned int timeout_up = 10;
-const unsigned int timeout_down = 5500;
+const unsigned int timeout_down = 5700;
 
 #define STOPPED 0
 #define MOVING 99

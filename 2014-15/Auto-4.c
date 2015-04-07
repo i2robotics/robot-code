@@ -461,7 +461,7 @@ void mission_ramp()
   drive_t(N, 1, 500);
   drive_t(S, 2, 500);
   drive_t(N, 1, 300);
-  drive_e(S, 20, 1500);
+  drive_e(S, 20, 1600); //was 1500
 
   drive_t(S, 20, 400);
   PlayImmediateTone(200, 200);
@@ -490,6 +490,7 @@ void mission_goal1(bool pointed)
   } else {
     while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {abortTimeslice();}
   }
+  //writeDebugStreamLine("Grabbed 60 at time: %i (TO: 900)", time1[T1]);
   GRAB_CLOSE;
   wait1Msec(300);
 
@@ -549,13 +550,13 @@ void mission_goal2(int pointed)
     swerve_e(-50, 600, 1000);
     //drive_e(W, 100, 300);// new/alt swerve for pointy-pointy
   } else { //flat
-    drive_e(S, 40, 1600);
-    drive_e(E, 100, 200);
+    drive_e(S, 30, 1600);
   }
 
-  drive_t(S, 15, 0);
+  drive_t(S, 18, 0);
   ClearTimer(T1);
-  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 1500) {abortTimeslice();}
+  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < ((pointed)? 900 : 1500)) {abortTimeslice();}
+  //writeDebugStreamLine("Grabbed 90 at time: %i (TO: 1000 or 1500)", time1[T1]);
   //if (pointed == 2) {
   //	drive_e(CW, 60, 200);
   //	wait1Msec(1000);
@@ -632,11 +633,12 @@ void mission_park()
 task main()
 {
   HTSPBsetupIO(HTSPB, 0x100);
+  writeDebugStreamLine("---start---");
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanHigh;
+  Plan_t cur_plan = kPlanRamp;
   int tubes = 2;
-  int point = 1;
+  int point = 2;
   int delay = 0;
 
   int monolith_position;
@@ -650,14 +652,11 @@ task main()
   switch (cur_plan) {
     case kPlanRamp: //================== Plan Ramp
       initialize_servos();
-
       mission_ramp();
-
       if (tubes > 0)
         mission_goal1(point % 2);
       if (tubes > 1)
         mission_goal2(point ? point - 1 : 0);
-
       break;
 
     case kPlanKick: //================== Plan Kick
@@ -685,6 +684,7 @@ task main()
       mission_ramp();
       mission_goal1(point % 2);
       mission_park();
+      break;
   }
 
   halt();
