@@ -231,7 +231,7 @@ void square()
     }
   }
   wait1Msec(400);
-  drive_e(W, 80, 480); // was 530 until 3 Apr; was 600 until 4 mar
+  drive_e(W, 80, 425); // was 530 until 3 Apr; was 600 until 4 mar
 }
 
 int seek_ultra_pos()
@@ -543,7 +543,7 @@ void mission_goal2(int pointed)
 
   square();
   if (pointed == 1) {
-    drive_e(S, 40, 2100);// 1500 too short
+    drive_e(S, 40, 1700);// 1500 too short
     swerve_e(-50, 600, 900);// old/standard swerve but slower now
   } else if (pointed == 2) {
     drive_e(S, 40, 1500);
@@ -555,7 +555,7 @@ void mission_goal2(int pointed)
 
   drive_t(S, 18, 0);
   ClearTimer(T1);
-  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < ((pointed)? 900 : 1500)) {abortTimeslice();}
+  while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < ((pointed)? 1000 : 1500)) {abortTimeslice();}
   //writeDebugStreamLine("Grabbed 90 at time: %i (TO: 1000 or 1500)", time1[T1]);
   //if (pointed == 2) {
   //	drive_e(CW, 60, 200);
@@ -565,7 +565,7 @@ void mission_goal2(int pointed)
   //  while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 500) {abortTimeslice();}
   //}
   GRAB_CLOSE;
-  wait1Msec(140);
+  wait1Msec(300);
   halt();
   drive_t(N, 20, 500);
   GRAB_OPEN;
@@ -638,7 +638,7 @@ task main()
   Alliance_t cur_alli = kAllianceRed;
   Plan_t cur_plan = kPlanRamp;
   int tubes = 2;
-  int point = 2;
+  int point = 3;
   int delay = 0;
 
   int monolith_position;
