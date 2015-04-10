@@ -227,6 +227,8 @@ void drive(int d, byte s, unsigned int t, bool useGyro, bool useEnc)
 
   if (useEnc) {
     nMotorEncoder[DRIVE_SW] = 0;
+    nMotorEncoder[DRIVE_SW] = 0;
+
     float k_p = 0.08;
     float error;
     while (abs(nMotorEncoder[DRIVE_SW]) < abs(t)) {

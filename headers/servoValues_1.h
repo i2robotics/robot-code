@@ -11,7 +11,7 @@ const unsigned byte kFlapOpen   = 125; // FLAP
 const unsigned byte kFlapHigh   = 205;
 
 const unsigned byte kRoofClosed = 255;
-const unsigned byte kRoofOpen   = 185; // ROOF
+const unsigned byte kRoofOpen   = 170; // ROOF
 const unsigned byte kRoofHigh   = 162;
 
 const unsigned byte kSpoutClosed = 227;
@@ -26,3 +26,4 @@ const unsigned byte kGrab2Open   = 215;
 
 const unsigned byte kGrab3Closed = 202;
 const unsigned byte kGrab3Open = 30;
+const unsigned byte kGrab3Half = 150;

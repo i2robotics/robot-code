@@ -1,7 +1,5 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
 #pragma config(Hubs,  S2, HTMotor,  HTMotor,  HTServo,  HTServo)
-#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
-#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSPB,          sensorI2CCustom9V)
 #pragma config(Sensor, S4,     HTSMUX,         sensorI2CCustom)
 #pragma config(Motor,  motorB,          left,          tmotorNXT, PIDControl, encoder)
@@ -22,7 +20,7 @@
 #pragma config(Servo,  srvo_S2_C3_6,    FLAP,                 tServoStandard)
 #pragma config(Servo,  srvo_S2_C4_1,    GRAB1,                tServoStandard)
 #pragma config(Servo,  srvo_S2_C4_2,    GRAB2,                tServoStandard)
-#pragma config(Servo,  srvo_S2_C4_3,    servo9,               tServoNone)
+#pragma config(Servo,  srvo_S2_C4_3,    GRAB3 ,                tServoNone)
 #pragma config(Servo,  srvo_S2_C4_4,    servo10,              tServoNone)
 #pragma config(Servo,  srvo_S2_C4_5,    servo11,              tServoNone)
 #pragma config(Servo,  srvo_S2_C4_6,    servo12,              tServoNone)
@@ -35,6 +33,7 @@ bool grab_lock = false;
 bool grab_state = false;
 task main()
 {
+  servo[GRAB3] = kGrab3Open;
 	if (ServoValue[ROOF] != kRoofClosed) {
     servo[FLAP] = kFlapClosed;
     servo[ROOF] = kRoofClosed;

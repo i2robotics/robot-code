@@ -93,13 +93,12 @@ void initialize_servos()
   servo[GRAB3] = kGrab3Open;
 }
 
-void center_slam()
+void center_slam(unsigned int change = 0)
 {
-  while (ServoValue[SPOUT] > 110) {
+  while (ServoValue[SPOUT] > (110 - change)) {
     servo[SPOUT] -= 1;
     wait1Msec(10);
   }
-  servo[ROOF] = kRoofHigh+ 50;
   wait1Msec(1500);
   servo[SPOUT] = kSpoutClosed;
 }
@@ -255,7 +254,7 @@ int seek_ultra_pos()
   } else {
     monolith_position = 1;
   }
-  writeDebugStreamLine("first: %i, second: %i", first_ULTRA, second_ULTRA);
+  writeDebugStreamLine("first: %i, second: %i, first1: %i, second1: %i, first2: %i, second2: %i, first3: %i, second3: %i" , first_ULTRA, second_ULTRA, first_1_ULTRA, second_1_ULTRA, first_2_ULTRA, second_2_ULTRA, first_3_ULTRA, second_3_ULTRA);
 #ifdef DEBUG_ULTRA
 	writeDebugStreamLine("first: %i, second: %i", first_ULTRA, second_ULTRA);
 	writeDebugStreamLine("result: %i", monolith_position);
@@ -420,7 +419,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
       ultra_line_up(27);
       drive_e(E, 60, 375);
        while (!NINETY_REACHED) {}
-     center_slam();
+     center_slam(10);
       break;
     case 3:
       ultra_line_up(27);
@@ -441,7 +440,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
   servo[GRAB2] = kGrab2Open;
   servo[GRAB3] = kGrab3Open;
   ClearTimer(T4);   //Alex please look at this.  I'm clearing the timer at change of want_state.
-  want_state.fork = DOWN;
+  //want_state.fork = DOWN;
   drive_e(E, 60, 400);
   drive_e(CW, 60, 300);
       servo[SPOUT] = kSpoutOpen;
@@ -597,29 +596,45 @@ void mission_goal2(int pointed)
 void mission_park()
 {
   want_state.tube = NINETY;
-  square();
+  //square();
   drive_e(W, 100, 220);
   drive_e(CCW, 80, 3800);
   drive_e(E, 70, 280);
   drive_e(N, 40, 1000);
   drive_t(W, 90, 2000);
-  drive_e(E, 60, 200);
+  drive_e(E, 60, 300); // was 200
   drive_e(N, 40, 400);
+  servo[GRAB3] = kGrab3Half;
+  drive_e(W, 60, 100);
+
+  nMotorEncoder[DRIVE_NW] = 0;
+  ClearTimer(T1);
+  motor[DRIVE_NW] = 30;
+  motor[DRIVE_SW] = 30;
+  while (nMotorEncoder[DRIVE_NW] < 500 && time1[T1] < 500) {abortTimeslice();}
+  writeDebugStreamLine("thingy ended at time: %i (TO: 500)", time1[T1]);
+
   servo[GRAB3] = kGrab3Closed;
-  Sleep(100);
-  drive_e(N, 20, 200);
-  drive_e(S, 20, 200);
+  //Sleep(100);
+  //drive_e(N, 20, 200);
+  //drive_e(S, 20, 200);
+  //Sleep(200);
+  //drive_e(CW, 20, 400);
+  //Sleep(200);
+  //drive_e(CCW, 20, 400);
   Sleep(200);
-  drive_e(CW, 20, 400);
-  Sleep(200);
-  drive_e(CCW, 20, 400);
-  Sleep(200);
-  drive_e(S, 80, 800);
+  drive_e(S, 40, 200);
+  drive_e(S, 80, 600);
   drive_e(E, 70, 300);
-  Sleep(300);
-  drive_e(CW, 30, 280);
-  drive_e(E, 80, 2000); // was 2800
-  drive_e(S, 80, 8700);
+
+  Sleep(500);
+  drive_e(E, 80, 1800); // strafe
+
+  //Sleep(300);
+  //drive_e(CW, 30, 180); // spin
+
+  Sleep(3000);
+  drive_e(S, 80, 9001); //BIG CROSSING
   GRAB_OPEN;
   Sleep(200);
   drive_e(N, 80, 600);
@@ -636,9 +651,9 @@ task main()
   writeDebugStreamLine("---start---");
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanRamp;
+  Plan_t cur_plan = kPlanPark;
   int tubes = 2;
-  int point = 3;
+  int point = 0;
   int delay = 0;
 
   int monolith_position;
@@ -681,8 +696,9 @@ task main()
     case kPlanPark: //=================== Plan Parking Zone
       plan_is_park = true;
       initialize_servos();
-      mission_ramp();
-      mission_goal1(point % 2);
+      //mission_ramp();
+      //mission_goal1(point % 2);
+      GRAB_CLOSE;
       mission_park();
       break;
   }

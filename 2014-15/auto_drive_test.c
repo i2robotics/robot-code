@@ -138,8 +138,6 @@ void swerve_e(int power, int enc_1, int enc_2)
 
 task main()
 {
-  while(true) {
- servo[GRAB1] = kGrab1Closed;
- servo[GRAB3] = kGrab3Open;
-}
+  servo[GRAB3] = kGrab3Half;
+  while(true) {}
 }
