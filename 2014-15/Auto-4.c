@@ -487,7 +487,7 @@ void mission_goal1(bool pointed)
   if (pointed) {
     while ((!LEFT_GRABBER_SWITCH || !RIGHT_GRABBER_SWITCH) && time1[T1] < 900) {abortTimeslice();}
   } else {
-    while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 900) {abortTimeslice();}
+    while (!LEFT_GRABBER_SWITCH && !RIGHT_GRABBER_SWITCH && time1[T1] < 850) {abortTimeslice();} //tiemout was 900
   }
   //writeDebugStreamLine("Grabbed 60 at time: %i (TO: 900)", time1[T1]);
   GRAB_CLOSE;
@@ -595,8 +595,6 @@ void mission_goal2(int pointed)
 
 void mission_park()
 {
-  want_state.tube = NINETY;
-  //square();
   drive_e(W, 100, 220);
   drive_e(CCW, 80, 3800);
   drive_e(E, 70, 280);
@@ -615,31 +613,30 @@ void mission_park()
   writeDebugStreamLine("thingy ended at time: %i (TO: 500)", time1[T1]);
 
   servo[GRAB3] = kGrab3Closed;
-  //Sleep(100);
-  //drive_e(N, 20, 200);
-  //drive_e(S, 20, 200);
-  //Sleep(200);
-  //drive_e(CW, 20, 400);
-  //Sleep(200);
-  //drive_e(CCW, 20, 400);
   Sleep(200);
-  drive_e(S, 40, 200);
-  drive_e(S, 80, 600);
+  want_state.tube = NINETY;
+  drive_e(S, 20, 400);// \.
+  drive_e(S, 50, 200);//  |- adds to 800
+  drive_e(S, 80, 200);// /'
   drive_e(E, 70, 300);
 
-  Sleep(500);
+  Sleep(200);
   drive_e(E, 80, 1800); // strafe
 
-  //Sleep(300);
-  //drive_e(CW, 30, 180); // spin
+  Sleep(200);
+  drive_e(S, 80, 4500); //BIG CROSSING
 
-  Sleep(3000);
-  drive_e(S, 80, 9001); //BIG CROSSING
+  Sleep(300);
+  drive_e(CCW, 30, 100); // spin
+  Sleep(300);
+
+  drive_e(S, 80, 4500);
+
   GRAB_OPEN;
   Sleep(200);
   drive_e(N, 80, 600);
-  drive_e(E, 80, 400);
-  drive_e(CW, 30, 5500);
+  drive_e(E, 80, 300);
+  drive_e(CW, 60, 5500);
   servo[GRAB3] = kGrab3Open;
   drive_e(N, 30, 500);
 }
@@ -653,7 +650,7 @@ task main()
   Alliance_t cur_alli = kAllianceRed;
   Plan_t cur_plan = kPlanPark;
   int tubes = 2;
-  int point = 0;
+  int point = 1;
   int delay = 0;
 
   int monolith_position;
@@ -696,9 +693,8 @@ task main()
     case kPlanPark: //=================== Plan Parking Zone
       plan_is_park = true;
       initialize_servos();
-      //mission_ramp();
-      //mission_goal1(point % 2);
-      GRAB_CLOSE;
+      mission_ramp();
+      mission_goal1(point % 2);
       mission_park();
       break;
   }
