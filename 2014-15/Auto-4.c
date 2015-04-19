@@ -249,12 +249,29 @@ int seek_ultra_pos()
   drive_e(S, 60 , 800);
   if (first_ULTRA <= 115 || second_ULTRA <= 115) {
     monolith_position = 3;
-  } else if (second_ULTRA == 255 && first_ULTRA == 255) {
+  } else if (second_ULTRA >= 230 && first_ULTRA >= 230) {
+  int first_1_ULTRA = ULTRA_RIGHT_VAL;
+  int second_1_ULTRA = ULTRA_LEFT_VAL;
+  wait1Msec(50);
+  int first_2_ULTRA = ULTRA_RIGHT_VAL;
+  int second_2_ULTRA = ULTRA_LEFT_VAL;
+  wait1Msec(50);
+  int first_3_ULTRA = ULTRA_RIGHT_VAL;
+  int second_3_ULTRA = ULTRA_LEFT_VAL;
+  int monolith_position;
+  int first_ULTRA = (first_1_ULTRA + first_2_ULTRA + first_3_ULTRA)/3;
+  int second_ULTRA = (second_1_ULTRA + second_2_ULTRA + second_3_ULTRA)/3;
+    if (first_ULTRA <= 115 || second_ULTRA <= 115) {
+    monolith_position = 3;
+  } else if (second_ULTRA >= 230 && first_ULTRA >= 230) {
     monolith_position = 2;
   } else {
     monolith_position = 1;
   }
-  writeDebugStreamLine("first: %i, second: %i, first1: %i, second1: %i, first2: %i, second2: %i, first3: %i, second3: %i" , first_ULTRA, second_ULTRA, first_1_ULTRA, second_1_ULTRA, first_2_ULTRA, second_2_ULTRA, first_3_ULTRA, second_3_ULTRA);
+  } else {
+    monolith_position = 1;
+  }
+  writeDebugStreamLine("first: %i, second: %i, first1: %i, second1: %i, first2: %i, second2: %i, first3: %i, second3: %i, pos: %i" , first_ULTRA, second_ULTRA, first_1_ULTRA, second_1_ULTRA, first_2_ULTRA, second_2_ULTRA, first_3_ULTRA, second_3_ULTRA, monolith_position);
 #ifdef DEBUG_ULTRA
 	writeDebugStreamLine("first: %i, second: %i", first_ULTRA, second_ULTRA);
 	writeDebugStreamLine("result: %i", monolith_position);
@@ -440,7 +457,7 @@ void mission_high(int mono_pos) // Center 120 cm goal
   servo[GRAB2] = kGrab2Open;
   servo[GRAB3] = kGrab3Open;
   ClearTimer(T4);   //Alex please look at this.  I'm clearing the timer at change of want_state.
-  //want_state.fork = DOWN;
+  want_state.fork = DOWN;
   drive_e(E, 60, 400);
   drive_e(CW, 60, 300);
       servo[SPOUT] = kSpoutOpen;
@@ -648,15 +665,15 @@ task main()
   writeDebugStreamLine("---start---");
 
   Alliance_t cur_alli = kAllianceRed;
-  Plan_t cur_plan = kPlanPark;
+  Plan_t cur_plan = kPlanHigh;
   int tubes = 2;
   int point = 1;
   int delay = 0;
 
   int monolith_position;
 
-  //dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
-  //waitForStart();
+  dialog(&cur_plan, &tubes, &point, &delay); // Run Dialog for user input of parameters
+  waitForStart();
   ClearTimer(T4); //global `run timer' used by new concurrency code
   wait1Msec(delay * 1000);
   StartTask(background_loop);
